@@ -1,0 +1,35 @@
+image-storage:
+  type: "SQLite" # SQLite, MySQL
+  mysql:
+    host: "127.0.0.1"
+    port: "3306"
+    db: "mapads"
+    user: "mapads_user"
+    pass: "secure_password_123"
+  sqlite:
+    db-name: "images.db"
+advert-storage:
+  type: "SQLite" # SQLite, MySQL
+  mysql:
+    host: "127.0.0.1"
+    port: "3306"
+    db: "mapads"
+    user: "mapads_user"
+    pass: "secure_password_123"
+  sqlite:
+    db-name: "adverts.db"
+
+images:
+  max-size: 5242880
+  url-whitelist:
+    - "imgur.com"
+    - "*.imgur.com"
+ads:
+  min-ad-minutes: 10
+  max-ad-minutes: 120
+  step: 5
+  price-per-minute: 1000.0
+
+enable-advanced-optimization-algorithm: false
+
+default-images: { }
