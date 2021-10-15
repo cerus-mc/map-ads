@@ -35,88 +35,54 @@ public class AdvertController {
         }
 
         final Context context = this.contextMap.computeIfAbsent(screen.getId(), o -> new Context());
-        System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Update start");
 
+        // Get the default image if we either don't have an ad to
+        // display or if we are explicitly asked to display the default image
         final MapImage image = context.displayDefaultImg || context.currentAdvertImage == null
                 ? this.plugin.getDefaultImageSupplier().apply(mapScreen.getWidth() * 128, mapScreen.getHeight() * 128)
                 : context.currentAdvertImage;
         if (image != null) {
-            System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Img draw start");
+            // Do the transition thingy
             final Transition transition = TransitionRegistry.getOrDefault(screen.getTransition());
             transition.makeTransition(mapScreen, context.prevImg, image);
             mapScreen.update(MapScreen.DirtyHandlingPolicy.IGNORE, ReviewerUtil.getNonReviewingPlayers(mapScreen));
 
+            // If we're displaying an ad we need to decrement its amount of remaining minutes
             if (context.currentAdvert != null) {
-                System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Advert update");
                 context.currentAdvert.setRemainingMinutes(context.currentAdvert.getRemainingMinutes() - 1);
                 this.advertStorage.updateAdvert(context.currentAdvert);
-                System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Advert remaining = " + context.currentAdvert.getRemainingMinutes());
             }
-            System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Img draw end");
         }
         context.prevImg = image;
 
+        // Poll the next ad if we did not display the default image
         if (!context.displayDefaultImg) {
-            System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Next advert");
             this.advertStorage.nextAdvert(screen.getId());
         }
         final Advertisement currentAdvert = this.advertStorage.getCurrentAdvert(screen.getId());
         if (currentAdvert == null) {
-            System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Advert null, setting default img");
+            // We don't have an ad, so we just set the default image
             context.currentAdvertImage = this.plugin.getDefaultImageSupplier()
                     .apply(mapScreen.getWidth() * 128, mapScreen.getHeight() * 128);
             context.currentAdvert = null;
             return;
         }
         if (context.displayDefaultImg) {
-            System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | displayDefaultImg = false");
+            // Don't display the default image again
             context.displayDefaultImg = false;
         } else if (this.advertStorage.getIndex(screen.getId()) == 0) {
-            System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | displayDefaultImg = true");
+            // Display the default image every time the cycle starts
             context.displayDefaultImg = true;
             context.currentAdvert = null;
             return;
         }
         context.currentAdvert = currentAdvert;
 
-        System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Polling next img");
+        // Fetch the image of the next ad
+        // We do this at the end because we have about a minute of time for this operation
         this.imageStorage.getMapImage(currentAdvert.getImageId()).whenComplete((mapImage, throwable) -> {
-            System.out.println("[DEBUG] '" + screen.getId() + "' #" + screen.getScreenId() + " | Next img done (t null = " + (throwable == null) + ", img null = " + (mapImage == null) + ")");
-            if (throwable != null) {
-                System.err.println(throwable.getMessage());
-                throwable.printStackTrace();
-            }
             context.currentAdvertImage = mapImage;
         });
-
-/*        final int index = this.advertStorage.getIndex();
-        final MapImage image = this.displayDefaultImg ? this.emptyImage : this.currentAdvertImage;
-
-        // Display
-        this.adScreenStorage.getScreens().forEach(adScreen -> {
-            final MapScreen mapScreen = MapScreenRegistry.getScreen(adScreen.getMapScreenId());
-            if (mapScreen != null) {
-                image.drawOnto(mapScreen);
-                mapScreen.update(MapScreen.DirtyHandlingPolicy.IGNORE);
-            }
-        });
-
-        if (!this.displayDefaultImg) {
-            final Advertisement currentAdvert = this.advertStorage.getCurrentAdvert();
-            currentAdvert.setRemainingMinutes(currentAdvert.getRemainingMinutes() - 1);
-            this.advertStorage.updateAdvert(currentAdvert);
-
-            this.advertStorage.nextAdvert();
-            if (index != 0 && this.advertStorage.getIndex() == 0) {
-                this.displayDefaultImg = true;
-            }
-            this.imageStorage.getMapImage(this.advertStorage.getCurrentAdvert().getImageId())
-                    .whenComplete((mapImage, throwable) -> {
-                        this.currentAdvertImage = mapImage;
-                    });
-        } else {
-            this.displayDefaultImg = false;
-        }*/
     }
 
     public static class Context {

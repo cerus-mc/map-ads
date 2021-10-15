@@ -52,6 +52,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class MapAdsPlugin extends JavaPlugin {
 
+    private static boolean enabled = false;
+
     private final Set<AutoCloseable> closeables = new HashSet<>();
     private ConfigModel configModel;
     private BiFunction<Integer, Integer, MapImage> defaultImageSupplier;
@@ -59,6 +61,14 @@ public class MapAdsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        if (enabled) {
+            this.getLogger().severe("DO NOT RELOAD YOUR SERVER.");
+            this.getLogger().severe("This plugin will probably not work correctly now. Disabling.");
+            this.getPluginLoader().disablePlugin(this);
+            return;
+        }
+        enabled = true;
+
         Premium.init();
         this.closeables.add(TransitionRegistry::cleanup);
 
@@ -76,7 +86,7 @@ public class MapAdsPlugin extends JavaPlugin {
             } else if (o instanceof String) {
                 L10n.put(key.replace(",", "."), ChatColor.translateAlternateColorCodes('&', (String) o));
             } else {
-                System.out.println("Invalid lang mapping: " + key + "->" + o.getClass().getName());
+                this.getLogger().warning("Invalid lang mapping: " + key + "->" + o.getClass().getName());
             }
         }
 
