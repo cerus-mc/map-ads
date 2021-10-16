@@ -346,7 +346,15 @@ public class CreateAdGui {
 
                 this.economy.withdrawPlayer(this.player, this.context.selectedMinutes * this.config.pricePerMin);
                 this.imageStorage.updateMapImage(this.context.image).whenComplete((o, errImg) -> {
+                    if (errImg != null) {
+                        System.err.println(errImg.getMessage());
+                    }
+
                     this.advertStorage.updateAdvert(advertisement).whenComplete((oo, errAdv) -> {
+                        if (errAdv != null) {
+                            System.err.println(errAdv.getMessage());
+                        }
+
                         Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(MapAdsPlugin.class), () -> {
                             this.state = State.EDITING;
                             this.player.closeInventory();

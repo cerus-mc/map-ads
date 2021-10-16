@@ -2,7 +2,7 @@ image-storage:
   type: "SQLite" # SQLite, MySQL
   mysql:
     host: "127.0.0.1"
-    port: "3306"
+    port: 3306
     db: "mapads"
     user: "mapads_user"
     pass: "secure_password_123"
@@ -12,7 +12,7 @@ advert-storage:
   type: "SQLite" # SQLite, MySQL
   mysql:
     host: "127.0.0.1"
-    port: "3306"
+    port: 3306
     db: "mapads"
     user: "mapads_user"
     pass: "secure_password_123"

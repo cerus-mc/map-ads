@@ -7,8 +7,6 @@ import dev.cerus.mapads.advert.AdvertController;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.advert.storage.MySqlAdvertStorageImpl;
 import dev.cerus.mapads.advert.storage.SqliteAdvertStorageImpl;
-import dev.cerus.mapads.api.event.AdvertCreateEvent;
-import dev.cerus.mapads.api.event.AdvertReviewEvent;
 import dev.cerus.mapads.command.DefaultImageCommand;
 import dev.cerus.mapads.command.HelpCommand;
 import dev.cerus.mapads.command.MapAdsCommand;
@@ -45,8 +43,6 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -174,18 +170,6 @@ public class MapAdsPlugin extends JavaPlugin {
         this.getServer().getScheduler().runTaskTimerAsynchronously(this, new FrameSendTask(adScreenStorage), 4 * 20, 2 * 20);
         this.getServer().getScheduler().runTaskTimerAsynchronously(this, () -> adScreenStorage.getScreens().forEach(advertController::update), 4 * 20, 60 * 20);
         this.getServer().getScheduler().runTaskLater(this, () -> this.screensLoaded = true, 4 * 20);
-
-        this.getServer().getPluginManager().registerEvents(new Listener() {
-            @EventHandler
-            public void handle(final AdvertCreateEvent event) {
-                event.setCancelled(true);
-            }
-
-            @EventHandler
-            public void handle(final AdvertReviewEvent event) {
-                event.setCancelled(true);
-            }
-        }, this);
     }
 
     @Override
@@ -217,7 +201,8 @@ public class MapAdsPlugin extends JavaPlugin {
 
                 final HikariConfig mysqlHikariConfig = new HikariConfig();
                 mysqlHikariConfig.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
-                mysqlHikariConfig.setJdbcUrl("jdbc:mysql://" + mysqlUser + ":" + mysqlPass + "@" + mysqlHost + ":" + mysqlPort + "/" + mysqlDb);
+                mysqlHikariConfig.setJdbcUrl("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/"
+                        + mysqlDb + "?user=" + mysqlUser + "&password=" + mysqlPass);
                 return new MySqlImageStorageImpl(new HikariDataSource(mysqlHikariConfig));
             case "sqlite":
                 final String dbName = config.getString("image-storage.sqlite.db-name");
@@ -243,7 +228,8 @@ public class MapAdsPlugin extends JavaPlugin {
 
                 final HikariConfig mysqlHikariConfig = new HikariConfig();
                 mysqlHikariConfig.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
-                mysqlHikariConfig.setJdbcUrl("jdbc:mysql://" + mysqlUser + ":" + mysqlPass + "@" + mysqlHost + ":" + mysqlPort + "/" + mysqlDb);
+                mysqlHikariConfig.setJdbcUrl("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/"
+                        + mysqlDb + "?user=" + mysqlUser + "&password=" + mysqlPass);
                 return new MySqlAdvertStorageImpl(new HikariDataSource(mysqlHikariConfig), imageStorage);
             case "sqlite":
                 final String dbName = config.getString("advert-storage.sqlite.db-name");

@@ -19,7 +19,7 @@ public abstract class SqlImageStorage implements ImageStorage {
         this.run(() -> {
             try (final Connection connection = this.getConnection();
                  final PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `mapads_images` " +
-                         "(id VACHAR(64) PRIMARY KEY, width TINYINT, height TINYINT, imgdata MEDIUMTEXT)")) {
+                         "(id VARCHAR(64) PRIMARY KEY, width TINYINT, height TINYINT, imgdata MEDIUMTEXT)")) {
                 statement.executeUpdate();
             } catch (final SQLException e) {
                 e.printStackTrace();

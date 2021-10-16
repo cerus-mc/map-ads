@@ -33,7 +33,7 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
         this.run(() -> {
             try (final Connection connection = this.getConnection();
                  final PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `mapads_ads` " +
-                         "(id VACHAR(64) PRIMARY KEY, player_uuid VARCHAR(64), img_id VARCHAR(64), ad_screen_id VARCHAR(64), purchase_timestamp BIGINT, " +
+                         "(id VARCHAR(64) PRIMARY KEY, player_uuid VARCHAR(64), img_id VARCHAR(64), ad_screen_id VARCHAR(64), purchase_timestamp BIGINT, " +
                          "purchased_minutes INT, remaining_minutes INT, price DOUBLE, reviewed INT)")) {
                 statement.executeUpdate();
             } catch (final SQLException e) {
@@ -185,7 +185,7 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
 
     protected String makeAdvertInsertQuery() {
         return "INSERT INTO `mapads_ads` (id, player_uuid, img_id, ad_screen_id, purchase_timestamp, purchased_minutes, remaining_minutes, price, reviewed) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE player_uuid = ?, img_id = ?, ad_screen_id = ?, " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE player_uuid = ?, img_id = ?, ad_screen_id = ?, " +
                 "purchase_timestamp = ?, purchased_minutes = ?, remaining_minutes = ?, price = ?, reviewed = ?";
     }
 
