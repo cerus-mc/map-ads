@@ -1,6 +1,8 @@
 package dev.cerus.mapads;
 
+import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.BukkitCommandManager;
+import co.aikar.commands.CommandCompletions;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.cerus.mapads.advert.AdvertController;
@@ -19,7 +21,6 @@ import dev.cerus.mapads.helpbook.HelpBookConfiguration;
 import dev.cerus.mapads.image.DefaultImageController;
 import dev.cerus.mapads.image.ImageConverter;
 import dev.cerus.mapads.image.ImageRetriever;
-import dev.cerus.mapads.image.MapImage;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.image.storage.MySqlImageStorageImpl;
 import dev.cerus.mapads.image.storage.SqliteImageStorageImpl;
@@ -37,14 +38,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
+import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 public class MapAdsPlugin extends JavaPlugin {
 
@@ -52,7 +56,6 @@ public class MapAdsPlugin extends JavaPlugin {
 
     private final Set<AutoCloseable> closeables = new HashSet<>();
     private ConfigModel configModel;
-    private BiFunction<Integer, Integer, MapImage> defaultImageSupplier;
     private boolean screensLoaded;
 
     @Override
@@ -65,12 +68,15 @@ public class MapAdsPlugin extends JavaPlugin {
         }
         enabled = true;
 
+        // Misc init
         Premium.init();
         this.closeables.add(TransitionRegistry::cleanup);
 
+        // Init config
         this.saveDefaultConfig();
         this.configModel = new ConfigModel(this.getConfig());
 
+        // Init L10n
         this.saveResource("lang.yml", false);
         final YamlConfiguration configuration = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "lang.yml"));
         for (final String key : configuration.getKeys(false)) {
@@ -86,11 +92,13 @@ public class MapAdsPlugin extends JavaPlugin {
             }
         }
 
+        // Init help book
         this.saveResource("helpbook.yml", false);
         final HelpBookConfiguration helpBookConfiguration = new HelpBookConfiguration();
         helpBookConfiguration.load();
         HelpBook.init(helpBookConfiguration);
 
+        // Init Vault
         final RegisteredServiceProvider<Economy> registration = this.getServer().getServicesManager().getRegistration(Economy.class);
         if (registration == null) {
             this.getLogger().severe("Please install an economy plugin!");
@@ -99,6 +107,7 @@ public class MapAdsPlugin extends JavaPlugin {
         }
         final Economy economy = registration.getProvider();
 
+        // Init image storage
         final ImageStorage imageStorage = this.loadImageStorage();
         if (imageStorage == null) {
             this.getLogger().severe("Invalid image storage configuration");
@@ -107,6 +116,7 @@ public class MapAdsPlugin extends JavaPlugin {
         }
         this.closeables.add(imageStorage);
 
+        // Init advert storage
         final AdvertStorage advertStorage = this.loadAdvertStorage(imageStorage);
         if (advertStorage == null) {
             this.getLogger().severe("Invalid advert storage configuration");
@@ -115,31 +125,32 @@ public class MapAdsPlugin extends JavaPlugin {
         }
         this.closeables.add(advertStorage);
 
+        // Init misc services
         final AdScreenStorage adScreenStorage = this.loadAdScreenStorage();
         this.closeables.add(adScreenStorage);
-
-        final DefaultImageController defaultImageRetriever = new DefaultImageController(this, imageStorage);
-        this.defaultImageSupplier = defaultImageRetriever::getDefaultImage;
-
-        final AdvertController advertController = new AdvertController(this, advertStorage, imageStorage);
+        final DefaultImageController defaultImageController = new DefaultImageController(this, imageStorage);
+        final AdvertController advertController = new AdvertController(this, advertStorage, imageStorage, defaultImageController);
         final ImageRetriever imageRetriever = new ImageRetriever();
         final ImageConverter imageConverter = new ImageConverter();
+
+        // Register commands & dependencies, init completions
         final BukkitCommandManager commandManager = new BukkitCommandManager(this);
-        commandManager.getCommandCompletions().registerCompletion("mapads_names", context ->
+        final CommandCompletions<BukkitCommandCompletionContext> completions = commandManager.getCommandCompletions();
+        completions.registerCompletion("mapads_names", context ->
                 adScreenStorage.getScreens().stream()
                         .map(AdScreen::getId)
                         .collect(Collectors.toList()));
-        commandManager.getCommandCompletions().registerCompletion("mapads_transitions", context ->
+        completions.registerCompletion("mapads_transitions", context ->
                 TransitionRegistry.names());
-        commandManager.getCommandCompletions().registerCompletion("mapads_adverts", context ->
+        completions.registerCompletion("mapads_adverts", context ->
                 advertStorage.getPendingAdvertisements().stream()
                         .map(advertisement -> advertisement.getAdvertId().toString())
                         .collect(Collectors.toSet()));
-        commandManager.getCommandCompletions().registerCompletion("maps_ids", context ->
+        completions.registerCompletion("maps_ids", context ->
                 MapScreenRegistry.getScreenIds().stream()
                         .map(String::valueOf)
                         .collect(Collectors.toList()));
-        commandManager.getCommandCompletions().registerCompletion("mapads_commondim", context -> {
+        completions.registerCompletion("mapads_commondim", context -> {
             final List<String> list = new ArrayList<>();
             for (int x = 1; x <= 20; x++) {
                 for (int y = 1; y <= 20; y++) {
@@ -153,7 +164,7 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerDependency(AdScreenStorage.class, adScreenStorage);
         commandManager.registerDependency(ImageRetriever.class, imageRetriever);
         commandManager.registerDependency(ImageConverter.class, imageConverter);
-        commandManager.registerDependency(DefaultImageController.class, defaultImageRetriever);
+        commandManager.registerDependency(DefaultImageController.class, defaultImageController);
         commandManager.registerDependency(AdvertController.class, advertController);
         commandManager.registerDependency(ConfigModel.class, this.configModel);
         commandManager.registerDependency(Economy.class, economy);
@@ -165,11 +176,24 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerCommand(new HelpCommand());
         commandManager.registerCommand(new PreviewCommand());
 
-        this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, adScreenStorage, advertStorage), this);
+        // Register listeners
+        final PluginManager pluginManager = this.getServer().getPluginManager();
+        pluginManager.registerEvents(new PlayerJoinListener(this, adScreenStorage, advertStorage), this);
 
-        this.getServer().getScheduler().runTaskTimerAsynchronously(this, new FrameSendTask(adScreenStorage), 4 * 20, 2 * 20);
-        this.getServer().getScheduler().runTaskTimerAsynchronously(this, () -> adScreenStorage.getScreens().forEach(advertController::update), 4 * 20, 60 * 20);
-        this.getServer().getScheduler().runTaskLater(this, () -> this.screensLoaded = true, 4 * 20);
+        // Start tasks
+        final BukkitScheduler scheduler = this.getServer().getScheduler();
+        scheduler.runTaskTimerAsynchronously(this, new FrameSendTask(adScreenStorage), 4 * 20, 2 * 20);
+        scheduler.runTaskTimerAsynchronously(this, () -> adScreenStorage.getScreens().forEach(advertController::update), 4 * 20, 60 * 20);
+        scheduler.runTaskLater(this, () -> this.screensLoaded = true, 4 * 20);
+
+        // Register services
+        final ServicesManager servicesManager = this.getServer().getServicesManager();
+        servicesManager.register(AdvertStorage.class, advertStorage, this, ServicePriority.Normal);
+        servicesManager.register(AdScreenStorage.class, adScreenStorage, this, ServicePriority.Normal);
+        servicesManager.register(ImageStorage.class, imageStorage, this, ServicePriority.Normal);
+        servicesManager.register(DefaultImageController.class, defaultImageController, this, ServicePriority.Normal);
+        servicesManager.register(ImageConverter.class, imageConverter, this, ServicePriority.Normal);
+        servicesManager.register(ImageRetriever.class, imageRetriever, this, ServicePriority.Normal);
     }
 
     @Override
@@ -245,10 +269,6 @@ public class MapAdsPlugin extends JavaPlugin {
 
     public ConfigModel getConfigModel() {
         return this.configModel;
-    }
-
-    public BiFunction<Integer, Integer, MapImage> getDefaultImageSupplier() {
-        return this.defaultImageSupplier;
     }
 
     public boolean areScreensLoaded() {

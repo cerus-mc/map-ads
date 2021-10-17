@@ -2,6 +2,7 @@ package dev.cerus.mapads.advert;
 
 import dev.cerus.mapads.MapAdsPlugin;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
+import dev.cerus.mapads.image.DefaultImageController;
 import dev.cerus.mapads.image.MapImage;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.image.transition.Transition;
@@ -18,14 +19,17 @@ public class AdvertController {
     private final Map<String, Context> contextMap = new HashMap<>();
     private final AdvertStorage advertStorage;
     private final ImageStorage imageStorage;
+    private final DefaultImageController defaultImageController;
     private final MapAdsPlugin plugin;
 
     public AdvertController(final MapAdsPlugin plugin,
                             final AdvertStorage advertStorage,
-                            final ImageStorage imageStorage) {
+                            final ImageStorage imageStorage,
+                            final DefaultImageController defaultImageController) {
         this.plugin = plugin;
         this.advertStorage = advertStorage;
         this.imageStorage = imageStorage;
+        this.defaultImageController = defaultImageController;
     }
 
     public void update(final AdScreen screen) {
@@ -39,7 +43,7 @@ public class AdvertController {
         // Get the default image if we either don't have an ad to
         // display or if we are explicitly asked to display the default image
         final MapImage image = context.displayDefaultImg || context.currentAdvertImage == null
-                ? this.plugin.getDefaultImageSupplier().apply(mapScreen.getWidth() * 128, mapScreen.getHeight() * 128)
+                ? this.defaultImageController.getDefaultImage(mapScreen.getWidth() * 128, mapScreen.getHeight() * 128)
                 : context.currentAdvertImage;
         if (image != null) {
             // Do the transition thingy
@@ -62,8 +66,8 @@ public class AdvertController {
         final Advertisement currentAdvert = this.advertStorage.getCurrentAdvert(screen.getId());
         if (currentAdvert == null) {
             // We don't have an ad, so we just set the default image
-            context.currentAdvertImage = this.plugin.getDefaultImageSupplier()
-                    .apply(mapScreen.getWidth() * 128, mapScreen.getHeight() * 128);
+            context.currentAdvertImage = this.defaultImageController
+                    .getDefaultImage(mapScreen.getWidth() * 128, mapScreen.getHeight() * 128);
             context.currentAdvert = null;
             return;
         }
