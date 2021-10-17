@@ -148,6 +148,14 @@
             <version>5.0.0</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Metrics -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>2.2.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -186,6 +194,10 @@
                                 <relocation>
                                     <pattern>co.aikar.locales</pattern>
                                     <shadedPattern>dev.cerus.mapads.thirdparty.acflocales</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>dev.cerus.mapads.thirdparty.bstats</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

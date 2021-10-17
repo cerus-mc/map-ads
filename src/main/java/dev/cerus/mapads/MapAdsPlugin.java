@@ -35,11 +35,16 @@ import dev.cerus.mapads.task.FrameSendTask;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.milkbowl.vault.economy.Economy;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.AdvancedPie;
+import org.bstats.charts.SimplePie;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -194,6 +199,22 @@ public class MapAdsPlugin extends JavaPlugin {
         servicesManager.register(DefaultImageController.class, defaultImageController, this, ServicePriority.Normal);
         servicesManager.register(ImageConverter.class, imageConverter, this, ServicePriority.Normal);
         servicesManager.register(ImageRetriever.class, imageRetriever, this, ServicePriority.Normal);
+
+        // Init metrics
+        final Metrics metrics = new Metrics(this, 13063);
+        metrics.addCustomChart(new SimplePie("premium", () -> Premium.isPremium() ? "Yes" : "No"));
+        metrics.addCustomChart(new AdvancedPie("transition_usage", () -> {
+            final Map<String, Integer> map = new HashMap<>();
+            for (final String name : TransitionRegistry.names()) {
+                map.put(name, 0);
+            }
+            for (final AdScreen screen : adScreenStorage.getScreens()) {
+                if (map.containsKey(screen.getTransition())) {
+                    map.put(screen.getTransition(), map.get(screen.getTransition()) + 1);
+                }
+            }
+            return map;
+        }));
     }
 
     @Override
