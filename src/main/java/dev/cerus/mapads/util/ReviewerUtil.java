@@ -81,11 +81,7 @@ public class ReviewerUtil {
             REVIEWER_MAP.remove(player.getUniqueId()).screen.update(MapScreen.DirtyHandlingPolicy.IGNORE, player);
         }
 
-        if (REVIEWER_MAP.containsKey(player.getUniqueId())) {
-            REVIEWER_MAP.resetExpiration(player.getUniqueId());
-        } else {
-            REVIEWER_MAP.put(player.getUniqueId(), new Context(player, image, screen));
-        }
+        REVIEWER_MAP.put(player.getUniqueId(), new Context(player, image, screen));
     }
 
     public static Set<Player> getNonReviewingPlayers(final MapScreen screen) {
