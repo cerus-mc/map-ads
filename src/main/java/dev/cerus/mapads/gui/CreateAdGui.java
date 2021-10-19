@@ -436,7 +436,10 @@ public class CreateAdGui {
     private ItemStack makeFrameBtn() {
         return switch (this.state) {
             case ERROR_IMAGE -> new ItemBuilder(BTN_FRAME).setLore(L10n.get("gui.create.error_image."
-                    + (this.context.errorState > 4 ? "def" : this.context.errorState))).build();
+                            + (this.context.errorState > 4 ? "def" : this.context.errorState),
+                    this.context.errorState == 2 ? new Object[] {
+                            this.context.mapScreen.getWidth() * 128, this.context.mapScreen.getHeight() * 128
+                    } : new Object[0])).build();
             case CONFIRMING -> new ItemBuilder(BTN_FRAME).setLore(L10n.get("gui.create.misc.confirming_image")).build();
             default -> this.context.image != null
                     ? new ItemBuilder(BTN_GLOW_FRAME).setLore(L10n.getList("gui.create.button.glow_frame.lore").stream()
