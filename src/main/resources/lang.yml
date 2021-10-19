@@ -42,6 +42,7 @@
 'gui,list,title': "Ad-screens"
 'gui,confirm,yes': "&aYes"
 'gui,confirm,no': "&cNo"
+'gui,create,title': "Create advertisement"
 'gui,create,button,map,name': "&eChoose an ad-screen"
 'gui,create,button,map,lore,noscreen': [ "&7You did not choose an ad-screen yet." ]
 'gui,create,button,map,lore,screen': [ "&f{0} &7({1}x{2})" ]

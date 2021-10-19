@@ -97,7 +97,7 @@ public class CreateAdGui {
     }
 
     public void open() {
-        this.gui = new GUIBuilder("Create advertisement", 5)
+        this.gui = new GUIBuilder(L10n.get("gui.create.title"), 5)
                 .withComponents(SlotRange.full(), this.makeGlassPane(Material.GRAY_STAINED_GLASS_PANE))
                 .withComponents(SlotRange.row(0), this.makeGlassPane(Material.BLACK_STAINED_GLASS_PANE))
                 .withComponents(SlotRange.row(4), this.makeGlassPane(Material.BLACK_STAINED_GLASS_PANE))
@@ -234,6 +234,7 @@ public class CreateAdGui {
                                     this.state = State.EDITING;
                                     this.context.imgUrl = uri.toString();
                                     this.context.image = mapImage;
+                                    this.context.originalImage = image;
                                     this.updateGui();
                                     this.player.playSound(this.player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                                 });
@@ -253,9 +254,6 @@ public class CreateAdGui {
             HelpBook.open(this.player);
         }));
         this.setMinuteSelector();
-        this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(31)), new Item(new ItemBuilder(Material.GOLD_INGOT)
-                .setName(L10n.get("gui.create.button.gold.name", this.config.pricePerMin * this.context.selectedMinutes))
-                .build()));
         this.setConcreteButtons();
     }
 
@@ -335,7 +333,11 @@ public class CreateAdGui {
                         this.context.selectedMinutes,
                         this.context.selectedMinutes * this.config.pricePerMin,
                         false);
-                final AdvertCreateEvent ev = new AdvertCreateEvent(this.player, advertisement);
+                final AdvertCreateEvent ev = new AdvertCreateEvent(this.player,
+                        advertisement,
+                        this.context.imgUrl,
+                        this.context.image,
+                        this.context.originalImage);
                 Bukkit.getPluginManager().callEvent(ev);
                 if (ev.isCancelled()) {
                     this.state = State.EDITING;
@@ -426,6 +428,9 @@ public class CreateAdGui {
                         .map(s -> s.replace("{1}", String.valueOf(this.config.maxAdMins)))
                         .collect(Collectors.toList()))
                 .build()));
+        this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(31)), new Item(new ItemBuilder(Material.GOLD_INGOT)
+                .setName(L10n.get("gui.create.button.gold.name", this.config.pricePerMin * this.context.selectedMinutes))
+                .build()));
     }
 
     private ItemStack makeFrameBtn() {
@@ -466,6 +471,7 @@ public class CreateAdGui {
 
         public String imgUrl;
         public MapImage image;
+        public BufferedImage originalImage;
         public AdScreen adScreen;
         public MapScreen mapScreen;
         public int selectedMinutes;
