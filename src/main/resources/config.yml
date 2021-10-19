@@ -20,6 +20,7 @@ advert-storage:
     db-name: "adverts.db"
 
 images:
+  use-color-cache: false
   max-size: 5242880
   url-whitelist:
     - "imgur.com"

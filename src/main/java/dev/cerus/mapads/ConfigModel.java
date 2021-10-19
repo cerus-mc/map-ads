@@ -12,6 +12,7 @@ public class ConfigModel {
     public int maxAdMins;
     public int minsStep;
     public double pricePerMin;
+    public boolean useColorCache;
 
     public ConfigModel(final FileConfiguration configuration) {
         this.maxImageSize = configuration.getInt("images.max-size");
@@ -21,6 +22,7 @@ public class ConfigModel {
         this.maxAdMins = configuration.getInt("ads.max-ad-minutes");
         this.minsStep = configuration.getInt("ads.step");
         this.pricePerMin = configuration.getDouble("ads.price-per-minute");
+        this.useColorCache = configuration.getBoolean("images.use-color-cache");
     }
 
 }

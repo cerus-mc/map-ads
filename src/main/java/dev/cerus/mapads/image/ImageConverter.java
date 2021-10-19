@@ -20,6 +20,11 @@ public class ImageConverter {
     private static final Ditherer DITHERER = new Ditherer(COLOR_PALETTE);
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ColorCache colorCache;
+
+    public ImageConverter(final ColorCache colorCache) {
+        this.colorCache = colorCache;
+    }
 
     public MapImage convert(final BufferedImage image, final Dither dither) {
         if (image.getWidth() % 128 > 0 || image.getHeight() % 128 > 0) {
@@ -40,7 +45,9 @@ public class ImageConverter {
                     data[x][y] = (byte) MapColor.TRANSPARENT_0.getId();
                 } else {
                     final Color color = new Color(rgb);
-                    data[x][y] = (byte) MapColor.rgbToMapColor(color.getRed(), color.getGreen(), color.getBlue()).getId();
+                    data[x][y] = this.colorCache == null
+                            ? (byte) MapColor.rgbToMapColor(color.getRed(), color.getGreen(), color.getBlue()).getId()
+                            : this.colorCache.getColor(color.getRed(), color.getGreen(), color.getBlue());
                 }
             }
         }

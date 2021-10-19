@@ -18,6 +18,7 @@ import dev.cerus.mapads.command.ReviewCommand;
 import dev.cerus.mapads.command.ScreenCommand;
 import dev.cerus.mapads.helpbook.HelpBook;
 import dev.cerus.mapads.helpbook.HelpBookConfiguration;
+import dev.cerus.mapads.image.ColorCache;
 import dev.cerus.mapads.image.DefaultImageController;
 import dev.cerus.mapads.image.ImageConverter;
 import dev.cerus.mapads.image.ImageRetriever;
@@ -34,6 +35,11 @@ import dev.cerus.mapads.screen.storage.YamlAdScreenStorageImpl;
 import dev.cerus.mapads.task.FrameSendTask;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,6 +86,30 @@ public class MapAdsPlugin extends JavaPlugin {
         // Init config
         this.saveDefaultConfig();
         this.configModel = new ConfigModel(this.getConfig());
+
+        // Init color cache
+        ColorCache colorCache = null;
+        if (this.configModel.useColorCache && Premium.isPremium()) {
+            final File file = new File(this.getDataFolder(), "colors.cache");
+            if (!file.exists()) {
+                this.getLogger().info("Color cache does not exist. Generating new cache... This will take a while");
+                colorCache = ColorCache.generate();
+                try (final OutputStream outputStream = new FileOutputStream(file)) {
+                    colorCache.write(outputStream);
+                    outputStream.flush();
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                    this.getLogger().severe("Failed to save color cache");
+                }
+            } else {
+                try (final InputStream inputStream = new FileInputStream(file)) {
+                    colorCache = ColorCache.fromInputStream(inputStream);
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                    this.getLogger().severe("Failed to load color cache");
+                }
+            }
+        }
 
         // Init L10n
         this.saveResource("lang.yml", false);
@@ -136,7 +166,7 @@ public class MapAdsPlugin extends JavaPlugin {
         final DefaultImageController defaultImageController = new DefaultImageController(this, imageStorage);
         final AdvertController advertController = new AdvertController(this, advertStorage, imageStorage, defaultImageController);
         final ImageRetriever imageRetriever = new ImageRetriever();
-        final ImageConverter imageConverter = new ImageConverter();
+        final ImageConverter imageConverter = new ImageConverter(colorCache);
 
         // Register commands & dependencies, init completions
         final BukkitCommandManager commandManager = new BukkitCommandManager(this);
