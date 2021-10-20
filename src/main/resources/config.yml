@@ -32,5 +32,6 @@ ads:
   price-per-minute: 1000.0
 
 enable-advanced-optimization-algorithm: false
+send-update-message: true
 
 default-images: { }

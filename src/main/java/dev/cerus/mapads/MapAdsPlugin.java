@@ -113,7 +113,9 @@ public class MapAdsPlugin extends JavaPlugin {
 
         // Init L10n
         this.saveResource("lang.yml", false);
-        final YamlConfiguration configuration = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "lang.yml"));
+        final File l10nFile = new File(this.getDataFolder(), "lang.yml");
+        final YamlConfiguration configuration = YamlConfiguration.loadConfiguration(l10nFile);
+        this.update(configuration, l10nFile);
         for (final String key : configuration.getKeys(false)) {
             final Object o = configuration.get(key);
             if (o instanceof List) {
@@ -245,6 +247,28 @@ public class MapAdsPlugin extends JavaPlugin {
             }
             return map;
         }));
+    }
+
+    private void update(final YamlConfiguration configuration, final File l10nFile) {
+        boolean changed = false;
+        if (!configuration.contains("misc,update,0")) {
+            configuration.set("misc,update,0", "&aA new Map-Ads update is available!");
+            changed = true;
+        }
+        if (!configuration.contains("misc,update,1")) {
+            configuration.set("misc,update,1", "&e%s");
+            changed = true;
+        }
+
+        if (changed) {
+            try {
+                configuration.save(l10nFile);
+                this.getLogger().info("lang.yml was updated");
+            } catch (final IOException e) {
+                e.printStackTrace();
+                this.getLogger().severe("Failed to update lang.yml file");
+            }
+        }
     }
 
     @Override

@@ -33,6 +33,8 @@
 'misc,broken_screen,0': "&cAd-screen '%s' is broken! &7(Map-screen not found)"
 'misc,broken_screen,1': "&7You can fix this by setting a new map screen: &e/mapads screen set screenid %s <Map screen id>"
 'misc,pending': "&7There are &d%d adverts &7that are waiting to be reviewed. (&e/mapads review list&7)"
+'misc,update,0': "&aA new Map-Ads update is available!"
+'misc,update,1': "&e%s"
 
 'gui,page': "&bPage %d"
 'gui,prev_page,enabled': "&7« &fPrevious page"

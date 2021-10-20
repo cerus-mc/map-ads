@@ -5,6 +5,7 @@ import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.update.UpdaterChecker;
 import dev.cerus.maps.api.MapScreen;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import org.bukkit.Bukkit;
@@ -38,6 +39,22 @@ public class PlayerJoinListener implements Listener {
                 }
             }
         }, 5);
+
+        if (player.hasPermission("mapads.update") && this.plugin.getConfigModel().updateMessage) {
+            UpdaterChecker.getNewestVersion().whenComplete((ver, throwable) -> {
+                if (throwable != null) {
+                    throwable.printStackTrace();
+                    this.plugin.getLogger().severe("Failed to check for updates");
+                    return;
+                }
+
+                final boolean hasUpdate = UpdaterChecker.isGreater(ver, this.plugin.getDescription().getVersion());
+                if (hasUpdate) {
+                    player.sendMessage(L10n.getPrefixed("misc.update.0"));
+                    player.sendMessage(L10n.getPrefixed("misc.update.1", "https://www.spigotmc.org/resources/96918/"));
+                }
+            });
+        }
 
         if (!player.hasPermission("mapads.admin")) {
             return;
