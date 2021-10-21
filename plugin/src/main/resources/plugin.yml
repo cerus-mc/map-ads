@@ -4,6 +4,8 @@ main: dev.cerus.mapads.MapAdsPlugin
 author: Cerus
 api-version: 1.17
 
+softdepend:
+  - ${parent.artifactId}-discord-bot
 depend:
   - maps
   - Vault

@@ -1,0 +1,8 @@
+name: ${parent.artifactId}-${artifactId}
+version: ${version}
+main: dev.cerus.mapads.discordbot.plugin.MapAdsDiscordPlugin
+author: Cerus
+api-version: 1.17
+
+libraries:
+  - "org.xerial:sqlite-jdbc:3.36.0.3"

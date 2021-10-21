@@ -18,6 +18,7 @@ import dev.cerus.mapads.command.ReviewCommand;
 import dev.cerus.mapads.command.ScreenCommand;
 import dev.cerus.mapads.helpbook.HelpBook;
 import dev.cerus.mapads.helpbook.HelpBookConfiguration;
+import dev.cerus.mapads.hook.DiscordHook;
 import dev.cerus.mapads.image.ColorCache;
 import dev.cerus.mapads.image.DefaultImageController;
 import dev.cerus.mapads.image.ImageConverter;
@@ -161,6 +162,16 @@ public class MapAdsPlugin extends JavaPlugin {
             return;
         }
         this.closeables.add(advertStorage);
+
+        // Init Discord bot
+        if (this.getServer().getPluginManager().isPluginEnabled("map-ads-discord-bot")) {
+            final DiscordHook discordHook = new DiscordHook(this, advertStorage, imageStorage);
+            final AutoCloseable closeable = discordHook.load();
+            if (closeable != null) {
+                this.closeables.add(closeable);
+                this.getLogger().info("Discovered Discord extension");
+            }
+        }
 
         // Init misc services
         final AdScreenStorage adScreenStorage = this.loadAdScreenStorage();

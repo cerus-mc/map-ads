@@ -1,0 +1,29 @@
+enable: false
+token: "?"
+
+storage:
+  sqlite:
+    path: "discord.db"
+
+activity:
+  online-status: "ONLINE" # ONLINE, IDLE, DO_NOT_DISTURB, INVISIBLE
+  type: "WATCHING" # LISTENING, WATCHING, COMPETING
+  text: "the server" # type + text = "watching the server"
+
+time-format: "dd.MM.yyyy HH:mm:ss"
+message:
+  title: "Advertisement by {{PLAYER_NAME}}"
+  description: |-
+    Player {{PLAYER_NAME}} (`{{PLAYER_ID}}`) submitted a new advertisement
+    ID: {{ADVERT_ID}}
+    Date: {{TIME}} (<t:{{TIME_RAW}}:f>, <t:{{TIME_RAW}}:R>)
+    Screen: {{SCREEN}}
+    Purchased minutes: {{MINUTES}} for ${{PRICE}}
+  color: "#00AFFE"
+  image: "{{IMAGE_URL}}"
+  #thumbnail: "{{IMAGE_URL}}"
+  button:
+    accept: "Accept ad"
+    deny: "Deny ad"
+
+channel-ids: [ ]
