@@ -74,6 +74,16 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
     }
 
     @Override
+    public void deleteAdScreen(final AdScreen screen) {
+        this.screens.remove(screen);
+        try {
+            this.saveScreens();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public List<AdScreen> getScreens() {
         return this.screens;
     }

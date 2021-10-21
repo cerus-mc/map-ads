@@ -41,6 +41,17 @@ public class ScreenCommand extends BaseCommand {
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
     }
 
+    @Subcommand("delete")
+    @CommandCompletion("@mapads_names")
+    public void handleScreenDelete(final Player player, final String name) {
+        if (this.adScreenStorage.getAdScreen(name) == null) {
+            player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
+            return;
+        }
+        this.adScreenStorage.deleteAdScreen(this.adScreenStorage.getAdScreen(name));
+        player.sendMessage(L10n.getPrefixed("success.deleted"));
+    }
+
     @Subcommand("create")
     @CommandCompletion("@nothing @maps_ids")
     public void handleScreenCreate(final Player player, final String name, final int screenId) {

@@ -11,6 +11,8 @@ public interface AdScreenStorage extends AutoCloseable {
 
     void updateAdScreen(AdScreen adScreen);
 
+    void deleteAdScreen(AdScreen screen);
+
     List<AdScreen> getScreens();
 
     List<AdScreen> getBrokenScreens();

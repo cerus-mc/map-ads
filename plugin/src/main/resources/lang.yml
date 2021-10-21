@@ -26,6 +26,7 @@
 'success,preview': "&aThe image will be displayed on ad-screen &e'%s' &afor one minute."
 'success,created': "&aAd-screen '%s' has been created"
 'success,updated': "&aAd-screen has been updated"
+'success,deleted': "&aAd-screen has been deleted"
 
 'misc,please_wait': "&7&oPlease wait..."
 'misc,visible': "&eThe image on the ad-screen is only visible to you."

@@ -164,14 +164,17 @@ public class MapAdsPlugin extends JavaPlugin {
         this.closeables.add(advertStorage);
 
         // Init Discord bot
+        boolean discordEnabled = false;
         if (this.getServer().getPluginManager().isPluginEnabled("map-ads-discord-bot")) {
-            final DiscordHook discordHook = new DiscordHook(this, advertStorage, imageStorage);
+            final DiscordHook discordHook = new DiscordHook(this, advertStorage, imageStorage, economy);
             final AutoCloseable closeable = discordHook.load();
             if (closeable != null) {
                 this.closeables.add(closeable);
                 this.getLogger().info("Discovered Discord extension");
+                discordEnabled = true;
             }
         }
+        final boolean finalDiscordEnabled = discordEnabled;
 
         // Init misc services
         final AdScreenStorage adScreenStorage = this.loadAdScreenStorage();
@@ -246,6 +249,7 @@ public class MapAdsPlugin extends JavaPlugin {
         // Init metrics
         final Metrics metrics = new Metrics(this, 13063);
         metrics.addCustomChart(new SimplePie("premium", () -> Premium.isPremium() ? "Yes" : "No"));
+        metrics.addCustomChart(new SimplePie("discord_integration_enabled", () -> finalDiscordEnabled ? "Yes" : "No"));
         metrics.addCustomChart(new AdvancedPie("transition_usage", () -> {
             final Map<String, Integer> map = new HashMap<>();
             for (final String name : TransitionRegistry.names()) {
@@ -268,6 +272,10 @@ public class MapAdsPlugin extends JavaPlugin {
         }
         if (!configuration.contains("misc,update,1")) {
             configuration.set("misc,update,1", "&e%s");
+            changed = true;
+        }
+        if (!configuration.contains("success,deleted")) {
+            configuration.set("success,deleted", "&aAd-screen has been deleted");
             changed = true;
         }
 

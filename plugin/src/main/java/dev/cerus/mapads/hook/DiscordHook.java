@@ -11,6 +11,7 @@ import dev.cerus.mapads.image.storage.ImageStorage;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
@@ -23,11 +24,13 @@ public class DiscordHook {
     private final JavaPlugin plugin;
     private final AdvertStorage advertStorage;
     private final ImageStorage imageStorage;
+    private final Economy economy;
 
-    public DiscordHook(final JavaPlugin plugin, final AdvertStorage advertStorage, final ImageStorage imageStorage) {
+    public DiscordHook(final JavaPlugin plugin, final AdvertStorage advertStorage, final ImageStorage imageStorage, final Economy economy) {
         this.plugin = plugin;
         this.advertStorage = advertStorage;
         this.imageStorage = imageStorage;
+        this.economy = economy;
     }
 
     public AutoCloseable load() {
@@ -111,6 +114,7 @@ public class DiscordHook {
                             } else {
                                 this.imageStorage.deleteMapImages(advertisement.getImageId());
                                 this.advertStorage.deleteAdverts(advertisement.getAdvertId());
+                                this.economy.depositPlayer(Bukkit.getOfflinePlayer(advertisement.getPlayerUuid()), advertisement.getPricePaid());
                             }
                             future.complete(false);
                         });
