@@ -127,11 +127,11 @@ public class DetailsGui {
                 .withComponents(
                         SlotRange.single(Coordinate.fromSlot(7 + 9)),
                         new Button(new ItemBuilder(Material.BARRIER)
-                                .setName("§cDeny (delete)")
+                                .setName(L10n.get("gui.details.button.deny.name"))
                                 .build(), event -> {
-                            ConfirmationGui.create("Confirmation", () -> new ItemBuilder(Material.PAPER)
-                                            .setName("§fAre you sure?")
-                                            .setLore("§7This action can not be undone.")
+                            ConfirmationGui.create(L10n.get("gui.details.button.deny.confirm.title"), () -> new ItemBuilder(Material.PAPER)
+                                            .setName(L10n.get("gui.details.button.deny.confirm.name"))
+                                            .setLore(L10n.getList("gui.details.button.deny.confirm.lore"))
                                             .build())
                                     .onYes(() -> {
                                         if (this.cancelReview(AdvertReviewEvent.Result.DENY)) {
