@@ -3,12 +3,14 @@ package dev.cerus.mapads;
 import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.BukkitCommandManager;
 import co.aikar.commands.CommandCompletions;
+import co.aikar.commands.InvalidCommandArgument;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.cerus.mapads.advert.AdvertController;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.advert.storage.MySqlAdvertStorageImpl;
 import dev.cerus.mapads.advert.storage.SqliteAdvertStorageImpl;
+import dev.cerus.mapads.command.AdvertCommand;
 import dev.cerus.mapads.command.DefaultImageCommand;
 import dev.cerus.mapads.command.HelpCommand;
 import dev.cerus.mapads.command.MapAdsCommand;
@@ -47,6 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.milkbowl.vault.economy.Economy;
 import org.bstats.bukkit.Metrics;
@@ -210,6 +213,14 @@ public class MapAdsPlugin extends JavaPlugin {
             }
             return list;
         });
+        commandManager.getCommandContexts().registerContext(UUID.class, ctx -> {
+            final String s = ctx.popFirstArg();
+            try {
+                return UUID.fromString(s);
+            } catch (final IllegalArgumentException ignored) {
+                throw new InvalidCommandArgument("Not a UUID");
+            }
+        });
         commandManager.registerDependency(ImageStorage.class, imageStorage);
         commandManager.registerDependency(AdvertStorage.class, advertStorage);
         commandManager.registerDependency(AdScreenStorage.class, adScreenStorage);
@@ -226,6 +237,7 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerCommand(new ReviewCommand());
         commandManager.registerCommand(new HelpCommand());
         commandManager.registerCommand(new PreviewCommand());
+        commandManager.registerCommand(new AdvertCommand());
 
         // Register listeners
         final PluginManager pluginManager = this.getServer().getPluginManager();
@@ -262,32 +274,6 @@ public class MapAdsPlugin extends JavaPlugin {
             }
             return map;
         }));
-    }
-
-    private void update(final YamlConfiguration configuration, final File l10nFile) {
-        boolean changed = false;
-        if (!configuration.contains("misc,update,0")) {
-            configuration.set("misc,update,0", "&aA new Map-Ads update is available!");
-            changed = true;
-        }
-        if (!configuration.contains("misc,update,1")) {
-            configuration.set("misc,update,1", "&e%s");
-            changed = true;
-        }
-        if (!configuration.contains("success,deleted")) {
-            configuration.set("success,deleted", "&aAd-screen has been deleted");
-            changed = true;
-        }
-
-        if (changed) {
-            try {
-                configuration.save(l10nFile);
-                this.getLogger().info("lang.yml was updated");
-            } catch (final IOException e) {
-                e.printStackTrace();
-                this.getLogger().severe("Failed to update lang.yml file");
-            }
-        }
     }
 
     @Override
@@ -358,6 +344,63 @@ public class MapAdsPlugin extends JavaPlugin {
                 return new SqliteAdvertStorageImpl(new HikariDataSource(sqliteHikariConfig), imageStorage);
             default:
                 return null;
+        }
+    }
+
+    private void update(final YamlConfiguration configuration, final File l10nFile) {
+        boolean changed = false;
+        if (!configuration.contains("misc,update,0")) {
+            configuration.set("misc,update,0", "&aA new Map-Ads update is available!");
+            changed = true;
+        }
+        if (!configuration.contains("misc,update,1")) {
+            configuration.set("misc,update,1", "&e%s");
+            changed = true;
+        }
+        if (!configuration.contains("success,deleted")) {
+            configuration.set("success,deleted", "&aAd-screen has been deleted");
+            changed = true;
+        }
+        if (!configuration.contains("gui,create,format,day")) {
+            configuration.set("gui,create,format,day", "%dd ");
+            changed = true;
+        }
+        if (!configuration.contains("gui,create,format,hour")) {
+            configuration.set("gui,create,format,hour", "%dh ");
+            changed = true;
+        }
+        if (!configuration.contains("gui,create,format,minute")) {
+            configuration.set("gui,create,format,minute", "%dm");
+            changed = true;
+        }
+        if (configuration.getString("gui,create,button,info_min,name", "").contains("%d Min")) {
+            configuration.set("gui,create,button,info_min,name", configuration
+                    .getString("gui,create,button,info_min,name").replace("%d Min", "%s"));
+            changed = true;
+        }
+        if (configuration.getStringList("gui,create,button,info_min,lore").stream()
+                .anyMatch(s -> s.contains("} Min"))) {
+            configuration.set("gui,create,button,info_min,lore", configuration.getStringList("gui,create,button,info_min,lore").stream()
+                    .map(s -> s.replace("} Min", "}"))
+                    .collect(Collectors.toList()));
+            changed = true;
+        }
+        if (configuration.getStringList("gui,details,button,info,lore").stream()
+                .anyMatch(s -> s.contains("} Min"))) {
+            configuration.set("gui,details,button,info,lore", configuration.getStringList("gui,details,button,info,lore").stream()
+                    .map(s -> s.replace("{1} min", "{1}"))
+                    .collect(Collectors.toList()));
+            changed = true;
+        }
+
+        if (changed) {
+            try {
+                configuration.save(l10nFile);
+                this.getLogger().info("lang.yml was updated");
+            } catch (final IOException e) {
+                e.printStackTrace();
+                this.getLogger().severe("Failed to update lang.yml file");
+            }
         }
     }
 

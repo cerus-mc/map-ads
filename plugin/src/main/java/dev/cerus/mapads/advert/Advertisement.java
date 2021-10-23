@@ -13,6 +13,7 @@ public class Advertisement {
     private final double pricePaid;
     private boolean reviewed;
     private int remainingMinutes;
+    private boolean deleted;
 
     public Advertisement(final UUID advertId,
                          final UUID playerUuid,
@@ -78,4 +79,11 @@ public class Advertisement {
         this.reviewed = reviewed;
     }
 
+    public boolean isDeleted() {
+        return this.deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
 }

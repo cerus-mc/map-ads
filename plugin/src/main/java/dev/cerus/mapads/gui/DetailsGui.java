@@ -7,6 +7,7 @@ import dev.cerus.mapads.api.event.AdvertReviewEvent;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.FormatUtil;
 import dev.cerus.mapads.util.ItemBuilder;
 import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
@@ -64,7 +65,7 @@ public class DetailsGui {
                                 .setName(L10n.get("gui.details.button.info.name"))
                                 .setLore(L10n.getList("gui.details.button.info.lore").stream()
                                         .map(s -> s.replace("{0}", Bukkit.getOfflinePlayer(this.advertisement.getPlayerUuid()).getName()))
-                                        .map(s -> s.replace("{1}", String.valueOf(this.advertisement.getPurchasedMinutes())))
+                                        .map(s -> s.replace("{1}", FormatUtil.formatMinutes(this.advertisement.getPurchasedMinutes())))
                                         .map(s -> s.replace("{2}", String.valueOf(this.advertisement.getPricePaid())))
                                         .map(s -> s.replace("{3}", this.advertisement.getAdScreenId()))
                                         .map(s -> s.replace("{4}", DATE_FORMAT.format(this.advertisement.getPurchaseTimestamp())))

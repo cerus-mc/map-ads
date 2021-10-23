@@ -422,10 +422,10 @@ public class CreateAdGui {
         }
 
         this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(15)), new Item(new ItemBuilder(Material.CLOCK)
-                .setName(L10n.get("gui.create.button.info_min.name", this.context.selectedMinutes))
+                .setName(L10n.get("gui.create.button.info_min.name", FormatUtil.formatMinutes(this.context.selectedMinutes)))
                 .setLore(L10n.getList("gui.create.button.info_min.lore").stream()
-                        .map(s -> s.replace("{0}", String.valueOf(this.config.minAdMins)))
-                        .map(s -> s.replace("{1}", String.valueOf(this.config.maxAdMins)))
+                        .map(s -> s.replace("{0}", FormatUtil.formatMinutes(this.config.minAdMins)))
+                        .map(s -> s.replace("{1}", FormatUtil.formatMinutes(this.config.maxAdMins)))
                         .collect(Collectors.toList()))
                 .build()));
         this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(31)), new Item(new ItemBuilder(Material.GOLD_INGOT)

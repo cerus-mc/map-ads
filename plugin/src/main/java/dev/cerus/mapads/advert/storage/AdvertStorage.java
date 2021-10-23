@@ -17,6 +17,10 @@ public interface AdvertStorage extends AutoCloseable {
 
     CompletableFuture<Void> deleteAdverts(UUID... ids);
 
+    Advertisement getAdvert(UUID id);
+
     List<Advertisement> getPendingAdvertisements();
+
+    List<Advertisement> getRunningAdvertisements(String screenName);
 
 }

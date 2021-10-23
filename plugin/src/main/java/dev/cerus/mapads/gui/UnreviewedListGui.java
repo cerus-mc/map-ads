@@ -6,6 +6,7 @@ import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.FormatUtil;
 import dev.cerus.mapads.util.ItemBuilder;
 import dev.pelkum.yamif.components.Button;
 import dev.pelkum.yamif.components.Item;
@@ -73,7 +74,7 @@ public class UnreviewedListGui {
                     .setName("§6Advertisement")
                     .setLore(L10n.getList("gui.details.button.info.lore").stream()
                             .map(s -> s.replace("{0}", Bukkit.getOfflinePlayer(advertisement.getPlayerUuid()).getName()))
-                            .map(s -> s.replace("{1}", String.valueOf(advertisement.getPurchasedMinutes())))
+                            .map(s -> s.replace("{1}", FormatUtil.formatMinutes(advertisement.getPurchasedMinutes())))
                             .map(s -> s.replace("{2}", String.valueOf(advertisement.getPricePaid())))
                             .map(s -> s.replace("{3}", advertisement.getAdScreenId()))
                             .map(s -> s.replace("{4}", DATE_FORMAT.format(advertisement.getPurchaseTimestamp())))

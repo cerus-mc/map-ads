@@ -121,6 +121,7 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
                         for (final String key : this.advertisementMap.keySet()) {
                             this.advertisementMap.get(key).remove(advertisement);
                         }
+                        advertisement.setDeleted(true);
                     });
 
             final String arrStr = Arrays.stream(ids)
@@ -140,6 +141,10 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
 
     @Override
     public CompletableFuture<Void> updateAdvert(final Advertisement advertisement) {
+        if (advertisement.isDeleted()) {
+            return CompletableFuture.completedFuture(null);
+        }
+
         final CompletableFuture<Void> future = new CompletableFuture<>();
         this.run(() -> {
             try (final Connection connection = this.getConnection();
@@ -214,8 +219,24 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
     }
 
     @Override
+    public Advertisement getAdvert(final UUID id) {
+        return this.advertisements.stream()
+                .filter(advertisement -> advertisement.getAdvertId().equals(id))
+                .findAny()
+                .orElse(null);
+    }
+
+    @Override
     public List<Advertisement> getPendingAdvertisements() {
         return this.pendingAdvertisements;
+    }
+
+    @Override
+    public List<Advertisement> getRunningAdvertisements(final String screenName) {
+        return this.advertisements.stream()
+                .filter(advertisement -> advertisement.getRemainingMinutes() > 0)
+                .filter(advertisement -> advertisement.getAdScreenId().equals(screenName))
+                .collect(Collectors.toList());
     }
 
 }
