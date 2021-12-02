@@ -12,5 +12,4 @@ depend:
 
 libraries:
   - "org.xerial:sqlite-jdbc:3.36.0.3"
-  - "com.zaxxer:HikariCP:5.0.0"
   - "org.mariadb.jdbc:mariadb-java-client:2.7.2"

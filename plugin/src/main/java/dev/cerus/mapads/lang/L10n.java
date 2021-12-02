@@ -1,9 +1,12 @@
 package dev.cerus.mapads.lang;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class L10n {
 
@@ -15,7 +18,13 @@ public class L10n {
     }
 
     public static String get(final String key, final Object... params) {
-        return String.format(stringMap.getOrDefault(key, key), params);
+        try {
+            return String.format(stringMap.getOrDefault(key, key), params);
+        } catch (final IllegalFormatConversionException e) {
+            throw new RuntimeException("Failed to translate '" + key + "' (" + Arrays.stream(params)
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", ")) + ")", e);
+        }
     }
 
     public static List<String> getList(final String key) {
