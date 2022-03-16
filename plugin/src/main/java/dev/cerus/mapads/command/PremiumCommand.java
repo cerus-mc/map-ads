@@ -7,6 +7,10 @@ import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.premium.Premium;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,7 +29,10 @@ public class PremiumCommand extends BaseCommand {
             player.sendMessage("§7This is not a premium version");
         } else {
             player.sendMessage("§dDownload-ID: §7" + Premium.getNonce());
-            player.sendMessage("§dID: §7" + Premium.to64BitIdentifier());
+            player.spigot().sendMessage(new ComponentBuilder("§dID: §7" + Premium.to64BitIdentifier())
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§7Click to copy ID")))
+                    .event(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.valueOf(Premium.to64BitIdentifier())))
+                    .create());
         }
     }
 
