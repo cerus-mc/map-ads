@@ -102,6 +102,9 @@ public class ScreenCommand extends BaseCommand {
         adScreen.setTransition(transition);
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.updated"));
+        if (TransitionRegistry.getTransition(transition).isPerformanceIntensive()) {
+            player.sendMessage(L10n.getPrefixed("misc.intensive_transition"));
+        }
     }
 
 }

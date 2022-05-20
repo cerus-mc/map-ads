@@ -36,6 +36,7 @@
 'misc,pending': "&7There are &d%d adverts &7that are waiting to be reviewed. (&e/mapads review list&7)"
 'misc,update,0': "&aA new Map-Ads update is available!"
 'misc,update,1': "&e%s"
+'misc,intensive_transition': "&c⚠ &eWarning: &7This transition is marked as performance intensive. &7 &c⚠"
 
 'gui,page': "&bPage %d"
 'gui,prev_page,enabled': "&7« &fPrevious page"

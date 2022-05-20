@@ -53,4 +53,8 @@ public class AlphaTransition implements Transition {
         this.scheduler.close();
     }
 
+    @Override
+    public boolean isPerformanceIntensive() {
+        return true;
+    }
 }

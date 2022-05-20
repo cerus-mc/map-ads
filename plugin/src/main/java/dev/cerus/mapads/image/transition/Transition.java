@@ -12,4 +12,8 @@ public interface Transition {
     default void cleanup() throws Exception {
     }
 
+    default boolean isPerformanceIntensive() {
+        return false;
+    }
+
 }
