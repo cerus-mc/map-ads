@@ -30,7 +30,8 @@ public class ReviewerUtil {
                 if (!player.isOnline()) {
                     return;
                 }
-                ((Context) o2).screen.update(MapScreen.DirtyHandlingPolicy.IGNORE, player);
+                ((Context) o2).screen.sendFrames(player);
+                ((Context) o2).screen.sendMaps(true, player);
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(L10n.get("misc.img_viewing")));
             })
             .build();
@@ -66,10 +67,11 @@ public class ReviewerUtil {
     }
 
     public static void sendImage(final Player player, final MapScreen screen, final MapImage image) {
-        final MapScreen fakeScreen = new MapScreen(VERSION_ADAPTER, screen.getWidth(), screen.getHeight());
+        final MapScreen fakeScreen = new MapScreen((int) (System.currentTimeMillis() / 1000), VERSION_ADAPTER, screen.getWidth(), screen.getHeight());
         fakeScreen.setFrameIds(screen.getFrameIds());
-        image.drawOnto(fakeScreen);
-        fakeScreen.update(MapScreen.DirtyHandlingPolicy.IGNORE, player);
+        image.drawOnto(fakeScreen, 0, 0);
+        fakeScreen.sendFrames(player);
+        fakeScreen.sendMaps(true, player);
 
         if (REVIEWER_MAP.containsKey(player.getUniqueId())) {
             REVIEWER_MAP.get(player.getUniqueId()).fakeScreen = fakeScreen;
@@ -78,7 +80,9 @@ public class ReviewerUtil {
 
     public static void markAsReviewer(final Player player, final MapImage image, final MapScreen screen) {
         if (REVIEWER_MAP.containsKey(player.getUniqueId())) {
-            REVIEWER_MAP.remove(player.getUniqueId()).screen.update(MapScreen.DirtyHandlingPolicy.IGNORE, player);
+            final Context ctx = REVIEWER_MAP.remove(player.getUniqueId());
+            ctx.screen.sendFrames(player);
+            ctx.screen.sendMaps(true, player);
         }
 
         REVIEWER_MAP.put(player.getUniqueId(), new Context(player, image, screen));

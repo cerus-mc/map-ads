@@ -10,42 +10,40 @@ import dev.cerus.maps.api.graphics.MapGraphics;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class GradualBarTransition implements Transition {
+public class AlphaTransition implements Transition {
 
-    private static final int STEP = 8;
     private final Scheduler scheduler = ExecutorServiceScheduler.create(Executors.newScheduledThreadPool(1));
 
     @Override
-    public void makeTransition(final @NotNull MapScreen screen, final MapImage oldImg, final @NotNull MapImage newImg) {
+    public void makeTransition(@NotNull final MapScreen screen, @Nullable final MapImage oldImg, @NotNull final MapImage newImg) {
         if (oldImg != null && oldImg.getId().equals(newImg.getId())) {
             return;
         }
 
         final MapGraphics<?, ?> graphics = screen.getGraphics();
         this.scheduler.scheduleAtFixedRate(new SchedulerRunnable() {
-            private int x = 0;
+            private float alpha = 0.05f;
+            private int t = 0;
 
             @Override
             public void run() {
-                final MapGraphics<?, ?> imageGraphics = newImg.getGraphics();
-                if (graphics.hasDirectAccessCapabilities()) {
-                    for (int y = 0; y < screen.getHeight() * 128; y++) {
-                        System.arraycopy(imageGraphics.getDirectAccessData(), imageGraphics.index(this.x, y), graphics.getDirectAccessData(), graphics.index(this.x, y), STEP);
-                    }
-                } else {
-                    for (int xs = 0; xs < STEP; xs++) {
-                        for (int y = 0; y < screen.getHeight() * 128; y++) {
-                            graphics.setPixel(this.x + xs, y, imageGraphics.getPixel(this.x + xs, y));
-                        }
-                    }
+                if (this.t < 3) {
+                    this.t++;
+                    return;
                 }
-                screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
-
-                if ((this.x = this.x + STEP) >= screen.getWidth() * 128) {
+                this.t = 0;
+                if (this.alpha > 1f) {
                     this.cancel();
+                    graphics.place(newImg.getGraphics(), 0, 0, 1f);
                     screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
+                    return;
                 }
+
+                graphics.place(newImg.getGraphics(), 0, 0, this.alpha);
+                screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
+                this.alpha += 0.05f;
             }
         }, 0, 1000 / 20, TimeUnit.MILLISECONDS);
     }

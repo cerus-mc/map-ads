@@ -10,9 +10,11 @@ import dev.cerus.mapads.image.transition.TransitionRegistry;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
+import dev.cerus.maps.api.graphics.FastMapScreenGraphics;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.Bukkit;
 
 public class AdvertController {
 
@@ -38,6 +40,10 @@ public class AdvertController {
             return;
         }
 
+        if (!(mapScreen.getGraphics() instanceof FastMapScreenGraphics)) {
+            mapScreen.useFastGraphics(true);
+        }
+
         final Context context = this.contextMap.computeIfAbsent(screen.getId(), o -> new Context());
 
         // Get the default image if we either don't have an ad to
@@ -49,7 +55,8 @@ public class AdvertController {
             // Do the transition thingy
             final Transition transition = TransitionRegistry.getOrDefault(screen.getTransition());
             transition.makeTransition(mapScreen, context.prevImg, image);
-            mapScreen.update(MapScreen.DirtyHandlingPolicy.IGNORE, ReviewerUtil.getNonReviewingPlayers(mapScreen));
+            mapScreen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(mapScreen));
+            Bukkit.broadcastMessage("transitioning " + transition.getClass().getSimpleName());
 
             // If we're displaying an ad we need to decrement its amount of remaining minutes
             if (context.currentAdvert != null) {

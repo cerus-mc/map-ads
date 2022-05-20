@@ -6,7 +6,7 @@ import dev.cerus.mapads.scheduler.Scheduler;
 import dev.cerus.mapads.scheduler.SchedulerRunnable;
 import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
-import dev.cerus.maps.api.graphics.MapScreenGraphics;
+import dev.cerus.maps.api.graphics.MapGraphics;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public class PixelateBigTransition implements Transition {
             }
         }
 
-        final MapScreenGraphics graphics = screen.getGraphics();
+        final MapGraphics<?, ?> graphics = screen.getGraphics();
         this.scheduler.scheduleAtFixedRate(new SchedulerRunnable() {
             private int count = 0;
 
@@ -51,6 +51,7 @@ public class PixelateBigTransition implements Transition {
             public void run() {
                 if (this.count >= 16) {
                     this.cancel();
+                    screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
                     return;
                 }
 
@@ -61,16 +62,26 @@ public class PixelateBigTransition implements Transition {
                         final int baseX = coords[0] * 32 + (sx * 128);
                         final int baseY = coords[1] * 32 + (sy * 128);
 
-                        for (int x = baseX; x < baseX + 32; x++) {
+                        if (graphics.hasDirectAccessCapabilities()) {
                             for (int y = baseY; y < baseY + 32; y++) {
-                                graphics.setPixel(x, y, newImg.getData()[x][y]);
+                                System.arraycopy(newImg.getGraphics().getDirectAccessData(),
+                                        newImg.getGraphics().index(baseX, y),
+                                        graphics.getDirectAccessData(),
+                                        graphics.index(baseX, y),
+                                        32);
+                            }
+                        } else {
+                            for (int x = baseX; x < baseX + 32; x++) {
+                                for (int y = baseY; y < baseY + 32; y++) {
+                                    graphics.setPixel(x, y, newImg.getGraphics().getPixel(x, y));
+                                }
                             }
                         }
                     }
                 }
 
                 this.count++;
-                screen.update(MapScreen.DirtyHandlingPolicy.IGNORE, ReviewerUtil.getNonReviewingPlayers(screen));
+                screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
             }
         }, 0, 2 * (1000 / 20), TimeUnit.MILLISECONDS);
     }

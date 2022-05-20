@@ -13,8 +13,8 @@ public class InstantTransition implements Transition {
             return;
         }
 
-        newImg.drawOnto(screen);
-        screen.update(MapScreen.DirtyHandlingPolicy.IGNORE, ReviewerUtil.getNonReviewingPlayers(screen));
+        newImg.drawOnto(screen, 0, 0);
+        screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
     }
 
 }

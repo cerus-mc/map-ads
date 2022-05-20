@@ -35,7 +35,8 @@ public class PlayerJoinListener implements Listener {
             for (final AdScreen screen : this.adScreenStorage.getScreens()) {
                 final MapScreen mapScreen = MapScreenRegistry.getScreen(screen.getScreenId());
                 if (mapScreen != null) {
-                    mapScreen.update(MapScreen.DirtyHandlingPolicy.IGNORE, event.getPlayer());
+                    mapScreen.sendFrames(player);
+                    mapScreen.sendMaps(true, player);
                 }
             }
         }, 5);

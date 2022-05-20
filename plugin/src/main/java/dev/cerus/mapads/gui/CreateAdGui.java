@@ -13,6 +13,7 @@ import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.EnumUtil;
 import dev.cerus.mapads.util.FormatUtil;
 import dev.cerus.mapads.util.ItemBuilder;
 import dev.cerus.mapads.util.UrlVerificationUtil;
@@ -60,7 +61,7 @@ public class CreateAdGui {
 
     private static final ItemStack BTN_MAP = new ItemBuilder(Material.MAP).setName(L10n.get("gui.create.button.map.name")).build();
     private static final ItemStack BTN_FRAME = new ItemBuilder(Material.ITEM_FRAME).setName(L10n.get("gui.create.button.frame.name")).build();
-    private static final ItemStack BTN_GLOW_FRAME = new ItemBuilder(Material.GLOW_ITEM_FRAME).setName(L10n.get("gui.create.button.glow_frame.name")).build();
+    private static final ItemStack BTN_GLOW_FRAME = new ItemBuilder(EnumUtil.attemptGet("GLOW_ITEM_FRAME", Material.PAINTING)).setName(L10n.get("gui.create.button.glow_frame.name")).build();
 
     private final AdvertStorage advertStorage;
     private final ImageStorage imageStorage;
@@ -258,7 +259,7 @@ public class CreateAdGui {
     }
 
     private ItemStack makeAmethystBtn() {
-        return new ItemBuilder(Material.AMETHYST_SHARD)
+        return new ItemBuilder(EnumUtil.attemptGet("AMETHYST_SHARD", Material.POPPED_CHORUS_FRUIT))
                 .setName(L10n.get("gui.create.button.amethyst.name"))
                 .setLore(L10n.getList("gui.create.button.amethyst.lore").stream()
                         .map(s -> s.replace("{0}", switch (this.context.dither) {

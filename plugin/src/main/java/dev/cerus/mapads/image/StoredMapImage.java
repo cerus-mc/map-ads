@@ -26,7 +26,7 @@ public class StoredMapImage {
         try (final GZIPOutputStream out = new GZIPOutputStream(bout)) {
             for (int x = 0; x < mapImage.getWidth() * 128; x++) {
                 for (int y = 0; y < mapImage.getHeight() * 128; y++) {
-                    out.write(mapImage.getData()[x][y]);
+                    out.write(mapImage.getGraphics().getPixel(x, y));
                 }
             }
             out.finish();

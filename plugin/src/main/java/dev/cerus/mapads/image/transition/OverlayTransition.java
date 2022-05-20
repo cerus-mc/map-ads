@@ -6,7 +6,7 @@ import dev.cerus.mapads.scheduler.Scheduler;
 import dev.cerus.mapads.scheduler.SchedulerRunnable;
 import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
-import dev.cerus.maps.api.graphics.MapScreenGraphics;
+import dev.cerus.maps.api.graphics.MapGraphics;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ public class OverlayTransition implements Transition {
             return;
         }
 
-        final MapScreenGraphics graphics = screen.getGraphics();
+        final MapGraphics<?, ?> graphics = screen.getGraphics();
         this.scheduler.scheduleAtFixedRate(new SchedulerRunnable() {
             private int col = 1;
 
@@ -31,18 +31,20 @@ public class OverlayTransition implements Transition {
             public void run() {
                 if (this.col > (screen.getWidth() * 128) / STEP) {
                     this.cancel();
+                    screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
                     return;
                 }
 
-                for (int x = 0; x < this.col * STEP; x++) {
+                /*for (int x = 0; x < this.col * STEP; x++) {
                     for (int y = 0; y < screen.getHeight() * 128; y++) {
                         final int xx = (screen.getWidth() * 128) - ((this.col * STEP) - x);
                         graphics.setPixel(x, y, newImg.getData()[xx][y]);
                     }
-                }
+                }*/
+                graphics.place(newImg.getGraphics(), (this.col * STEP) - (newImg.getWidth() * 128), 0);
                 this.col++;
 
-                screen.update(MapScreen.DirtyHandlingPolicy.IGNORE, ReviewerUtil.getNonReviewingPlayers(screen));
+                screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
             }
         }, 0, 1000 / 20, TimeUnit.MILLISECONDS);
     }

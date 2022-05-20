@@ -7,6 +7,7 @@ import dev.cerus.mapads.api.event.AdvertReviewEvent;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.EnumUtil;
 import dev.cerus.mapads.util.FormatUtil;
 import dev.cerus.mapads.util.ItemBuilder;
 import dev.cerus.mapads.util.ReviewerUtil;
@@ -74,7 +75,7 @@ public class DetailsGui {
                 )
                 .withComponents(
                         SlotRange.single(Coordinate.fromSlot(4 + 9)),
-                        new Button(new ItemBuilder(Material.SPYGLASS)
+                        new Button(new ItemBuilder(EnumUtil.attemptGet("SPYGLASS", Material.NETHER_STAR))
                                 .setName(L10n.get("gui.details.button.viewimg.name"))
                                 .build(), event -> {
                             this.player.closeInventory();

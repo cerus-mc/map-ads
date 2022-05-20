@@ -18,6 +18,9 @@ public class TransitionRegistry {
                 this.put("pixelate_small", new PixelateSmallTransition());
                 this.put("shift", new ShiftTransition());
                 this.put("overlay", new OverlayTransition());
+                this.put("stripes_big", new StripesTransition(128));
+                this.put("stripes_small", new StripesTransition(64));
+                this.put("alpha", new AlphaTransition());
             }
         }
     };

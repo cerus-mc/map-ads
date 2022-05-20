@@ -1,13 +1,23 @@
 package dev.cerus.mapads.task;
 
+import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
-import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import net.jodah.expiringmap.ExpiringMap;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class FrameSendTask implements Runnable {
 
+    private static final double DIST = 64 * 64;
+
+    private final ExpiringMap<UUID, List<Integer>> playerScreenMap = ExpiringMap.builder().expiration(15, TimeUnit.SECONDS).build();
     private final AdScreenStorage adScreenStorage;
 
     public FrameSendTask(final AdScreenStorage adScreenStorage) {
@@ -16,18 +26,34 @@ public class FrameSendTask implements Runnable {
 
     @Override
     public void run() {
-        for (final Integer screenId : MapScreenRegistry.getScreenIds()) {
-            if (this.adScreenStorage.getAdScreen(screenId) != null) {
-                final MapScreen screen = MapScreenRegistry.getScreen(screenId);
-                final Player[] players = ReviewerUtil.getNonReviewingPlayers(screen).toArray(new Player[0]);
-                screen.sendFramesOnly(players);
+        for (final AdScreen screen : this.adScreenStorage.getScreens()) {
+            final MapScreen mapScreen = MapScreenRegistry.getScreen(screen.getScreenId());
+            if (mapScreen != null && mapScreen.getLocation() != null) {
+                final Location screenLoc = mapScreen.getLocation();
+                for (final Player player : Bukkit.getOnlinePlayers()) {
+                    final List<Integer> screenList = this.playerScreenMap.computeIfAbsent(player.getUniqueId(), $ -> new ArrayList<>());
+                    final double distance = player.getLocation().distanceSquared(screenLoc);
+                    if (screenList.contains(mapScreen.getId()) && distance > DIST) {
+                        screenList.remove((Integer) mapScreen.getId());
+                        player.sendMessage("remove " + mapScreen.getId());
+                    } else if (!screenList.contains(mapScreen.getId()) && distance < DIST) {
+                        screenList.add(mapScreen.getId());
+                        mapScreen.sendFrames(player);
+                        mapScreen.sendMaps(true, player);
+                        player.sendMessage("add " + mapScreen.getId());
+                    }
+                    this.playerScreenMap.resetExpiration(player.getUniqueId());
+                }
             }
         }
 
-        ReviewerUtil.getReviewingPlayers().forEach(player -> {
-            final MapScreen fakeScreen = ReviewerUtil.getFakeScreen(player);
-            fakeScreen.sendFramesOnly(player);
-        });
+        /*for (final Integer screenId : MapScreenRegistry.getScreenIds()) {
+            if (this.adScreenStorage.getAdScreen(screenId) != null) {
+                final MapScreen screen = MapScreenRegistry.getScreen(screenId);
+                final Player[] players = ReviewerUtil.getNonReviewingPlayers(screen).toArray(new Player[0]);
+                screen.sendFrames(players);
+            }
+        }*/
     }
 
 }

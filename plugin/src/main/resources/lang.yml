@@ -72,7 +72,7 @@
 'gui,create,button,plus_min,name': "&6&l+"
 'gui,create,button,plus_min,lore': [ "&fIncrease the minutes you want to purchase by {0}", "&fClick+SHIFT to select maximum minutes" ]
 'gui,create,button,info_min,name': "&8« &b%s &8»"
-'gui,create,button,info_min,lore': [ "&7Minimum: &f{0} min", "&7Maximum: &f{1} min" ]
+'gui,create,button,info_min,lore': [ "&7Minimum: &f{0}", "&7Maximum: &f{1}" ]
 'gui,create,error,choose_screen_first': "Please choose a screen first"
 'gui,create,error,choose_image_first': "Please choose an image first"
 'gui,create,error,invalid_url': "Invalid url"
