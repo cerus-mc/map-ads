@@ -35,12 +35,12 @@ public class StripesTransition implements Transition {
 
             @Override
             public void run() {
-                if (this.row > (screen.getHeight() * 128) / StripesTransition.this.size) {
+                if (this.row >= (screen.getHeight() * 128) / StripesTransition.this.size) {
                     this.row = 0;
                     this.col++;
                     this.dir = !this.dir;
                 }
-                if (this.col > (screen.getWidth() * 128) / StripesTransition.this.size) {
+                if (this.col >= (screen.getWidth() * 128) / StripesTransition.this.size) {
                     this.cancel();
                     screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
                     return;
@@ -51,16 +51,13 @@ public class StripesTransition implements Transition {
                 final int fromY = (this.dir ? (screen.getHeight() * 128) - (this.row * StripesTransition.this.size) - StripesTransition.this.size : this.row * StripesTransition.this.size);
                 final int toY = (this.dir ? (screen.getHeight() * 128) - (this.row * StripesTransition.this.size) : this.row * StripesTransition.this.size + StripesTransition.this.size);
 
-                //Bukkit.broadcastMessage(this.col + "," + this.row + " / " + ((screen.getWidth() * 128) / STEP) + "," + ((screen.getHeight() * 128) / STEP));
-                //Bukkit.broadcastMessage(fromX + "->" + toX + ", " + fromY + "->" + toY);
-
-                if (graphics.hasDirectAccessCapabilities() && false) {
+                if (graphics.hasDirectAccessCapabilities()) {
                     final MapGraphics<?, ?> imgGraphics = newImg.getGraphics();
                     for (int y = fromY; y < toY; y++) {
                         System.arraycopy(imgGraphics.getDirectAccessData(),
                                 imgGraphics.index(fromX, y),
                                 graphics.getDirectAccessData(),
-                                fromX,
+                                graphics.index(fromX, y),
                                 toX - fromX);
                     }
                 } else {
