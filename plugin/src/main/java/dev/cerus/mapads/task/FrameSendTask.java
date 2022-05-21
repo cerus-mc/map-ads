@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
 
 public class FrameSendTask implements Runnable {
 
-    private static final double DIST = 64 * 64;
+    private static final double DIST = 30 * 30;
 
     private final ExpiringMap<UUID, List<Integer>> playerScreenMap = ExpiringMap.builder().expiration(15, TimeUnit.SECONDS).build();
     private final AdScreenStorage adScreenStorage;

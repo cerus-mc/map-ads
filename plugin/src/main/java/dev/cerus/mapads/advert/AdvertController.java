@@ -14,7 +14,6 @@ import dev.cerus.maps.api.graphics.FastMapScreenGraphics;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.util.HashMap;
 import java.util.Map;
-import org.bukkit.Bukkit;
 
 public class AdvertController {
 
@@ -56,7 +55,6 @@ public class AdvertController {
             final Transition transition = TransitionRegistry.getOrDefault(screen.getTransition());
             transition.makeTransition(mapScreen, context.prevImg, image);
             mapScreen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(mapScreen));
-            Bukkit.broadcastMessage("transitioning " + transition.getClass().getSimpleName());
 
             // If we're displaying an ad we need to decrement its amount of remaining minutes
             if (context.currentAdvert != null) {
