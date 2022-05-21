@@ -12,12 +12,12 @@ import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class StripesTransition implements Transition {
+public class SnakeTransition implements Transition {
 
     private final Scheduler scheduler = ExecutorServiceScheduler.create(Executors.newScheduledThreadPool(1));
     private final int size;
 
-    public StripesTransition(final int size) {
+    public SnakeTransition(final int size) {
         this.size = size;
     }
 
@@ -35,21 +35,21 @@ public class StripesTransition implements Transition {
 
             @Override
             public void run() {
-                if (this.row >= (screen.getHeight() * 128) / StripesTransition.this.size) {
+                if (this.row >= (screen.getHeight() * 128) / SnakeTransition.this.size) {
                     this.row = 0;
                     this.col++;
                     this.dir = !this.dir;
                 }
-                if (this.col >= (screen.getWidth() * 128) / StripesTransition.this.size) {
+                if (this.col >= (screen.getWidth() * 128) / SnakeTransition.this.size) {
                     this.cancel();
                     screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
                     return;
                 }
 
-                final int fromX = this.col * StripesTransition.this.size;
-                final int toX = this.col * StripesTransition.this.size + StripesTransition.this.size;
-                final int fromY = (this.dir ? (screen.getHeight() * 128) - (this.row * StripesTransition.this.size) - StripesTransition.this.size : this.row * StripesTransition.this.size);
-                final int toY = (this.dir ? (screen.getHeight() * 128) - (this.row * StripesTransition.this.size) : this.row * StripesTransition.this.size + StripesTransition.this.size);
+                final int fromX = this.col * SnakeTransition.this.size;
+                final int toX = this.col * SnakeTransition.this.size + SnakeTransition.this.size;
+                final int fromY = (this.dir ? (screen.getHeight() * 128) - (this.row * SnakeTransition.this.size) - SnakeTransition.this.size : this.row * SnakeTransition.this.size);
+                final int toY = (this.dir ? (screen.getHeight() * 128) - (this.row * SnakeTransition.this.size) : this.row * SnakeTransition.this.size + SnakeTransition.this.size);
 
                 if (graphics.hasDirectAccessCapabilities()) {
                     final MapGraphics<?, ?> imgGraphics = newImg.getGraphics();

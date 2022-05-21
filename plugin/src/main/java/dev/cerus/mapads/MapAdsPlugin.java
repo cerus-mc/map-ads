@@ -236,7 +236,9 @@ public class MapAdsPlugin extends JavaPlugin {
         metrics.addCustomChart(new AdvancedPie("transition_usage", () -> {
             final Map<String, Integer> map = new HashMap<>();
             for (final String name : TransitionRegistry.names()) {
-                map.put(name, 0);
+                if (TransitionRegistry.getTransition(name).getClass().getPackageName().equals("dev.cerus.mapads.image.transition")) {
+                    map.put(name, 0);
+                }
             }
             for (final AdScreen screen : adScreenStorage.getScreens()) {
                 if (map.containsKey(screen.getTransition())) {

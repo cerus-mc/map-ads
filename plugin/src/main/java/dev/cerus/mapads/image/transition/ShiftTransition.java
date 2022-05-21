@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ShiftTransition implements Transition {
 
-    private static final int STEP = 8;
+    private static final int STEP = 16;
     private final Scheduler scheduler = ExecutorServiceScheduler.create(Executors.newScheduledThreadPool(1));
 
     @Override
@@ -30,25 +30,15 @@ public class ShiftTransition implements Transition {
             public void run() {
                 if (this.col > (screen.getWidth() * 128) / STEP) {
                     this.cancel();
+                    //graphics.place(newImg.getGraphics(), 0, 0, 1f, false);
                     screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
                     return;
                 }
 
                 if (oldImg != null) {
-                    /*for (int x = this.col * STEP; x < screen.getWidth() * 128; x++) {
-                        for (int y = 0; y < screen.getHeight() * 128; y++) {
-                            graphics.setPixel(x, y, oldImg.getData()[x - (this.col * STEP)][y]);
-                        }
-                    }*/
-                    graphics.place(oldImg.getGraphics(), this.col * STEP, 0);
+                    graphics.place(oldImg.getGraphics(), this.col * STEP, 0, 1f, false);
                 }
-                /*for (int x = 0; x < this.col * STEP; x++) {
-                    for (int y = 0; y < screen.getHeight() * 128; y++) {
-                        final int xx = (screen.getWidth() * 128) - ((this.col * STEP) - x);
-                        graphics.setPixel(x, y, newImg.getData()[xx][y]);
-                    }
-                }*/
-                graphics.place(newImg.getGraphics(), (this.col * STEP) - (newImg.getWidth() * 128), 0);
+                graphics.place(newImg.getGraphics(), (this.col * STEP) - (newImg.getWidth() * 128), 0, 1f, false);
                 this.col++;
 
                 screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));

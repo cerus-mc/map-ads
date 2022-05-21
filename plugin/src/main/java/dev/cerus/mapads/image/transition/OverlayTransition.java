@@ -35,13 +35,7 @@ public class OverlayTransition implements Transition {
                     return;
                 }
 
-                /*for (int x = 0; x < this.col * STEP; x++) {
-                    for (int y = 0; y < screen.getHeight() * 128; y++) {
-                        final int xx = (screen.getWidth() * 128) - ((this.col * STEP) - x);
-                        graphics.setPixel(x, y, newImg.getData()[xx][y]);
-                    }
-                }*/
-                graphics.place(newImg.getGraphics(), (this.col * STEP) - (newImg.getWidth() * 128), 0);
+                graphics.place(newImg.getGraphics(), (this.col * STEP) - (newImg.getWidth() * 128), 0, 1f, false);
                 this.col++;
 
                 screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));

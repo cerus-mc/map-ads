@@ -38,18 +38,20 @@ public class ShrinkingTransition implements Transition {
             public void run() {
                 if (this.scaler <= 0d) {
                     this.cancel();
-                    graphics.place(newImg.getGraphics(), 0, 0);
+                    graphics.place(newImg.getGraphics(), 0, 0, 1f, false);
                     screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
                     return;
                 }
 
-                graphics.place(newImg.getGraphics(), 0, 0);
+                graphics.place(newImg.getGraphics(), 0, 0, 1f, false);
                 final MapGraphics<?, ?> scaledImg = ShrinkingTransition.this.resizeImage(oldImg.getGraphics(),
                         (int) ((oldImg.getWidth() * 128d) * this.scaler),
                         (int) ((oldImg.getHeight() * 128d) * this.scaler));
                 graphics.place(scaledImg,
                         (graphics.getWidth() / 2) - (scaledImg.getWidth() / 2),
-                        (graphics.getHeight() / 2) - (scaledImg.getHeight() / 2));
+                        (graphics.getHeight() / 2) - (scaledImg.getHeight() / 2),
+                        1f,
+                        false);
 
                 screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
                 this.scaler -= this.sub;
