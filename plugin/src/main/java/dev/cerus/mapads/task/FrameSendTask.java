@@ -15,7 +15,8 @@ import org.bukkit.entity.Player;
 
 public class FrameSendTask implements Runnable {
 
-    private static final double DIST = 30 * 30;
+    private static final double DIST_HARD = 30 * 30;
+    private static final double DIST_SOFT = 20 * 20;
 
     private final ExpiringMap<UUID, List<Integer>> playerScreenMap = ExpiringMap.builder().expiration(15, TimeUnit.SECONDS).build();
     private final AdScreenStorage adScreenStorage;
@@ -33,14 +34,14 @@ public class FrameSendTask implements Runnable {
                 for (final Player player : Bukkit.getOnlinePlayers()) {
                     final List<Integer> screenList = this.playerScreenMap.computeIfAbsent(player.getUniqueId(), $ -> new ArrayList<>());
                     final double distance = player.getLocation().distanceSquared(screenLoc);
-                    if (screenList.contains(mapScreen.getId()) && distance > DIST) {
+                    if (screenList.contains(mapScreen.getId()) && distance > DIST_HARD) {
                         screenList.remove((Integer) mapScreen.getId());
-                        player.sendMessage("remove " + mapScreen.getId());
-                    } else if (!screenList.contains(mapScreen.getId()) && distance < DIST) {
+                    } else if (!screenList.contains(mapScreen.getId()) && distance < DIST_HARD) {
                         screenList.add(mapScreen.getId());
                         mapScreen.sendFrames(player);
                         mapScreen.sendMaps(true, player);
-                        player.sendMessage("add " + mapScreen.getId());
+                    } else if (distance < DIST_SOFT) {
+                        mapScreen.sendFrames(player);
                     }
                     this.playerScreenMap.resetExpiration(player.getUniqueId());
                 }
