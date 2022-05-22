@@ -23,6 +23,7 @@ public class TransitionRegistry {
                 this.put("alpha", new AlphaTransition());
                 this.put("growing", new GrowingTransition());
                 this.put("shrinking", new ShrinkingTransition());
+                this.put("stripes", new StripesTransition());
             }
         }
     };
