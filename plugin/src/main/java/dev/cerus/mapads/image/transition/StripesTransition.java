@@ -34,7 +34,6 @@ public class StripesTransition implements Transition {
                     this.cancel();
                     graphics.place(newImg.getGraphics(), 0, 0);
                     screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
-                    Bukkit.broadcastMessage(screen.getId() + " stop");
                     return;
                 }
 
