@@ -24,6 +24,7 @@ public class TransitionRegistry {
                 this.put("growing", new GrowingTransition());
                 this.put("shrinking", new ShrinkingTransition());
                 this.put("stripes", new StripesTransition());
+                this.put("random", new RandomTransition());
             }
         }
     };
