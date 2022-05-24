@@ -32,6 +32,10 @@ public class FrameSendTask implements Runnable {
             if (mapScreen != null && mapScreen.getLocation() != null) {
                 final Location screenLoc = mapScreen.getLocation();
                 for (final Player player : Bukkit.getOnlinePlayers()) {
+                    if (!player.getWorld().getName().equals(screenLoc.getWorld().getName())) {
+                        continue;
+                    }
+
                     final List<Integer> screenList = this.playerScreenMap.computeIfAbsent(player.getUniqueId(), $ -> new ArrayList<>());
                     final double distance = player.getLocation().distanceSquared(screenLoc);
                     if (screenList.contains(mapScreen.getId()) && distance > DIST_HARD) {
