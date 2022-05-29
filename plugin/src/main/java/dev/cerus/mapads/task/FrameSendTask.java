@@ -2,6 +2,7 @@ package dev.cerus.mapads.task;
 
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import net.jodah.expiringmap.ExpiringMap;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -31,7 +31,7 @@ public class FrameSendTask implements Runnable {
             final MapScreen mapScreen = MapScreenRegistry.getScreen(screen.getScreenId());
             if (mapScreen != null && mapScreen.getLocation() != null) {
                 final Location screenLoc = mapScreen.getLocation();
-                for (final Player player : Bukkit.getOnlinePlayers()) {
+                for (final Player player : ReviewerUtil.getNonReviewingPlayers(mapScreen)) {
                     if (!player.getWorld().getName().equals(screenLoc.getWorld().getName())) {
                         continue;
                     }
@@ -44,7 +44,7 @@ public class FrameSendTask implements Runnable {
                         screenList.add(mapScreen.getId());
                         mapScreen.sendFrames(player);
                         mapScreen.sendMaps(true, player);
-                    } else if (distance < DIST_SOFT) {
+                    } else if (distance >= DIST_SOFT && distance < DIST_HARD) {
                         mapScreen.sendFrames(player);
                     }
                     this.playerScreenMap.resetExpiration(player.getUniqueId());
