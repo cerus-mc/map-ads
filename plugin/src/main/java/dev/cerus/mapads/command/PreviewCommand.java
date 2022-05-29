@@ -23,7 +23,6 @@ import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -38,8 +37,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 @CommandPermission("mapads.command.preview")
 public class PreviewCommand extends BaseCommand {
 
-    private final Map<UUID, Long> cooldownMap = ExpiringMap.builder()
+    private final ExpiringMap<UUID, Long> cooldownMap = ExpiringMap.builder()
             .expiration(5, TimeUnit.MINUTES)
+            .variableExpiration()
             .build();
 
     @Dependency
@@ -95,7 +95,12 @@ public class PreviewCommand extends BaseCommand {
             return;
         }
 
-        this.cooldownMap.put(player.getUniqueId(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5));
+        if (player.hasPermission("mapads.command.preview.shortcooldown")) {
+            this.cooldownMap.put(player.getUniqueId(), System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10));
+            this.cooldownMap.setExpiration(player.getUniqueId(), 10, TimeUnit.SECONDS);
+        } else {
+            this.cooldownMap.put(player.getUniqueId(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5));
+        }
 
         player.sendMessage(L10n.getPrefixed("misc.please_wait"));
         this.imageRetriever.getImageAsync(imageUrl, this.config.maxImageSize).whenComplete((result, throwable) -> {
