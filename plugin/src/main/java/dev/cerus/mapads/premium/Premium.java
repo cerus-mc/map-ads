@@ -52,9 +52,6 @@ public class Premium {
     }
 
     public static boolean isPremium() {
-        if (true) {
-            return true;
-        }
         return !user.startsWith("%%") && !resource.startsWith("%%") && !nonce.startsWith("%%");
     }
 
