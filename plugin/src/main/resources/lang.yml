@@ -1,3 +1,4 @@
+'ver': "4"
 'prefix': "&6&lM&e&lap-&6&lA&e&lds &8» &r"
 
 'api,event,create,cancelled': "Advert creation has been cancelled by an external plugin"
@@ -38,7 +39,7 @@
 'misc,pending': "&7There are &d%d adverts &7that are waiting to be reviewed. (&e/mapads review list&7)"
 'misc,update,0': "&aA new Map-Ads update is available!"
 'misc,update,1': "&e%s"
-'misc,intensive_transition': "&c⚠ &eWarning: &7This transition is marked as performance intensive. &7 &c⚠"
+'misc,intensive_transition': "&c⚠ &eWarning: &7This transition is marked as performance intensive. &c⚠"
 
 'gui,page': "&bPage %d"
 'gui,prev_page,enabled': "&7« &fPrevious page"

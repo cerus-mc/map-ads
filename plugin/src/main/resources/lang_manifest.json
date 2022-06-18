@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 4,
   "1": {
     "misc.update.0": "&aA new Map-Ads update is available!",
     "misc.update.1": "&e%s",
@@ -9,6 +9,12 @@
     "gui.create.format.minute": "%dm"
   },
   "2": {
+    "gui.create.title": "Create advertisement"
+  },
+  "3": {
+    "misc.intensive_transition": "&c⚠ &eWarning: &7This transition is marked as performance intensive. &c⚠"
+  },
+  "4": {
     "success.def_img_changed_new": "&aThe default image for %s has been changed!",
     "error.expected_screen_or_size": "&cInvalid argument! Expected screen id or size"
   }
