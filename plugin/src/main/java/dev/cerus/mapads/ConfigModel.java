@@ -14,6 +14,8 @@ public class ConfigModel {
     public double pricePerMin;
     public boolean useColorCache;
     public boolean updateMessage;
+    public boolean onlyGroups;
+    public boolean deductEachScreenInGroup;
 
     public ConfigModel(final FileConfiguration configuration) {
         this.maxImageSize = configuration.getInt("images.max-size");
@@ -25,6 +27,8 @@ public class ConfigModel {
         this.pricePerMin = configuration.getDouble("ads.price-per-minute");
         this.useColorCache = configuration.getBoolean("images.use-color-cache");
         this.updateMessage = configuration.getBoolean("send-update-message");
+        this.onlyGroups = configuration.getBoolean("only-show-groups");
+        this.deductEachScreenInGroup = configuration.getBoolean("deduct-each-screen-in-group");
     }
 
 }

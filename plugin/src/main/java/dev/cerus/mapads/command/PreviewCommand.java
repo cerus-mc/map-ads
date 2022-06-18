@@ -138,10 +138,11 @@ public class PreviewCommand extends BaseCommand {
                 return;
             }
 
-            final AdScreenListGui gui = new AdScreenListGui(player, this.adScreenStorage, adScreen -> {
+            final AdScreenListGui gui = new AdScreenListGui(player, this.adScreenStorage, either -> {
                 player.closeInventory();
                 player.sendMessage(L10n.getPrefixed("misc.please_wait"));
 
+                final AdScreen adScreen = either.unsafeGet();
                 final MapScreen mapScreen = MapScreenRegistry.getScreen(adScreen.getScreenId());
                 this.imageConverter.convertAsync(image, dither).whenComplete((mapImage, throwable_) -> {
                     ReviewerUtil.markAsReviewer(player, mapImage, mapScreen);
@@ -149,7 +150,7 @@ public class PreviewCommand extends BaseCommand {
 
                     player.sendMessage(L10n.getPrefixed("success.preview", adScreen.getId()));
                 });
-            }, predicate);
+            }, predicate, false);
             Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(MapAdsPlugin.class), gui::open);
         });
     }

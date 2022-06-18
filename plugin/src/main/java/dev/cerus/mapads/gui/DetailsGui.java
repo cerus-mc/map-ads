@@ -68,7 +68,7 @@ public class DetailsGui {
                                         .map(s -> s.replace("{0}", Bukkit.getOfflinePlayer(this.advertisement.getPlayerUuid()).getName()))
                                         .map(s -> s.replace("{1}", FormatUtil.formatMinutes(this.advertisement.getPurchasedMinutes())))
                                         .map(s -> s.replace("{2}", String.valueOf(this.advertisement.getPricePaid())))
-                                        .map(s -> s.replace("{3}", this.advertisement.getAdScreenId()))
+                                        .map(s -> s.replace("{3}", this.advertisement.getScreenOrGroupId().unsafeGet()))
                                         .map(s -> s.replace("{4}", DATE_FORMAT.format(this.advertisement.getPurchaseTimestamp())))
                                         .collect(Collectors.toList()))
                                 .build())
@@ -81,14 +81,21 @@ public class DetailsGui {
                             this.player.closeInventory();
                             this.player.sendMessage(L10n.getPrefixed("misc.please_wait"));
                             this.imageStorage.getMapImage(this.advertisement.getImageId()).whenComplete((mapImage, throwable) -> {
-                                final MapScreen screen = MapScreenRegistry.getScreen(this.adScreenStorage
-                                        .getAdScreen(this.advertisement.getAdScreenId()).getScreenId());
+                                final MapScreen screen = this.advertisement.getScreenOrGroupId().map(
+                                        screenId -> MapScreenRegistry.getScreen(this.adScreenStorage
+                                                .getAdScreen(screenId).getScreenId()),
+                                        groupId -> MapScreenRegistry.getScreen(this.adScreenStorage.getAdScreen(this.adScreenStorage
+                                                .getScreenGroup(groupId).screenIds().get(0)).getScreenId())
+                                );
                                 ReviewerUtil.markAsReviewer(this.player, mapImage, screen);
                                 ReviewerUtil.sendImage(this.player, screen, mapImage);
                                 this.player.sendMessage(L10n.getPrefixed("misc.visible"));
                                 this.player.spigot().sendMessage(new ComponentBuilder("§6§lCLICK HERE")
                                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                                "/mapads screen teleport " + this.advertisement.getAdScreenId()))
+                                                "/mapads screen teleport " + this.advertisement.getScreenOrGroupId().map(
+                                                        screenId -> screenId,
+                                                        groupId -> this.adScreenStorage.getScreenGroup(groupId).screenIds().get(0)
+                                                )))
                                         .append(" §7to teleport to the ad-screen", ComponentBuilder.FormatRetention.NONE)
                                         .create());
                                 this.player.spigot().sendMessage(new ComponentBuilder("§6§lCLICK HERE")

@@ -12,6 +12,7 @@ import dev.cerus.mapads.advert.storage.MySqlAdvertStorageImpl;
 import dev.cerus.mapads.advert.storage.SqliteAdvertStorageImpl;
 import dev.cerus.mapads.command.AdvertCommand;
 import dev.cerus.mapads.command.DefaultImageCommand;
+import dev.cerus.mapads.command.GroupCommand;
 import dev.cerus.mapads.command.HelpCommand;
 import dev.cerus.mapads.command.MapAdsCommand;
 import dev.cerus.mapads.command.PremiumCommand;
@@ -33,6 +34,7 @@ import dev.cerus.mapads.lang.LangUpdater;
 import dev.cerus.mapads.listener.PlayerJoinListener;
 import dev.cerus.mapads.premium.Premium;
 import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.screen.storage.YamlAdScreenStorageImpl;
 import dev.cerus.mapads.task.FrameSendTask;
@@ -128,8 +130,12 @@ public class MapAdsPlugin extends JavaPlugin {
         }
         this.closeables.add(imageStorage);
 
+        // Init ad screen storage
+        final AdScreenStorage adScreenStorage = this.loadAdScreenStorage();
+        this.closeables.add(adScreenStorage);
+
         // Init advert storage
-        final AdvertStorage advertStorage = this.loadAdvertStorage(imageStorage);
+        final AdvertStorage advertStorage = this.loadAdvertStorage(adScreenStorage, imageStorage);
         if (advertStorage == null) {
             this.getLogger().severe("Invalid advert storage configuration");
             this.getPluginLoader().disablePlugin(this);
@@ -151,10 +157,9 @@ public class MapAdsPlugin extends JavaPlugin {
         final boolean finalDiscordEnabled = discordEnabled;
 
         // Init misc services
-        final AdScreenStorage adScreenStorage = this.loadAdScreenStorage();
-        this.closeables.add(adScreenStorage);
         final DefaultImageController defaultImageController = new DefaultImageController(this, imageStorage);
-        final AdvertController advertController = new AdvertController(this, advertStorage, imageStorage, defaultImageController);
+        final AdvertController advertController = new AdvertController(this, advertStorage, imageStorage,
+                defaultImageController, adScreenStorage);
         final ImageRetriever imageRetriever = new ImageRetriever();
         final ImageConverter imageConverter = new ImageConverter();
 
@@ -184,6 +189,11 @@ public class MapAdsPlugin extends JavaPlugin {
             }
             return list;
         });
+        completions.registerCompletion("mapads_groups", context ->
+                adScreenStorage.getScreenGroups().stream()
+                        .map(ScreenGroup::id)
+                        .toList());
+        completions.registerCompletion("mapads_group_name", context -> List.of("Group Name"));
         commandManager.getCommandContexts().registerContext(UUID.class, ctx -> {
             final String s = ctx.popFirstArg();
             try {
@@ -209,6 +219,7 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerCommand(new HelpCommand());
         commandManager.registerCommand(new PreviewCommand());
         commandManager.registerCommand(new AdvertCommand());
+        commandManager.registerCommand(new GroupCommand());
 
         // Register listeners
         final PluginManager pluginManager = this.getServer().getPluginManager();
@@ -262,9 +273,13 @@ public class MapAdsPlugin extends JavaPlugin {
     }
 
     private AdScreenStorage loadAdScreenStorage() {
-        final File file = new File(this.getDataFolder(), "screens.yml");
-        final YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
-        return new YamlAdScreenStorageImpl(file, configuration);
+        final File screenConfigFile = new File(this.getDataFolder(), "screens.yml");
+        final YamlConfiguration screenConfig = YamlConfiguration.loadConfiguration(screenConfigFile);
+
+        final File groupConfigFile = new File(this.getDataFolder(), "groups.yml");
+        final YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupConfigFile);
+
+        return new YamlAdScreenStorageImpl(screenConfigFile, screenConfig, groupConfigFile, groupConfig);
     }
 
     private ImageStorage loadImageStorage() {
@@ -294,7 +309,7 @@ public class MapAdsPlugin extends JavaPlugin {
         }
     }
 
-    private AdvertStorage loadAdvertStorage(final ImageStorage imageStorage) {
+    private AdvertStorage loadAdvertStorage(final AdScreenStorage adScreenStorage, final ImageStorage imageStorage) {
         final FileConfiguration config = this.getConfig();
         switch (config.getString("advert-storage.type", "sqlite").toLowerCase()) {
             case "mysql":
@@ -308,14 +323,14 @@ public class MapAdsPlugin extends JavaPlugin {
                 mysqlHikariConfig.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
                 mysqlHikariConfig.setJdbcUrl("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/"
                         + mysqlDb + "?user=" + mysqlUser + "&password=" + mysqlPass);
-                return new MySqlAdvertStorageImpl(new HikariDataSource(mysqlHikariConfig), imageStorage);
+                return new MySqlAdvertStorageImpl(new HikariDataSource(mysqlHikariConfig), adScreenStorage, imageStorage);
             case "sqlite":
                 final String dbName = config.getString("advert-storage.sqlite.db-name");
 
                 final HikariConfig sqliteHikariConfig = new HikariConfig();
                 sqliteHikariConfig.setDriverClassName(org.sqlite.JDBC.class.getName());
                 sqliteHikariConfig.setJdbcUrl("jdbc:sqlite:" + this.getDataFolder().getPath() + "/" + dbName);
-                return new SqliteAdvertStorageImpl(new HikariDataSource(sqliteHikariConfig), imageStorage);
+                return new SqliteAdvertStorageImpl(new HikariDataSource(sqliteHikariConfig), adScreenStorage, imageStorage);
             default:
                 return null;
         }

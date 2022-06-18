@@ -1,5 +1,6 @@
 package dev.cerus.mapads.advert;
 
+import dev.cerus.mapads.util.Either;
 import java.util.UUID;
 
 public class Advertisement {
@@ -7,7 +8,7 @@ public class Advertisement {
     private final UUID advertId;
     private final UUID playerUuid;
     private final UUID imageId;
-    private final String adScreenId;
+    private final Either<String, String> screenOrGroupId;
     private final long purchaseTimestamp;
     private final int purchasedMinutes;
     private final double pricePaid;
@@ -18,7 +19,7 @@ public class Advertisement {
     public Advertisement(final UUID advertId,
                          final UUID playerUuid,
                          final UUID imageId,
-                         final String adScreenId,
+                         final Either<String, String> screenOrGroupId,
                          final long purchaseTimestamp,
                          final int purchasedMinutes,
                          final int remainingMinutes,
@@ -27,7 +28,7 @@ public class Advertisement {
         this.advertId = advertId;
         this.playerUuid = playerUuid;
         this.imageId = imageId;
-        this.adScreenId = adScreenId;
+        this.screenOrGroupId = screenOrGroupId;
         this.purchaseTimestamp = purchaseTimestamp;
         this.purchasedMinutes = purchasedMinutes;
         this.remainingMinutes = remainingMinutes;
@@ -47,8 +48,8 @@ public class Advertisement {
         return this.imageId;
     }
 
-    public String getAdScreenId() {
-        return this.adScreenId;
+    public Either<String, String> getScreenOrGroupId() {
+        return this.screenOrGroupId;
     }
 
     public long getPurchaseTimestamp() {

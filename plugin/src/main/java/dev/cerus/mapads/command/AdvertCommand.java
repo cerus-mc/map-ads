@@ -40,8 +40,9 @@ public class AdvertCommand extends BaseCommand {
     @CommandCompletion("@mapads_names")
     public void handleList(final Player player, @Optional final String screenName) {
         if (screenName == null) {
-            new AdScreenListGui(player, this.adScreenStorage, adScreen ->
-                    player.performCommand("mapads advert list " + adScreen.getId())).open();
+            new AdScreenListGui(player, this.adScreenStorage, either ->
+                    player.performCommand("mapads advert list " + ((AdScreen) either.get()).getId()),
+                    false).open();
         } else {
             final AdScreen adScreen = this.adScreenStorage.getAdScreen(screenName);
             if (adScreen == null) {
@@ -49,7 +50,7 @@ public class AdvertCommand extends BaseCommand {
                 return;
             }
 
-            new AdListGui(this.advertStorage, adScreen, player, advertisement ->
+            new AdListGui(this.adScreenStorage, this.advertStorage, adScreen, player, advertisement ->
                     new AdDetailsGui(advertisement, player).open()).open();
         }
     }

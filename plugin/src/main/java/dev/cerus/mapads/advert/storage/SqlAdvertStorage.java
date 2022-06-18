@@ -2,6 +2,9 @@ package dev.cerus.mapads.advert.storage;
 
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.image.storage.ImageStorage;
+import dev.cerus.mapads.screen.ScreenGroup;
+import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.Either;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,9 +26,11 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
     protected final List<Advertisement> pendingAdvertisements = new ArrayList<>();
     protected final Map<String, List<Advertisement>> advertisementMap = new HashMap<>();
     protected final Map<String, Integer> indexMap = new HashMap<>();
+    private final AdScreenStorage adScreenStorage;
     private final ImageStorage imageStorage;
 
-    protected SqlAdvertStorage(final ImageStorage imageStorage) {
+    protected SqlAdvertStorage(final AdScreenStorage adScreenStorage, final ImageStorage imageStorage) {
+        this.adScreenStorage = adScreenStorage;
         this.imageStorage = imageStorage;
     }
 
@@ -34,8 +39,14 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
             try (final Connection connection = this.getConnection();
                  final PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `mapads_ads` " +
                          "(id VARCHAR(64) PRIMARY KEY, player_uuid VARCHAR(64), img_id VARCHAR(64), ad_screen_id VARCHAR(64), purchase_timestamp BIGINT, " +
-                         "purchased_minutes INT, remaining_minutes INT, price DOUBLE, reviewed INT)")) {
+                         "purchased_minutes INT, remaining_minutes INT, price DOUBLE, reviewed INT, screen_group_id VARCHAR(64))")) {
                 statement.executeUpdate();
+
+                // There's no ADD COLUMN IF NOT EXISTS, so we have to do this. Sucks but what are you gonna do?
+                try {
+                    connection.prepareStatement("ALTER TABLE `mapads_ads` ADD COLUMN screen_group_id VARCHAR(64)").executeUpdate();
+                } catch (final SQLException ignored) {
+                }
             } catch (final SQLException e) {
                 e.printStackTrace();
             }
@@ -52,7 +63,10 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
                             UUID.fromString(resultSet.getString("id")),
                             UUID.fromString(resultSet.getString("player_uuid")),
                             UUID.fromString(resultSet.getString("img_id")),
-                            resultSet.getString("ad_screen_id"),
+                            new Either<>(
+                                    resultSet.getString("ad_screen_id"),
+                                    resultSet.getString("screen_group_id")
+                            ),
                             resultSet.getLong("purchase_timestamp"),
                             resultSet.getInt("purchased_minutes"),
                             resultSet.getInt("remaining_minutes"),
@@ -62,9 +76,16 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
 
                     if (advertisement.isReviewed()) {
                         this.advertisements.add(advertisement);
-                        final List<Advertisement> list = this.advertisementMap.getOrDefault(advertisement.getAdScreenId(), new ArrayList<>());
-                        list.add(advertisement);
-                        this.advertisementMap.put(advertisement.getAdScreenId(), list);
+                        advertisement.getScreenOrGroupId().get(screenId -> {
+                            final List<Advertisement> list = this.advertisementMap.computeIfAbsent(screenId, $ -> new ArrayList<>());
+                            list.add(advertisement);
+                        }, groupId -> {
+                            final ScreenGroup group = this.adScreenStorage.getScreenGroup(groupId);
+                            for (final String screenId : group.screenIds()) {
+                                final List<Advertisement> list = this.advertisementMap.computeIfAbsent(screenId, $ -> new ArrayList<>());
+                                list.add(advertisement);
+                            }
+                        });
                     } else {
                         this.pendingAdvertisements.add(advertisement);
                     }
@@ -152,32 +173,43 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
                 statement.setString(1, advertisement.getAdvertId().toString());
                 statement.setString(2, advertisement.getPlayerUuid().toString());
                 statement.setString(3, advertisement.getImageId().toString());
-                statement.setString(4, advertisement.getAdScreenId().toString());
+                statement.setString(4, advertisement.getScreenOrGroupId().map(s -> s, s -> null)); // Screen id or null
                 statement.setLong(5, advertisement.getPurchaseTimestamp());
                 statement.setInt(6, advertisement.getPurchasedMinutes());
                 statement.setInt(7, advertisement.getRemainingMinutes());
                 statement.setDouble(8, advertisement.getPricePaid());
                 statement.setInt(9, advertisement.isReviewed() ? 1 : 0);
-                statement.setString(10, advertisement.getPlayerUuid().toString());
-                statement.setString(11, advertisement.getImageId().toString());
-                statement.setString(12, advertisement.getAdScreenId().toString());
-                statement.setLong(13, advertisement.getPurchaseTimestamp());
-                statement.setInt(14, advertisement.getPurchasedMinutes());
-                statement.setInt(15, advertisement.getRemainingMinutes());
-                statement.setDouble(16, advertisement.getPricePaid());
-                statement.setInt(17, advertisement.isReviewed() ? 1 : 0);
+                statement.setString(10, advertisement.getScreenOrGroupId().map(s -> null, s -> s)); // Group id or null
+                statement.setString(11, advertisement.getPlayerUuid().toString());
+                statement.setString(12, advertisement.getImageId().toString());
+                statement.setString(13, advertisement.getScreenOrGroupId().map(s -> s, s -> null)); // Screen id or null
+                statement.setLong(14, advertisement.getPurchaseTimestamp());
+                statement.setInt(15, advertisement.getPurchasedMinutes());
+                statement.setInt(16, advertisement.getRemainingMinutes());
+                statement.setDouble(17, advertisement.getPricePaid());
+                statement.setInt(18, advertisement.isReviewed() ? 1 : 0);
+                statement.setString(19, advertisement.getScreenOrGroupId().map(s -> null, s -> s)); // Group id or null
                 statement.executeUpdate();
                 future.complete(null);
 
                 if (!this.advertisements.contains(advertisement) && advertisement.isReviewed()) {
                     this.pendingAdvertisements.remove(advertisement);
                     this.advertisements.add(advertisement);
-                    final List<Advertisement> list = this.advertisementMap.getOrDefault(advertisement.getAdScreenId(), new ArrayList<>());
-                    list.add(advertisement);
-                    this.advertisementMap.put(advertisement.getAdScreenId(), list);
-                    if (!this.indexMap.containsKey(advertisement.getAdScreenId())) {
-                        this.indexMap.put(advertisement.getAdScreenId(), 0);
-                    }
+                    advertisement.getScreenOrGroupId().get(screenId -> {
+                        final List<Advertisement> list = this.advertisementMap.computeIfAbsent(screenId, $ -> new ArrayList<>());
+                        list.add(advertisement);
+                        if (!this.indexMap.containsKey(screenId)) {
+                            this.indexMap.put(screenId, 0);
+                        }
+                    }, groupId -> {
+                        for (final String screenId : this.adScreenStorage.getScreenGroup(groupId).screenIds()) {
+                            final List<Advertisement> list = this.advertisementMap.computeIfAbsent(screenId, $ -> new ArrayList<>());
+                            list.add(advertisement);
+                            if (!this.indexMap.containsKey(screenId)) {
+                                this.indexMap.put(screenId, 0);
+                            }
+                        }
+                    });
                 } else if (!this.pendingAdvertisements.contains(advertisement) && !advertisement.isReviewed()) {
                     this.pendingAdvertisements.add(advertisement);
                 }
@@ -189,9 +221,9 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
     }
 
     protected String makeAdvertInsertQuery() {
-        return "INSERT INTO `mapads_ads` (id, player_uuid, img_id, ad_screen_id, purchase_timestamp, purchased_minutes, remaining_minutes, price, reviewed) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE player_uuid = ?, img_id = ?, ad_screen_id = ?, " +
-                "purchase_timestamp = ?, purchased_minutes = ?, remaining_minutes = ?, price = ?, reviewed = ?";
+        return "INSERT INTO `mapads_ads` (id, player_uuid, img_id, ad_screen_id, purchase_timestamp, purchased_minutes, remaining_minutes, price, reviewed, screen_group_id) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE player_uuid = ?, img_id = ?, ad_screen_id = ?, " +
+                "purchase_timestamp = ?, purchased_minutes = ?, remaining_minutes = ?, price = ?, reviewed = ?, screen_group_id = ?";
     }
 
     protected abstract Connection getConnection() throws SQLException;
@@ -235,7 +267,11 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
     public List<Advertisement> getRunningAdvertisements(final String screenName) {
         return this.advertisements.stream()
                 .filter(advertisement -> advertisement.getRemainingMinutes() > 0)
-                .filter(advertisement -> advertisement.getAdScreenId().equals(screenName))
+                .filter(advertisement -> advertisement.getScreenOrGroupId().map(
+                        screenId -> screenId.equals(screenName),
+                        groupId -> this.adScreenStorage.getScreenGroup(groupId)
+                                .screenIds().contains(screenName))
+                )
                 .collect(Collectors.toList());
     }
 

@@ -52,6 +52,33 @@ public class DefaultImageCommand extends BaseCommand {
     @Dependency
     private MapAdsPlugin plugin;
 
+    @Subcommand("remove")
+    @CommandCompletion("@mapads_commondim|@mapads_names")
+    public void handleDefaultImageRemove(final Player player, final String targetArg) {
+        if (!targetArg.matches("\\d+x\\d+") && this.adScreenStorage.getAdScreen(targetArg) == null) {
+            player.sendMessage(L10n.get("error.expected_screen_or_size"));
+            return;
+        }
+
+        final String key;
+        if (this.adScreenStorage.getAdScreen(targetArg) == null) {
+            final String[] strings = targetArg.split("x");
+            final int width = Integer.parseInt(strings[0]);
+            final int height = Integer.parseInt(strings[1]);
+            if (width >= W_MAX || height >= H_MAX) {
+                player.sendMessage(L10n.getPrefixed("error.dimension_big"));
+                return;
+            }
+            key = (width * 128) + "x" + (height * 128);
+        } else {
+            final AdScreen adScreen = this.adScreenStorage.getAdScreen(targetArg);
+            key = adScreen.getId();
+        }
+
+        this.defaultImageController.removeDefaultImage(key);
+        player.sendMessage(L10n.getPrefixed("success.def_img_removed", key));
+    }
+
     @Subcommand("set")
     @CommandCompletion("@mapads_commondim|@mapads_names none|floyd_steinberg @nothing")
     public void handleDefaultImageSet(final Player player, final String targetArg, final String ditherStr, final String imageUrl) {
@@ -62,21 +89,24 @@ public class DefaultImageCommand extends BaseCommand {
 
         final int requiredWidth;
         final int requiredHeight;
+        final String key;
         if (this.adScreenStorage.getAdScreen(targetArg) == null) {
             final String[] strings = targetArg.split("x");
             final int width = Integer.parseInt(strings[0]);
             final int height = Integer.parseInt(strings[1]);
             if (width >= W_MAX || height >= H_MAX) {
-                player.sendMessage(L10n.get("error.dimension_big"));
+                player.sendMessage(L10n.getPrefixed("error.dimension_big"));
                 return;
             }
             requiredWidth = width;
             requiredHeight = height;
+            key = (width * 128) + "x" + (height * 128);
         } else {
             final AdScreen adScreen = this.adScreenStorage.getAdScreen(targetArg);
             final MapScreen mapScreen = MapScreenRegistry.getScreen(adScreen.getScreenId());
             requiredWidth = mapScreen.getWidth();
             requiredHeight = mapScreen.getHeight();
+            key = adScreen.getId();
         }
 
         final URI uri = URI.create(imageUrl);
@@ -120,8 +150,8 @@ public class DefaultImageCommand extends BaseCommand {
             }
             final MapImage converted = this.imageConverter.convert(image, dither);
             this.imageStorage.updateMapImage(converted);
-            this.defaultImageController.setDefaultImage(targetArg, converted);
-            player.sendMessage(L10n.getPrefixed("success.def_img_changed_new", targetArg));
+            this.defaultImageController.setDefaultImage(key, converted);
+            player.sendMessage(L10n.getPrefixed("success.def_img_changed_new", key));
         });
     }
 

@@ -56,7 +56,7 @@ public class AdDetailsGui {
 
     private ItemStack getDisplayItem() {
         final Function<String, String> replacer = s -> s.replace("{name}", Bukkit.getOfflinePlayer(this.advertisement.getPlayerUuid()).getName())
-                .replace("{screen}", this.advertisement.getAdScreenId())
+                .replace("{screen}", this.advertisement.getScreenOrGroupId().unsafeGet())
                 .replace("{price}", String.valueOf(this.advertisement.getPricePaid()))
                 .replace("{minrem}", String.valueOf(this.advertisement.getRemainingMinutes()))
                 .replace("{mintotal}", String.valueOf(this.advertisement.getPurchasedMinutes()))

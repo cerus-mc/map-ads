@@ -33,5 +33,7 @@ ads:
 enable-advanced-optimization-algorithm: false
 send-update-message: true
 disable-default-command: false
+only-show-groups: false
+deduct-each-screen-in-group: false
 
 default-images: { }

@@ -2,6 +2,7 @@ package dev.cerus.mapads.advert.storage;
 
 import com.zaxxer.hikari.HikariDataSource;
 import dev.cerus.mapads.image.storage.ImageStorage;
+import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -13,8 +14,8 @@ public class MySqlAdvertStorageImpl extends SqlAdvertStorage {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final HikariDataSource dataSource;
 
-    public MySqlAdvertStorageImpl(final HikariDataSource dataSource, final ImageStorage imageStorage) {
-        super(imageStorage);
+    public MySqlAdvertStorageImpl(final HikariDataSource dataSource, final AdScreenStorage adScreenStorage, final ImageStorage imageStorage) {
+        super(adScreenStorage, imageStorage);
         this.dataSource = dataSource;
         this.initTable();
         this.loadAllAds();

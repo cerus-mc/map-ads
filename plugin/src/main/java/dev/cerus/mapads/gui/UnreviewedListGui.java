@@ -69,7 +69,7 @@ public class UnreviewedListGui extends PagedGui<Advertisement> {
                         .map(s -> s.replace("{0}", Bukkit.getOfflinePlayer(item.getPlayerUuid()).getName()))
                         .map(s -> s.replace("{1}", FormatUtil.formatMinutes(item.getPurchasedMinutes())))
                         .map(s -> s.replace("{2}", String.valueOf(item.getPricePaid())))
-                        .map(s -> s.replace("{3}", item.getAdScreenId()))
+                        .map(s -> s.replace("{3}", item.getScreenOrGroupId().unsafeGet()))
                         .map(s -> s.replace("{4}", DATE_FORMAT.format(item.getPurchaseTimestamp())))
                         .collect(Collectors.toList()))
                 .build();

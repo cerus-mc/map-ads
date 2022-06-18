@@ -4,6 +4,7 @@ import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.util.ItemBuilder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,12 +19,19 @@ import org.bukkit.inventory.ItemStack;
 
 public class AdListGui extends PagedGui<Advertisement> {
 
-    public AdListGui(final AdvertStorage storage, final AdScreen screen, final Player player, final Consumer<Advertisement> clickCallback) {
+    public AdListGui(final AdScreenStorage adScreenStorage,
+                     final AdvertStorage storage,
+                     final AdScreen screen,
+                     final Player player,
+                     final Consumer<Advertisement> clickCallback) {
         super(new ArrayList<>() {
             {
                 this.addAll(storage.getRunningAdvertisements(screen.getId()));
                 this.addAll(storage.getPendingAdvertisements().stream()
-                        .filter(advertisement -> advertisement.getAdScreenId().equals(screen.getId()))
+                        .filter(advertisement -> advertisement.getScreenOrGroupId().map(
+                                s -> s.equals(screen.getId()),
+                                s -> adScreenStorage.getScreenGroup(s).screenIds().contains(screen.getId())
+                        ))
                         .toList());
             }
         }, player, clickCallback);
@@ -42,7 +50,7 @@ public class AdListGui extends PagedGui<Advertisement> {
     @Override
     protected ItemStack getDisplayItem(final Advertisement item) {
         final Function<String, String> replacer = s -> s.replace("{name}", Bukkit.getOfflinePlayer(item.getPlayerUuid()).getName())
-                .replace("{screen}", item.getAdScreenId())
+                .replace("{screen}", item.getScreenOrGroupId().unsafeGet())
                 .replace("{price}", String.valueOf(item.getPricePaid()))
                 .replace("{minrem}", String.valueOf(item.getRemainingMinutes()))
                 .replace("{mintotal}", String.valueOf(item.getPurchasedMinutes()))

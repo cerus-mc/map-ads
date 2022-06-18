@@ -46,6 +46,15 @@
     "command.advert.remove.confirm.name": "&fDo you want to delete this ad?",
     "command.advert.remove.confirm.lore": [
       "&4Warning: &7This cannot be undone."
-    ]
+    ],
+    "error.group_exists": "&cA group with this id already exists",
+    "error.group_not_found": "&cGroup does not exist",
+    "error.group_contains": "&cThis screen is already part of this group",
+    "error.group_not_contains": "&cThis screen is not part of this group",
+    "success.group_created": "&aGroup '%s' (%s) was created",
+    "success.group_deleted": "&aGroup '%s' (%s) was deleted",
+    "success.group_screen_added": "&aScreen %s has been added to group '%s'",
+    "success.group_screen_removed": "&aScreen %s was removed from group '%s'",
+    "success.def_img_removed": "&aThe default image for %s has been removed!"
   }
 }

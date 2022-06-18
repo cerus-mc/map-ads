@@ -8,6 +8,7 @@ import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.image.transition.Transition;
 import dev.cerus.mapads.image.transition.TransitionRegistry;
 import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
 import dev.cerus.maps.api.graphics.FastMapScreenGraphics;
@@ -21,16 +22,19 @@ public class AdvertController {
     private final AdvertStorage advertStorage;
     private final ImageStorage imageStorage;
     private final DefaultImageController defaultImageController;
+    private final AdScreenStorage adScreenStorage;
     private final MapAdsPlugin plugin;
 
     public AdvertController(final MapAdsPlugin plugin,
                             final AdvertStorage advertStorage,
                             final ImageStorage imageStorage,
-                            final DefaultImageController defaultImageController) {
+                            final DefaultImageController defaultImageController,
+                            final AdScreenStorage adScreenStorage) {
         this.plugin = plugin;
         this.advertStorage = advertStorage;
         this.imageStorage = imageStorage;
         this.defaultImageController = defaultImageController;
+        this.adScreenStorage = adScreenStorage;
     }
 
     public void update(final AdScreen screen) {
@@ -50,6 +54,7 @@ public class AdvertController {
         final MapImage image = context.displayDefaultImg || context.currentAdvertImage == null
                 ? this.defaultImageController.getDefaultImage(screen)
                 : context.currentAdvertImage;
+
         if (image != null) {
             // Do the transition thingy
             final Transition transition = TransitionRegistry.getOrDefault(screen.getTransition());
@@ -58,8 +63,15 @@ public class AdvertController {
 
             // If we're displaying an ad we need to decrement its amount of remaining minutes
             if (context.currentAdvert != null) {
-                context.currentAdvert.setRemainingMinutes(context.currentAdvert.getRemainingMinutes() - 1);
-                this.advertStorage.updateAdvert(context.currentAdvert);
+                final boolean shouldRemoveMinute = context.currentAdvert.getScreenOrGroupId().map(
+                        screenId -> true,
+                        groupId -> this.plugin.getConfigModel().deductEachScreenInGroup
+                                || this.adScreenStorage.getScreenGroup(groupId).screenIds().indexOf(screen.getId()) == 0
+                );
+                if (shouldRemoveMinute) {
+                    context.currentAdvert.setRemainingMinutes(context.currentAdvert.getRemainingMinutes() - 1);
+                    this.advertStorage.updateAdvert(context.currentAdvert);
+                }
             }
         }
         context.prevImg = image;

@@ -66,4 +66,11 @@ public class DefaultImageController {
         this.plugin.saveConfig();
     }
 
+    public void removeDefaultImage(final String key) {
+        this.defaultImageMap.remove(key);
+        final FileConfiguration config = this.plugin.getConfig();
+        config.set("default-images." + key, null);
+        this.plugin.saveConfig();
+    }
+
 }

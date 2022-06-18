@@ -12,7 +12,9 @@ import dev.cerus.mapads.image.MapImage;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.Either;
 import dev.cerus.mapads.util.EnumUtil;
 import dev.cerus.mapads.util.FormatUtil;
 import dev.cerus.mapads.util.ItemBuilder;
@@ -127,15 +129,21 @@ public class CreateAdGui {
             this.context.imgUrl = null;
 
             this.player.playSound(this.player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
-            final AdScreenListGui listGui = new AdScreenListGui(this.player, this.adScreenStorage, adScreen -> {
-                if (adScreen != null) {
-                    this.context.adScreen = adScreen;
-                    this.context.mapScreen = MapScreenRegistry.getScreen(adScreen.getScreenId());
+            final AdScreenListGui listGui = new AdScreenListGui(this.player, this.adScreenStorage, either -> {
+                if (either != null) {
+                    this.context.screenOrGroup = either;
+                    this.context.mapScreen = either.map(adScreen -> new MapScreen[] {
+                            MapScreenRegistry.getScreen(adScreen.getScreenId())
+                    }, group -> group.screenIds().stream()
+                            .map(this.adScreenStorage::getAdScreen)
+                            .map(AdScreen::getScreenId)
+                            .map(MapScreenRegistry::getScreen)
+                            .toArray(MapScreen[]::new));
                     this.player.playSound(this.player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                 }
                 this.state = State.EDITING;
                 this.open();
-            });
+            }, adScreen -> adScreen != null && MapScreenRegistry.getScreen(adScreen.getScreenId()) != null, true);
             listGui.open();
         }));
         this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(11)), new Button(this.makeAmethystBtn(), event -> {
@@ -156,7 +164,7 @@ public class CreateAdGui {
             if (this.state == State.CONFIRMING) {
                 return;
             }
-            if (this.context.adScreen == null || this.context.mapScreen == null) {
+            if (this.context.screenOrGroup == null || this.context.mapScreen == null || this.context.mapScreen.length == 0) {
                 this.raiseError(L10n.get("gui.create.error.choose_screen_first"));
                 return;
             }
@@ -220,13 +228,14 @@ public class CreateAdGui {
                                     this.updateGui();
                                     return;
                                 }
+                                final MapScreen first = this.context.mapScreen[0];
                                 if (image.getWidth() % 128 != 0 || image.getHeight() % 128 != 0
-                                        || image.getWidth() / 128 != this.context.mapScreen.getWidth()
-                                        || image.getHeight() / 128 != this.context.mapScreen.getHeight()) {
+                                        || image.getWidth() / 128 != first.getWidth()
+                                        || image.getHeight() / 128 != first.getHeight()) {
                                     this.state = State.ERROR_IMAGE;
                                     this.context.errorState = 2;
                                     this.raiseError(L10n.get("gui.create.error.invalid_dimensions",
-                                            this.context.mapScreen.getWidth() * 128, this.context.mapScreen.getHeight() * 128,
+                                            first.getWidth() * 128, first.getHeight() * 128,
                                             image.getWidth(), image.getHeight()));
                                     this.updateGui();
                                     return;
@@ -308,7 +317,7 @@ public class CreateAdGui {
                     .setName(L10n.get("gui.create.button.purchase.name.enabled"))
                     .build(), event -> {
                 this.raiseError(null);
-                if (this.context.adScreen == null || this.context.mapScreen == null) {
+                if (this.context.screenOrGroup == null || this.context.mapScreen == null || this.context.mapScreen.length == 0) {
                     this.raiseError(L10n.get("gui.create.error.choose_screen_first"));
                     return;
                 }
@@ -328,7 +337,10 @@ public class CreateAdGui {
                 final Advertisement advertisement = new Advertisement(UUID.randomUUID(),
                         this.player.getUniqueId(),
                         this.context.image.getId(),
-                        this.context.adScreen.getId(),
+                        this.context.screenOrGroup.mapToEither(
+                                AdScreen::getId,
+                                ScreenGroup::id
+                        ),
                         System.currentTimeMillis(),
                         this.context.selectedMinutes,
                         this.context.selectedMinutes,
@@ -353,7 +365,7 @@ public class CreateAdGui {
                         System.err.println(errImg.getMessage());
                     }
 
-                    this.advertStorage.updateAdvert(advertisement).whenComplete((oo, errAdv) -> {
+                    this.advertStorage.updateAdvert(advertisement).whenComplete((unused, errAdv) -> {
                         if (errAdv != null) {
                             System.err.println(errAdv.getMessage());
                         }
@@ -436,11 +448,14 @@ public class CreateAdGui {
 
     private ItemStack makeFrameBtn() {
         return switch (this.state) {
-            case ERROR_IMAGE -> new ItemBuilder(BTN_FRAME).setLore(L10n.get("gui.create.error_image."
-                            + (this.context.errorState > 4 ? "def" : this.context.errorState),
-                    this.context.errorState == 2 ? new Object[] {
-                            this.context.mapScreen.getWidth() * 128, this.context.mapScreen.getHeight() * 128
-                    } : new Object[0])).build();
+            case ERROR_IMAGE -> {
+                final MapScreen first = this.context.mapScreen[0];
+                yield new ItemBuilder(BTN_FRAME).setLore(L10n.get("gui.create.error_image."
+                                + (this.context.errorState > 4 ? "def" : this.context.errorState),
+                        this.context.errorState == 2 ? new Object[] {
+                                first.getWidth() * 128, first.getHeight() * 128
+                        } : new Object[0])).build();
+            }
             case CONFIRMING -> new ItemBuilder(BTN_FRAME).setLore(L10n.get("gui.create.misc.confirming_image")).build();
             default -> this.context.image != null
                     ? new ItemBuilder(BTN_GLOW_FRAME).setLore(L10n.getList("gui.create.button.glow_frame.lore").stream()
@@ -453,13 +468,15 @@ public class CreateAdGui {
     }
 
     private ItemStack makeMapBtn() {
-        if (this.context.adScreen == null || this.context.mapScreen == null) {
+        if (this.context.screenOrGroup == null || this.context.mapScreen == null || this.context.mapScreen.length == 0) {
             return new ItemBuilder(BTN_MAP).setLore(L10n.getList("gui.create.button.map.lore.noscreen")).build();
         }
+        final String id = this.context.screenOrGroup.map(AdScreen::getId, ScreenGroup::groupName);
+        final MapScreen first = this.context.mapScreen[0];
         return new ItemBuilder(BTN_MAP).setLore(L10n.getList("gui.create.button.map.lore.screen").stream()
-                .map(s -> s.replace("{0}", this.context.adScreen.getId()))
-                .map(s -> s.replace("{1}", String.valueOf(this.context.mapScreen.getWidth())))
-                .map(s -> s.replace("{2}", String.valueOf(this.context.mapScreen.getHeight())))
+                .map(s -> s.replace("{0}", id))
+                .map(s -> s.replace("{1}", String.valueOf(first.getWidth())))
+                .map(s -> s.replace("{2}", String.valueOf(first.getHeight())))
                 .collect(Collectors.toList())).build();
     }
 
@@ -476,8 +493,8 @@ public class CreateAdGui {
         public String imgUrl;
         public MapImage image;
         public BufferedImage originalImage;
-        public AdScreen adScreen;
-        public MapScreen mapScreen;
+        public Either<AdScreen, ScreenGroup> screenOrGroup;
+        public MapScreen[] mapScreen;
         public int selectedMinutes;
         public ImageConverter.Dither dither;
         // ERROR_IMAGE: 0 = Url not trusted, 1 = Image too big, 2 = Invalid proportions, 3 = Unknown, 4 = Not img

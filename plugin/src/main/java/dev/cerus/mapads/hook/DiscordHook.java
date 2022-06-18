@@ -76,7 +76,10 @@ public class DiscordHook {
                             advertisement.getPricePaid(),
                             advertisement.getPurchaseTimestamp(),
                             advertisement.getPurchasedMinutes(),
-                            advertisement.getAdScreenId()
+                            advertisement.getScreenOrGroupId().map(
+                                    s -> s,
+                                    s -> "(Group) " + s
+                            )
                     ));
                 }
             }

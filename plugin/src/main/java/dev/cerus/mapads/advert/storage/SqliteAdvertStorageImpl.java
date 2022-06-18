@@ -2,6 +2,7 @@ package dev.cerus.mapads.advert.storage;
 
 import com.zaxxer.hikari.HikariDataSource;
 import dev.cerus.mapads.image.storage.ImageStorage;
+import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -13,8 +14,8 @@ public class SqliteAdvertStorageImpl extends SqlAdvertStorage {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final HikariDataSource dataSource;
 
-    public SqliteAdvertStorageImpl(final HikariDataSource dataSource, final ImageStorage imageStorage) {
-        super(imageStorage);
+    public SqliteAdvertStorageImpl(final HikariDataSource dataSource, final AdScreenStorage adScreenStorage, final ImageStorage imageStorage) {
+        super(adScreenStorage, imageStorage);
         this.dataSource = dataSource;
         this.initTable();
         this.loadAllAds();
@@ -22,9 +23,9 @@ public class SqliteAdvertStorageImpl extends SqlAdvertStorage {
 
     @Override
     protected String makeAdvertInsertQuery() {
-        return "INSERT INTO `mapads_ads` (id, player_uuid, img_id, ad_screen_id, purchase_timestamp, purchased_minutes, remaining_minutes, price, reviewed) " +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET player_uuid = ?, img_id = ?, ad_screen_id = ?, " +
-                "purchase_timestamp = ?, purchased_minutes = ?, remaining_minutes = ?, price = ?, reviewed = ?";
+        return "INSERT INTO `mapads_ads` (id, player_uuid, img_id, ad_screen_id, purchase_timestamp, purchased_minutes, remaining_minutes, price, reviewed, screen_group_id) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET player_uuid = ?, img_id = ?, ad_screen_id = ?, " +
+                "purchase_timestamp = ?, purchased_minutes = ?, remaining_minutes = ?, price = ?, reviewed = ?, screen_group_id = ?";
     }
 
     @Override

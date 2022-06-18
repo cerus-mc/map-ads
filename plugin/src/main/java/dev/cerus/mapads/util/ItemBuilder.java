@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -58,6 +59,11 @@ public class ItemBuilder {
         }
         lore.addAll(Arrays.asList(strings));
         this.meta.setLore(lore);
+        return this;
+    }
+
+    public ItemBuilder custom(final Consumer<ItemMeta> func) {
+        func.accept(this.meta);
         return this;
     }
 

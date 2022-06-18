@@ -1,6 +1,7 @@
 package dev.cerus.mapads.screen.storage;
 
 import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.ScreenGroup;
 import java.util.List;
 
 public interface AdScreenStorage extends AutoCloseable {
@@ -13,8 +14,16 @@ public interface AdScreenStorage extends AutoCloseable {
 
     void deleteAdScreen(AdScreen screen);
 
+    ScreenGroup getScreenGroup(String name);
+
+    void updateScreenGroup(ScreenGroup group);
+
+    void deleteScreenGroup(ScreenGroup group);
+
     List<AdScreen> getScreens();
 
     List<AdScreen> getBrokenScreens();
+
+    List<ScreenGroup> getScreenGroups();
 
 }

@@ -1,6 +1,7 @@
 package dev.cerus.mapads.screen.storage;
 
 import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
 import java.io.IOException;
@@ -13,36 +14,56 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class YamlAdScreenStorageImpl implements AdScreenStorage {
 
     private final List<AdScreen> screens = new ArrayList<>();
-    private final File file;
-    private final FileConfiguration configuration;
+    private final List<ScreenGroup> groups = new ArrayList<>();
+    private final File screenConfigFile;
+    private final FileConfiguration screenConfig;
+    private final File groupConfigFile;
+    private final FileConfiguration groupConfig;
 
-    public YamlAdScreenStorageImpl(final File file, final FileConfiguration configuration) {
-        this.file = file;
-        this.configuration = configuration;
-        this.loadScreens();
+    public YamlAdScreenStorageImpl(final File screenConfigFile,
+                                   final FileConfiguration screenConfig,
+                                   final File groupConfigFile,
+                                   final FileConfiguration groupConfig) {
+        this.screenConfigFile = screenConfigFile;
+        this.screenConfig = screenConfig;
+        this.groupConfigFile = groupConfigFile;
+        this.groupConfig = groupConfig;
+        this.load();
     }
 
-    private void loadScreens() {
-        for (final String key : this.configuration.getKeys(false)) {
-            final ConfigurationSection section = this.configuration.getConfigurationSection(key);
+    private void load() {
+        for (final String key : this.screenConfig.getKeys(false)) {
+            final ConfigurationSection section = this.screenConfig.getConfigurationSection(key);
             final String id = section.getString("id");
             final int mapScreenId = section.getInt("screen-id");
             final String transition = section.getString("transition");
             final AdScreen adScreen = new AdScreen(id, mapScreenId, transition);
             this.screens.add(adScreen);
         }
+
+        for (final String key : this.groupConfig.getKeys(false)) {
+            final ConfigurationSection section = this.groupConfig.getConfigurationSection(key);
+            this.groups.add(new ScreenGroup(key, section.getString("name"), section.getStringList("screens")));
+        }
     }
 
-    private void saveScreens() throws IOException {
-        this.configuration.getKeys(false).forEach(s -> this.configuration.set(s, null));
+    private void save() throws IOException {
+        this.screenConfig.getKeys(false).forEach(s -> this.screenConfig.set(s, null));
         for (final AdScreen screen : this.screens) {
-            final ConfigurationSection section = this.configuration.createSection(screen.getId());
+            final ConfigurationSection section = this.screenConfig.createSection(screen.getId());
             section.set("id", screen.getId());
             section.set("screen-id", screen.getScreenId());
             section.set("transition", screen.getTransition());
         }
+        this.screenConfig.save(this.screenConfigFile);
 
-        this.configuration.save(this.file);
+        this.groupConfig.getKeys(false).forEach(s -> this.groupConfig.set(s, null));
+        for (final ScreenGroup group : this.groups) {
+            final ConfigurationSection section = this.groupConfig.createSection(group.id());
+            section.set("screens", group.screenIds());
+            section.set("name", group.groupName());
+        }
+        this.groupConfig.save(this.groupConfigFile);
     }
 
     @Override
@@ -67,7 +88,7 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             this.screens.add(adScreen);
         }
         try {
-            this.saveScreens();
+            this.save();
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -77,7 +98,37 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
     public void deleteAdScreen(final AdScreen screen) {
         this.screens.remove(screen);
         try {
-            this.saveScreens();
+            this.save();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public ScreenGroup getScreenGroup(final String name) {
+        return this.groups.stream()
+                .filter(group -> group.id().equalsIgnoreCase(name))
+                .findAny()
+                .orElse(null);
+    }
+
+    @Override
+    public void updateScreenGroup(final ScreenGroup group) {
+        if (!this.groups.contains(group)) {
+            this.groups.add(group);
+        }
+        try {
+            this.save();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteScreenGroup(final ScreenGroup group) {
+        this.groups.remove(group);
+        try {
+            this.save();
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -96,8 +147,13 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
     }
 
     @Override
+    public List<ScreenGroup> getScreenGroups() {
+        return this.groups;
+    }
+
+    @Override
     public void close() throws Exception {
-        this.saveScreens();
+        this.save();
     }
 
 }
