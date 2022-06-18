@@ -231,6 +231,7 @@ public class MapAdsPlugin extends JavaPlugin {
 
         // Init metrics
         final Metrics metrics = new Metrics(this, 13063);
+        metrics.addCustomChart(new SimplePie("default_command_enabled", () -> this.getConfig().getBoolean("disable-default-command") ? "No" : "Yes"));
         metrics.addCustomChart(new SimplePie("premium", () -> Premium.isPremium() ? "Yes" : "No"));
         metrics.addCustomChart(new SimplePie("discord_integration_enabled", () -> finalDiscordEnabled ? "Yes" : "No"));
         metrics.addCustomChart(new AdvancedPie("transition_usage", () -> {

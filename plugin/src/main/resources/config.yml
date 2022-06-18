@@ -32,5 +32,6 @@ ads:
 
 enable-advanced-optimization-algorithm: false
 send-update-message: true
+disable-default-command: false
 
 default-images: { }

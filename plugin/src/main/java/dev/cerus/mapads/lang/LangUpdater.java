@@ -38,7 +38,7 @@ public class LangUpdater {
 
         int ver = verInt;
         while (ver < langManifest.getCurrentVersion()) {
-            final Map<String, String> updates = langManifest.getUpdatesFor(ver + 1);
+            final Map<String, Object> updates = langManifest.getUpdatesFor(ver + 1);
             updates.forEach((k, v) -> {
                 final String key = k.replace(".", ",");
                 if (!langConf.contains(key)) {

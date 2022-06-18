@@ -3,6 +3,7 @@ version: ${version}
 main: dev.cerus.mapads.MapAdsPlugin
 author: Cerus
 api-version: 1.16
+website: "https://www.spigotmc.org/resources/96918/"
 
 softdepend:
   - ${parent.artifactId}-discord-bot

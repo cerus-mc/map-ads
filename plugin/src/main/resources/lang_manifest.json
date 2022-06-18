@@ -16,6 +16,36 @@
   },
   "4": {
     "success.def_img_changed_new": "&aThe default image for %s has been changed!",
-    "error.expected_screen_or_size": "&cInvalid argument! Expected screen id or size"
+    "error.expected_screen_or_size": "&cInvalid argument! Expected screen id or size",
+    "error.advert_not_found": "&cAdvert not found",
+    "success.ad_deleted": "&aAdvert has been deleted",
+    "gui.adverts.title": "Advertisements",
+    "gui.adverts.item.name": "&3Advert from {name}",
+    "gui.adverts.item.lore.reviewed.yes": "&aYes",
+    "gui.adverts.item.lore.reviewed.no": "&cNo",
+    "gui.adverts.item.lore": [
+      "&8» &7Screen: &b{screen}",
+      "&8» &7Price: &6{price}",
+      "&8» &7Minutes remaining: &e{minrem} of {mintotal}",
+      "&8» &7Reviewed: {review}",
+      "&8» &7Created: &f{created}"
+    ],
+    "gui.advdetails.title": "Manage advertisement",
+    "gui.advdetails.button.delete.name": "&cDelete ad",
+    "gui.advdetails.button.delete.lore": [
+      "&7Clicking this button will delete",
+      "&7the ad.",
+      "&4Warning: &7This cannot be undone!"
+    ],
+    "gui.advdetails.button.review.name": "&aReview ad",
+    "gui.advdetails.button.review.lore": [
+      "&7This advertisement has not been reviewed",
+      "&7yet. Clicking this button will bring up",
+      "&7the review GUI."
+    ],
+    "command.advert.remove.confirm.name": "&fDo you want to delete this ad?",
+    "command.advert.remove.confirm.lore": [
+      "&4Warning: &7This cannot be undone."
+    ]
   }
 }
