@@ -29,6 +29,7 @@ import dev.cerus.mapads.image.storage.MySqlImageStorageImpl;
 import dev.cerus.mapads.image.storage.SqliteImageStorageImpl;
 import dev.cerus.mapads.image.transition.TransitionRegistry;
 import dev.cerus.mapads.lang.L10n;
+import dev.cerus.mapads.lang.LangUpdater;
 import dev.cerus.mapads.listener.PlayerJoinListener;
 import dev.cerus.mapads.premium.Premium;
 import dev.cerus.mapads.screen.AdScreen;
@@ -37,7 +38,6 @@ import dev.cerus.mapads.screen.storage.YamlAdScreenStorageImpl;
 import dev.cerus.mapads.task.FrameSendTask;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -321,60 +321,8 @@ public class MapAdsPlugin extends JavaPlugin {
     }
 
     private void update(final YamlConfiguration configuration, final File l10nFile) {
-        boolean changed = false;
-        if (!configuration.contains("misc,update,0")) {
-            configuration.set("misc,update,0", "&aA new Map-Ads update is available!");
-            changed = true;
-        }
-        if (!configuration.contains("misc,update,1")) {
-            configuration.set("misc,update,1", "&e%s");
-            changed = true;
-        }
-        if (!configuration.contains("success,deleted")) {
-            configuration.set("success,deleted", "&aAd-screen has been deleted");
-            changed = true;
-        }
-        if (!configuration.contains("gui,create,format,day")) {
-            configuration.set("gui,create,format,day", "%dd ");
-            changed = true;
-        }
-        if (!configuration.contains("gui,create,format,hour")) {
-            configuration.set("gui,create,format,hour", "%dh ");
-            changed = true;
-        }
-        if (!configuration.contains("gui,create,format,minute")) {
-            configuration.set("gui,create,format,minute", "%dm");
-            changed = true;
-        }
-        if (configuration.getString("gui,create,button,info_min,name", "").contains("%d Min")) {
-            configuration.set("gui,create,button,info_min,name", configuration
-                    .getString("gui,create,button,info_min,name").replace("%d Min", "%s"));
-            changed = true;
-        }
-        if (configuration.getStringList("gui,create,button,info_min,lore").stream()
-                .anyMatch(s -> s.contains("} Min"))) {
-            configuration.set("gui,create,button,info_min,lore", configuration.getStringList("gui,create,button,info_min,lore").stream()
-                    .map(s -> s.replace("} Min", "}"))
-                    .collect(Collectors.toList()));
-            changed = true;
-        }
-        if (configuration.getStringList("gui,details,button,info,lore").stream()
-                .anyMatch(s -> s.contains("} Min"))) {
-            configuration.set("gui,details,button,info,lore", configuration.getStringList("gui,details,button,info,lore").stream()
-                    .map(s -> s.replace("{1} min", "{1}"))
-                    .collect(Collectors.toList()));
-            changed = true;
-        }
-
-        if (changed) {
-            try {
-                configuration.save(l10nFile);
-                this.getLogger().info("lang.yml was updated");
-            } catch (final IOException e) {
-                e.printStackTrace();
-                this.getLogger().severe("Failed to update lang.yml file");
-            }
-        }
+        final LangUpdater langUpdater = new LangUpdater();
+        langUpdater.update(l10nFile, configuration);
     }
 
     public ConfigModel getConfigModel() {

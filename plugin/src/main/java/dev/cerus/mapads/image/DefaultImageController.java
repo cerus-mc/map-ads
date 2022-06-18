@@ -1,8 +1,12 @@
 package dev.cerus.mapads.image;
 
 import dev.cerus.mapads.image.storage.ImageStorage;
+import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.maps.api.MapScreen;
+import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -38,17 +42,24 @@ public class DefaultImageController {
         }
     }
 
+    public MapImage getDefaultImage(final AdScreen adScreen) {
+        final MapScreen mapScreen = MapScreenRegistry.getScreen(adScreen.getScreenId());
+        if (mapScreen == null) {
+            throw new IllegalStateException("Map screen " + adScreen.getScreenId() + " not found (referenced by " + adScreen.getId() + ")");
+        }
+        return Optional.ofNullable(this.defaultImageMap.get(adScreen.getId()))
+                .orElseGet(() -> this.defaultImageMap.get((mapScreen.getWidth() * 128) + "x" + (mapScreen.getHeight() * 128)));
+    }
+
+    @Deprecated
     public MapImage getDefaultImage(final int width, final int height) {
         return this.defaultImageMap.get(width + "x" + height);
     }
 
-    public void setDefaultImage(final MapImage image) {
-        final int w = image.getWidth() * 128;
-        final int h = image.getHeight() * 128;
-        this.defaultImageMap.put(w + "x" + h, image);
-
+    public void setDefaultImage(final String key, final MapImage image) {
+        this.defaultImageMap.put(key, image);
         final FileConfiguration config = this.plugin.getConfig();
-        config.set("default-images." + w + "x" + h, image.getId().toString());
+        config.set("default-images." + key, image.getId().toString());
         this.plugin.saveConfig();
     }
 

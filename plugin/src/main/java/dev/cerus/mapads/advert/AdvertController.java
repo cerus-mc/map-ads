@@ -48,7 +48,7 @@ public class AdvertController {
         // Get the default image if we either don't have an ad to
         // display or if we are explicitly asked to display the default image
         final MapImage image = context.displayDefaultImg || context.currentAdvertImage == null
-                ? this.defaultImageController.getDefaultImage(mapScreen.getWidth() * 128, mapScreen.getHeight() * 128)
+                ? this.defaultImageController.getDefaultImage(screen)
                 : context.currentAdvertImage;
         if (image != null) {
             // Do the transition thingy

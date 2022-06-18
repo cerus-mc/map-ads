@@ -21,8 +21,10 @@
 'error,name_taken': "&cName is already taken"
 'error,does_not_exist': "&cMap screen #%d does not exist"
 'error,transition_not_found': "&cTransition not found"
+'error,expected_screen_or_size': "&cInvalid argument! Expected screen id or size"
 
 'success,def_img_changed': "&aThe default image for %dx%d has been changed!"
+'success,def_img_changed_new': "&aThe default image for %s has been changed!"
 'success,preview': "&aThe image will be displayed on ad-screen &e'%s' &afor one minute."
 'success,created': "&aAd-screen '%s' has been created"
 'success,updated': "&aAd-screen has been updated"

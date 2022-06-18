@@ -13,8 +13,12 @@ import dev.cerus.mapads.image.ImageRetriever;
 import dev.cerus.mapads.image.MapImage;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
+import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.util.FormatUtil;
 import dev.cerus.mapads.util.UrlVerificationUtil;
+import dev.cerus.maps.api.MapScreen;
+import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.util.Arrays;
@@ -43,24 +47,38 @@ public class DefaultImageCommand extends BaseCommand {
     private DefaultImageController defaultImageController;
 
     @Dependency
+    private AdScreenStorage adScreenStorage;
+
+    @Dependency
     private MapAdsPlugin plugin;
 
     @Subcommand("set")
-    @CommandCompletion("@mapads_commondim none|floyd_steinberg @nothing")
-    public void handleDefaultImageSet(final Player player, final String dimensions, final String ditherStr, final String imageUrl) {
-        if (!dimensions.matches("\\d+x\\d+")) {
-            player.sendMessage(L10n.get("error.invalid_dimension_format"));
+    @CommandCompletion("@mapads_commondim|@mapads_names none|floyd_steinberg @nothing")
+    public void handleDefaultImageSet(final Player player, final String targetArg, final String ditherStr, final String imageUrl) {
+        if (!targetArg.matches("\\d+x\\d+") && this.adScreenStorage.getAdScreen(targetArg) == null) {
+            player.sendMessage(L10n.get("error.expected_screen_or_size"));
             return;
         }
 
-        final String[] strings = dimensions.split("x");
-        final int width = Integer.parseInt(strings[0]);
-        final int height = Integer.parseInt(strings[1]);
-
-        if (width >= W_MAX || height >= H_MAX) {
-            player.sendMessage(L10n.get("error.dimension_big"));
-            return;
+        final int requiredWidth;
+        final int requiredHeight;
+        if (this.adScreenStorage.getAdScreen(targetArg) == null) {
+            final String[] strings = targetArg.split("x");
+            final int width = Integer.parseInt(strings[0]);
+            final int height = Integer.parseInt(strings[1]);
+            if (width >= W_MAX || height >= H_MAX) {
+                player.sendMessage(L10n.get("error.dimension_big"));
+                return;
+            }
+            requiredWidth = width;
+            requiredHeight = height;
+        } else {
+            final AdScreen adScreen = this.adScreenStorage.getAdScreen(targetArg);
+            final MapScreen mapScreen = MapScreenRegistry.getScreen(adScreen.getScreenId());
+            requiredWidth = mapScreen.getWidth();
+            requiredHeight = mapScreen.getHeight();
         }
+
         final URI uri = URI.create(imageUrl);
         if (uri.getHost() == null) {
             player.sendMessage(L10n.get("error.invalid_url"));
@@ -95,14 +113,15 @@ public class DefaultImageCommand extends BaseCommand {
                 return;
             }
             if (image.getWidth() % 128 != 0 || image.getHeight() % 128 != 0
-                    || image.getWidth() / 128 != width || image.getHeight() / 128 != height) {
-                player.sendMessage(L10n.getPrefixed("error.image_dimensions", width * 128, height * 128, image.getWidth(), image.getHeight()));
+                    || image.getWidth() / 128 != requiredWidth || image.getHeight() / 128 != requiredHeight) {
+                player.sendMessage(L10n.getPrefixed("error.image_dimensions", requiredWidth * 128,
+                        requiredHeight * 128, image.getWidth(), image.getHeight()));
                 return;
             }
             final MapImage converted = this.imageConverter.convert(image, dither);
             this.imageStorage.updateMapImage(converted);
-            this.defaultImageController.setDefaultImage(converted);
-            player.sendMessage(L10n.getPrefixed("success.def_img_changed", image.getWidth(), image.getHeight()));
+            this.defaultImageController.setDefaultImage(targetArg, converted);
+            player.sendMessage(L10n.getPrefixed("success.def_img_changed_new", targetArg));
         });
     }
 
