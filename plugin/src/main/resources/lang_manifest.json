@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "1": {
+    "misc.update.0": "&aA new Map-Ads update is available!",
+    "misc.update.1": "&e%s",
+    "success.deleted": "&aAd-screen has been deleted",
+    "gui,create,format,day": "%dd ",
+    "gui,create,format,hour": "%dh ",
+    "gui,create,format,minute": "%dm"
+  },
+  "2": {
+    "success.def_img_changed_new": "&aThe default image for %s has been changed!",
+    "error.expected_screen_or_size": "&cInvalid argument! Expected screen id or size"
+  }
+}
