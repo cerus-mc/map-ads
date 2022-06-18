@@ -28,12 +28,12 @@ public class DefaultImageController {
             final UUID imgId = UUID.fromString(section.getString(key));
             imageStorage.getMapImage(imgId).whenComplete((mapImage, throwable) -> {
                 if (throwable != null) {
-                    this.plugin.getLogger().severe("Failed to load default image for size " + key + ": " + throwable.getMessage());
+                    this.plugin.getLogger().severe("Failed to load default image for " + key + ": " + throwable.getMessage());
                     throwable.printStackTrace();
                     return;
                 }
                 if (mapImage == null) {
-                    this.plugin.getLogger().warning("Default image for size " + key + " not found");
+                    this.plugin.getLogger().warning("Default image for " + key + " not found");
                     return;
                 }
 
@@ -51,6 +51,9 @@ public class DefaultImageController {
                 .orElseGet(() -> this.defaultImageMap.get((mapScreen.getWidth() * 128) + "x" + (mapScreen.getHeight() * 128)));
     }
 
+    /**
+     * @deprecated Per screen default images are now supported, use {@link DefaultImageController#getDefaultImage(AdScreen)} instead
+     */
     @Deprecated
     public MapImage getDefaultImage(final int width, final int height) {
         return this.defaultImageMap.get(width + "x" + height);

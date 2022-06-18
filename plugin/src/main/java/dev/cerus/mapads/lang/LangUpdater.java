@@ -3,6 +3,7 @@ package dev.cerus.mapads.lang;
 import dev.cerus.mapads.MapAdsPlugin;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,12 +26,23 @@ public class LangUpdater {
             return;
         }
 
+        try {
+            final File backup = new File(langFile.getPath() + ".backup");
+            if (backup.exists()) {
+                backup.delete();
+            }
+            Files.copy(langFile.toPath(), backup.toPath());
+        } catch (final IOException e) {
+            this.logger.warning("Failed to create language file backup: " + e.getMessage());
+        }
+
         int ver = verInt;
         while (ver < langManifest.getCurrentVersion()) {
             final Map<String, String> updates = langManifest.getUpdatesFor(ver + 1);
             updates.forEach((k, v) -> {
-                if (!langConf.contains(k)) {
-                    langConf.set(k.replace(".", ","), v);
+                final String key = k.replace(".", ",");
+                if (!langConf.contains(key)) {
+                    langConf.set(key, v);
                 }
             });
             ver++;

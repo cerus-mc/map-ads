@@ -71,8 +71,7 @@ public class AdvertController {
         final Advertisement currentAdvert = this.advertStorage.getCurrentAdvert(screen.getId());
         if (currentAdvert == null) {
             // We don't have an ad, so we just set the default image
-            context.currentAdvertImage = this.defaultImageController
-                    .getDefaultImage(mapScreen.getWidth() * 128, mapScreen.getHeight() * 128);
+            context.currentAdvertImage = this.defaultImageController.getDefaultImage(screen);
             context.currentAdvert = null;
             return;
         }

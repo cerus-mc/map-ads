@@ -23,7 +23,7 @@ public class LangManifest {
 
     public static LangManifest load() {
         final JsonObject jsonObj;
-        try (final InputStream res = MapAdsPlugin.class.getClassLoader().getResourceAsStream("/lang_manifest.json");
+        try (final InputStream res = MapAdsPlugin.class.getClassLoader().getResourceAsStream("lang_manifest.json");
              final InputStreamReader inRead = new InputStreamReader(res)) {
             jsonObj = new JsonParser().parse(inRead).getAsJsonObject();
         } catch (final IOException e) {
@@ -33,6 +33,10 @@ public class LangManifest {
         final int ver = jsonObj.get("version").getAsInt();
         final Map<Integer, Map<String, String>> updateMap = new HashMap<>();
         for (final Map.Entry<String, JsonElement> entry : jsonObj.entrySet()) {
+            if (!entry.getKey().matches("\\d+")) {
+                continue;
+            }
+
             final int v = Integer.parseInt(entry.getKey());
             final JsonObject o = entry.getValue().getAsJsonObject();
             updateMap.put(v, o.entrySet().stream()
