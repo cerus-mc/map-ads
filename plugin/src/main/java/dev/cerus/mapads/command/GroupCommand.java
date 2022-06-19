@@ -6,11 +6,14 @@ import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Subcommand;
+import dev.cerus.mapads.advert.Advertisement;
+import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,6 +27,9 @@ public class GroupCommand extends BaseCommand {
 
     @Dependency
     private AdScreenStorage adScreenStorage;
+
+    @Dependency
+    private AdvertStorage advertStorage;
 
     @Subcommand("create")
     @CommandCompletion("group_id @mapads_group_name")
@@ -48,6 +54,15 @@ public class GroupCommand extends BaseCommand {
         final ScreenGroup group = this.adScreenStorage.getScreenGroup(id);
         this.adScreenStorage.deleteScreenGroup(group);
         player.sendMessage(L10n.getPrefixed("success.group_deleted", group.groupName(), group.id()));
+
+        for (final String screenId : group.screenIds()) {
+            final UUID[] adIds = this.advertStorage.getRunningAdvertisements(screenId).stream()
+                    .map(Advertisement::getAdvertId)
+                    .toArray(UUID[]::new);
+            if (adIds.length > 0) {
+                this.advertStorage.deleteAdverts(adIds);
+            }
+        }
     }
 
     @Subcommand("list")

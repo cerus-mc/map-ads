@@ -6,13 +6,17 @@ import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Subcommand;
+import dev.cerus.mapads.advert.Advertisement;
+import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.image.transition.TransitionRegistry;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
+import java.util.UUID;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -23,6 +27,9 @@ public class ScreenCommand extends BaseCommand {
 
     @Dependency
     private AdScreenStorage adScreenStorage;
+
+    @Dependency
+    private AdvertStorage advertStorage;
 
     @Subcommand("teleport")
     @CommandCompletion("@mapads_names")
@@ -44,12 +51,28 @@ public class ScreenCommand extends BaseCommand {
     @Subcommand("delete")
     @CommandCompletion("@mapads_names")
     public void handleScreenDelete(final Player player, final String name) {
-        if (this.adScreenStorage.getAdScreen(name) == null) {
+        final AdScreen adScreen = this.adScreenStorage.getAdScreen(name);
+        if (adScreen == null) {
             player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
             return;
         }
-        this.adScreenStorage.deleteAdScreen(this.adScreenStorage.getAdScreen(name));
+
+        this.adScreenStorage.deleteAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.deleted"));
+
+        for (final ScreenGroup group : this.adScreenStorage.getScreenGroups()) {
+            if (group.screenIds().contains(adScreen.getId())) {
+                group.screenIds().remove(adScreen.getId());
+                this.adScreenStorage.updateScreenGroup(group);
+            }
+        }
+
+        final UUID[] adIds = this.advertStorage.getRunningAdvertisements(adScreen.getId()).stream()
+                .map(Advertisement::getAdvertId)
+                .toArray(UUID[]::new);
+        if (adIds.length > 0) {
+            this.advertStorage.deleteAdverts(adIds);
+        }
     }
 
     @Subcommand("create")
