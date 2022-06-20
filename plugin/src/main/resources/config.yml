@@ -36,4 +36,8 @@ disable-default-command: false
 only-show-groups: false
 deduct-each-screen-in-group: false
 
+custom-despawning:
+  enabled: false
+  distance: 90
+
 default-images: { }

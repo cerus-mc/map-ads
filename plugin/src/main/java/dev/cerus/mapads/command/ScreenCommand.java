@@ -13,6 +13,7 @@ import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.FrameMarkerUtil;
 import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
@@ -57,6 +58,11 @@ public class ScreenCommand extends BaseCommand {
             return;
         }
 
+        final MapScreen mapScreen = MapScreenRegistry.getScreen(adScreen.getScreenId());
+        if (mapScreen != null) {
+            FrameMarkerUtil.unmark(mapScreen);
+        }
+
         this.adScreenStorage.deleteAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.deleted"));
 
@@ -87,6 +93,8 @@ public class ScreenCommand extends BaseCommand {
             player.sendMessage(L10n.getPrefixed("error.does_not_exist", screenId));
             return;
         }
+
+        FrameMarkerUtil.mark(screen);
         final AdScreen adScreen = new AdScreen(name, screenId, "instant");
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.created", name));
@@ -105,6 +113,13 @@ public class ScreenCommand extends BaseCommand {
             player.sendMessage(L10n.getPrefixed("error.does_not_exist", screenId));
             return;
         }
+
+        FrameMarkerUtil.mark(screen);
+        final MapScreen oldScreen = MapScreenRegistry.getScreen(adScreen.getScreenId());
+        if (oldScreen != null) {
+            FrameMarkerUtil.unmark(oldScreen);
+        }
+
         adScreen.setScreenId(screenId);
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.updated"));
