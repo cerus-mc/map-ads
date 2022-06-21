@@ -9,6 +9,7 @@ import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.ConfigModel;
 import dev.cerus.mapads.MapAdsPlugin;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
+import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.gui.CreateAdGui;
 import dev.cerus.mapads.image.DefaultImageController;
 import dev.cerus.mapads.image.ImageConverter;
@@ -18,7 +19,6 @@ import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -48,7 +48,7 @@ public class MapAdsCommand extends BaseCommand {
     private ConfigModel configModel;
 
     @Dependency
-    private Economy economy;
+    private EconomyWrapper<?> economy;
 
     @Default
     public void handle(final Player player) {

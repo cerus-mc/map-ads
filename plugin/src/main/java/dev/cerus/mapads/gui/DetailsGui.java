@@ -4,6 +4,7 @@ import dev.cerus.mapads.MapAdsPlugin;
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.api.event.AdvertReviewEvent;
+import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
@@ -23,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -37,14 +37,14 @@ public class DetailsGui {
     private final AdvertStorage advertStorage;
     private final ImageStorage imageStorage;
     private final AdScreenStorage adScreenStorage;
-    private final Economy economy;
+    private final EconomyWrapper<?> economy;
     private final Player player;
     private final Advertisement advertisement;
 
     public DetailsGui(final AdvertStorage advertStorage,
                       final ImageStorage imageStorage,
                       final AdScreenStorage adScreenStorage,
-                      final Economy economy,
+                      final EconomyWrapper<?> economy,
                       final Player player,
                       final Advertisement advertisement) {
         this.advertStorage = advertStorage;
@@ -150,7 +150,7 @@ public class DetailsGui {
                                         this.imageStorage.deleteMapImages(this.advertisement.getImageId());
                                         this.advertStorage.deleteAdverts(this.advertisement.getAdvertId()).whenComplete((unused, throwable) -> {
                                             Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(MapAdsPlugin.class), () -> {
-                                                this.economy.depositPlayer(Bukkit.getOfflinePlayer(this.advertisement.getPlayerUuid()), this.advertisement.getPricePaid());
+                                                this.economy.deposit(Bukkit.getOfflinePlayer(this.advertisement.getPlayerUuid()), this.advertisement.getPricePaid());
                                                 this.player.closeInventory();
                                                 this.player.playSound(this.player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
                                                 this.player.performCommand("mapads review list");

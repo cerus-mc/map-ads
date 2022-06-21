@@ -17,7 +17,6 @@ public class ConfigModel {
     public boolean onlyGroups;
     public boolean deductEachScreenInGroup;
     public boolean enableCustomDespawning;
-    public int customDespawnDistance;
 
     public ConfigModel(final FileConfiguration configuration) {
         this.maxImageSize = configuration.getInt("images.max-size");
@@ -31,8 +30,7 @@ public class ConfigModel {
         this.updateMessage = configuration.getBoolean("send-update-message");
         this.onlyGroups = configuration.getBoolean("only-show-groups");
         this.deductEachScreenInGroup = configuration.getBoolean("deduct-each-screen-in-group");
-        this.customDespawnDistance = configuration.getInt("custom-despawning.distance");
-        this.enableCustomDespawning = configuration.getBoolean("custom-despawning.enabled") && this.customDespawnDistance > 32;
+        this.enableCustomDespawning = configuration.getBoolean("custom-despawning");
     }
 
 }

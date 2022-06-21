@@ -11,18 +11,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 public class Below17Compatibility extends Compatibility {
-
-    private final Set<Integer> allowedDestroys = new HashSet<>();
-    private final Set<Integer> allowedSpawns = new HashSet<>();
-    private final Set<Integer> allowedMetas = new HashSet<>();
 
     public Below17Compatibility(final ConfigModel configModel, final AdScreenStorage adScreenStorage) {
         super(configModel, adScreenStorage);
@@ -41,45 +35,16 @@ public class Below17Compatibility extends Compatibility {
             final Field entityIdsFieldDestr = packetDestroyEntityClass.getDeclaredField("a");
             entityIdsFieldDestr.setAccessible(true);
 
-            final Class<?> packetSpawnEntityClass = Class.forName("net.minecraft.server." + this.getVersion() + ".PacketPlayOutSpawnEntity");
-            final Field entityIdsFieldSpawn = packetSpawnEntityClass.getDeclaredFields()[0];
-            entityIdsFieldSpawn.setAccessible(true);
-
-            final Class<?> packetEntityMetaClass = Class.forName("net.minecraft.server." + this.getVersion() + ".PacketPlayOutEntityMetadata");
-            final Field entityIdsFieldMeta = packetEntityMetaClass.getDeclaredFields()[0];
-            entityIdsFieldMeta.setAccessible(true);
-
             final Object channel = channelField.get(networkManager);
             final ChannelPipeline pipeline = (ChannelPipeline) pipelineMethod.invoke(channel);
             pipeline.addBefore("packet_handler", "mapads_compat", new ChannelDuplexHandler() {
                 @Override
                 public void write(final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) throws Exception {
-                    if (packetDestroyEntityClass.isInstance(msg)
-                            || packetSpawnEntityClass.isInstance(msg)
-                            || packetEntityMetaClass.isInstance(msg)) {
-                        final boolean despawn = packetDestroyEntityClass.isInstance(msg);
-                        final boolean meta = packetEntityMetaClass.isInstance(msg);
-                        final int[] eids = despawn
-                                ? ((int[]) entityIdsFieldDestr.get(msg))
-                                : new int[] {meta ? (int) entityIdsFieldMeta.get(msg) : (int) entityIdsFieldSpawn.get(msg)};
+                    if (packetDestroyEntityClass.isInstance(msg)) {
+                        final int[] eids = ((int[]) entityIdsFieldDestr.get(msg));
                         for (final int eid : eids) {
                             if (Below17Compatibility.this.cancelFrameDespawn(eid)) {
-                                if (despawn) {
-                                    if (Below17Compatibility.this.allowedDestroys.contains(eid)) {
-                                        Below17Compatibility.this.allowedDestroys.remove(eid);
-                                        continue;
-                                    }
-                                } else if (meta) {
-                                    if (Below17Compatibility.this.allowedMetas.contains(eid)) {
-                                        Below17Compatibility.this.allowedMetas.remove(eid);
-                                        continue;
-                                    }
-                                } else {
-                                    if (Below17Compatibility.this.allowedSpawns.contains(eid)) {
-                                        Below17Compatibility.this.allowedSpawns.remove(eid);
-                                        continue;
-                                    }
-                                }
+                                player.sendMessage("cancel despawn " + eid);
                                 return;
                             }
                         }
@@ -92,20 +57,6 @@ public class Below17Compatibility extends Compatibility {
         }
     }
 
-    @Override
-    public void despawnEntity(final Player player, final int eid) {
-        try {
-            final Class<?> packetClass = Class.forName("net.minecraft.server." + this.getVersion() + ".PacketPlayOutEntityDestroy");
-            final Constructor<?> constr = packetClass.getDeclaredConstructor(int[].class);
-            constr.setAccessible(true);
-            final Object packet = constr.newInstance(new Object[] {new int[] {eid}});
-            this.allowedDestroys.add(eid);
-            this.sendPacket(player, packet);
-        } catch (final ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException |
-                       IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public void spawnEntity(final Player player, final Entity entity) {
@@ -119,8 +70,6 @@ public class Below17Compatibility extends Compatibility {
             final Object nmsEntity = getHandleMethod.invoke(entity);
 
             final Object packet = constr.newInstance(nmsEntity);
-            this.allowedSpawns.add(entity.getEntityId());
-            this.allowedMetas.add(entity.getEntityId());
             this.sendPacket(player, packet);
         } catch (final ClassNotFoundException
                        | InvocationTargetException
@@ -132,6 +81,7 @@ public class Below17Compatibility extends Compatibility {
     }
 
     private void sendPacket(final Player player, final Object packet) {
+        player.sendMessage("sending " + packet.getClass().getSimpleName());
         try {
             final Object networkManager = this.getNetworkManager(player);
             final Method sendPacketMethod = networkManager.getClass().getDeclaredMethod("sendPacket", packet.getClass().getInterfaces()[0]);
@@ -160,6 +110,7 @@ public class Below17Compatibility extends Compatibility {
         }
     }
 
+
     @Override
     public Entity getEntity(final World world, final int entityId) {
         try {
@@ -183,13 +134,6 @@ public class Below17Compatibility extends Compatibility {
                        | NoSuchMethodException
                        | IllegalAccessException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void allowMetas(final int... ids) {
-        for (final int id : ids) {
-            this.allowedMetas.add(id);
         }
     }
 

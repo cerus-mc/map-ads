@@ -21,6 +21,8 @@ import dev.cerus.mapads.command.ReviewCommand;
 import dev.cerus.mapads.command.ScreenCommand;
 import dev.cerus.mapads.compatibility.Compatibility;
 import dev.cerus.mapads.compatibility.CompatibilityFactory;
+import dev.cerus.mapads.economy.EconomyWrapper;
+import dev.cerus.mapads.economy.EconomyWrappers;
 import dev.cerus.mapads.helpbook.HelpBook;
 import dev.cerus.mapads.helpbook.HelpBookConfiguration;
 import dev.cerus.mapads.hook.DiscordHook;
@@ -50,7 +52,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.milkbowl.vault.economy.Economy;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.SimplePie;
@@ -58,7 +59,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -89,6 +89,10 @@ public class MapAdsPlugin extends JavaPlugin {
         // Init config
         this.saveDefaultConfig();
         this.configModel = new ConfigModel(this.getConfig());
+        if (this.configModel.enableCustomDespawning) {
+            this.getLogger().warning("The setting 'custom-despawning' is not supported yet.");
+            this.configModel.enableCustomDespawning = false;
+        }
 
         // Init L10n
         this.saveResource("lang.yml", false);
@@ -114,14 +118,17 @@ public class MapAdsPlugin extends JavaPlugin {
         helpBookConfiguration.load();
         HelpBook.init(helpBookConfiguration);
 
-        // Init Vault
-        final RegisteredServiceProvider<Economy> registration = this.getServer().getServicesManager().getRegistration(Economy.class);
-        if (registration == null) {
-            this.getLogger().severe("Please install an economy plugin!");
+        // Init economy
+        final EconomyWrapper<?> economyWrapper = EconomyWrappers.find();
+        if (economyWrapper == null) {
+            this.getLogger().severe("No economy plugin found! Please install one of the following supported economy plugins:");
+            this.getLogger().severe("- Vault");
+            this.getLogger().severe("- PlayerPoints");
+            this.getLogger().severe("Map-Ads will not function without one.");
             this.getPluginLoader().disablePlugin(this);
             return;
         }
-        final Economy economy = registration.getProvider();
+        this.getLogger().info("Found economy wrapper " + economyWrapper.asString());
 
         // Init image storage
         final ImageStorage imageStorage = this.loadImageStorage();
@@ -147,11 +154,12 @@ public class MapAdsPlugin extends JavaPlugin {
 
         // Init compatibility layer
         final Compatibility compatibility = new CompatibilityFactory().makeCompatibilityLayer(this, adScreenStorage);
+        this.getLogger().info("Using compatibility layer " + compatibility.getClass().getSimpleName());
 
         // Init Discord bot
         boolean discordEnabled = false;
         if (this.getServer().getPluginManager().isPluginEnabled("map-ads-discord-bot")) {
-            final DiscordHook discordHook = new DiscordHook(this, advertStorage, imageStorage, economy);
+            final DiscordHook discordHook = new DiscordHook(this, advertStorage, imageStorage, economyWrapper);
             final AutoCloseable closeable = discordHook.load();
             if (closeable != null) {
                 this.closeables.add(closeable);
@@ -215,7 +223,7 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerDependency(DefaultImageController.class, defaultImageController);
         commandManager.registerDependency(AdvertController.class, advertController);
         commandManager.registerDependency(ConfigModel.class, this.configModel);
-        commandManager.registerDependency(Economy.class, economy);
+        commandManager.registerDependency(EconomyWrapper.class, economyWrapper);
         commandManager.registerCommand(new MapAdsCommand());
         commandManager.registerCommand(new PremiumCommand());
         commandManager.registerCommand(new ScreenCommand());
@@ -232,7 +240,7 @@ public class MapAdsPlugin extends JavaPlugin {
 
         // Start tasks
         final BukkitScheduler scheduler = this.getServer().getScheduler();
-        scheduler.runTaskTimerAsynchronously(this, new FrameSendTask(this.configModel, adScreenStorage, compatibility), 4 * 20, 2 * 20);
+        scheduler.runTaskTimerAsynchronously(this, new FrameSendTask(this.configModel, adScreenStorage, compatibility), 4 * 20, FrameSendTask.TICK_PERIOD);
         scheduler.runTaskTimerAsynchronously(this, () -> adScreenStorage.getScreens().forEach(advertController::update), 4 * 20, 60 * 20);
         scheduler.runTaskLater(this, () -> this.screensLoaded = true, 4 * 20);
 

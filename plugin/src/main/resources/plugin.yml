@@ -7,9 +7,10 @@ website: "https://www.spigotmc.org/resources/96918/"
 
 softdepend:
   - ${parent.artifactId}-discord-bot
+  - Vault
+  - PlayerPoints
 depend:
   - maps
-  - Vault
 
 libraries:
   - "org.xerial:sqlite-jdbc:3.36.0.3"

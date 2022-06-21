@@ -12,19 +12,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 
 public class Above16Compatibility extends Compatibility {
-
-    private final Set<Integer> allowedDestroys = new HashSet<>();
-    private final Set<Integer> allowedSpawns = new HashSet<>();
-    private final Set<Integer> allowedMetas = new HashSet<>();
 
     public Above16Compatibility(final ConfigModel configModel, final AdScreenStorage adScreenStorage) {
         super(configModel, adScreenStorage);
@@ -41,37 +36,15 @@ public class Above16Compatibility extends Compatibility {
             channelField.setAccessible(true);
 
             final Class<?> packetDestroyEntityClass = Class.forName("net.minecraft.network.protocol.game.PacketPlayOutEntityDestroy");
-            final Class<?> packetSpawnEntityClass = Class.forName("net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity");
-            final Class<?> packetEntityMetaClass = Class.forName("net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata");
 
             final Channel channel = (Channel) channelField.get(networkMan);
             channel.pipeline().addBefore("packet_handler", "mapads_compat", new ChannelDuplexHandler() {
                 @Override
                 public void write(final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) throws Exception {
-                    if (packetDestroyEntityClass.isInstance(msg)
-                            || packetSpawnEntityClass.isInstance(msg)
-                            || packetEntityMetaClass.isInstance(msg)) {
-                        final boolean despawn = packetDestroyEntityClass.isInstance(msg);
-                        final boolean meta = packetEntityMetaClass.isInstance(msg);
+                    if (packetDestroyEntityClass.isInstance(msg)) {
                         final int[] eids = Above16Compatibility.this.getEntityIds(msg);
                         for (final int eid : eids) {
                             if (Above16Compatibility.this.cancelFrameDespawn(eid)) {
-                                if (despawn) {
-                                    if (Above16Compatibility.this.allowedDestroys.contains(eid)) {
-                                        Above16Compatibility.this.allowedDestroys.remove(eid);
-                                        continue;
-                                    }
-                                } else if (meta) {
-                                    if (Above16Compatibility.this.allowedMetas.contains(eid)) {
-                                        Above16Compatibility.this.allowedMetas.remove(eid);
-                                        continue;
-                                    }
-                                } else {
-                                    if (Above16Compatibility.this.allowedSpawns.contains(eid)) {
-                                        Above16Compatibility.this.allowedSpawns.remove(eid);
-                                        continue;
-                                    }
-                                }
                                 return;
                             }
                         }
@@ -105,33 +78,15 @@ public class Above16Compatibility extends Compatibility {
     }
 
     @Override
-    public void despawnEntity(final Player player, final int eid) {
-        try {
-            final Class<?> packetDestroyEntityClass = Class.forName("net.minecraft.network.protocol.game.PacketPlayOutEntityDestroy");
-            final Constructor<?> constr = packetDestroyEntityClass.getDeclaredConstructor(int[].class);
-            constr.setAccessible(true);
-
-            final Object packet = constr.newInstance(new Object[] {new int[] {eid}});
-            this.allowedDestroys.add(eid);
-            this.sendPacket(player, packet);
-        } catch (final ClassNotFoundException
-                       | InvocationTargetException
-                       | NoSuchMethodException
-                       | InstantiationException
-                       | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public void spawnEntity(final Player player, final Entity entity) {
         try {
             final Class<?> entityClass = Class.forName("net.minecraft.world.entity.Entity");
 
             final Class<?> packetClass = Class.forName("net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity");
             final Constructor<?> constr = Arrays.stream(packetClass.getDeclaredConstructors())
-                    .filter(c -> c.getParameterCount() == 1)
+                    .filter(c -> c.getParameterCount() == 2)
                     .filter(c -> c.getParameterTypes()[0] == entityClass)
+                    .filter(c -> c.getParameterTypes()[1] == int.class)
                     .findFirst()
                     .orElseThrow();
 
@@ -140,9 +95,28 @@ public class Above16Compatibility extends Compatibility {
             getHandleMethod.setAccessible(true);
             final Object nmsEntity = getHandleMethod.invoke(entity);
 
-            final Object packet = constr.newInstance(nmsEntity);
-            this.allowedSpawns.add(entity.getEntityId());
-            this.allowedMetas.add(entity.getEntityId());
+            int extra = 0;
+            if (entity instanceof ItemFrame frame) {
+                try {
+                    final Class<?> dirClass = Class.forName("net.minecraft.core.EnumDirection");
+                    final Field idField = dirClass.getDeclaredField("l");
+                    idField.setAccessible(true);
+
+                    final Object[] enumConstants = dirClass.getEnumConstants();
+                    for (int i = 0; i < enumConstants.length; i++) {
+                        final Object enumConstant = enumConstants[i];
+                        final String id = (String) idField.get(enumConstant);
+                        if (id.equals(frame.getRotation().name().toLowerCase())) {
+                            extra = i;
+                            break;
+                        }
+                    }
+                } catch (final NoSuchFieldException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            final Object packet = constr.newInstance(nmsEntity, extra);
             this.sendPacket(player, packet);
         } catch (final ClassNotFoundException
                        | InvocationTargetException
@@ -201,6 +175,7 @@ public class Above16Compatibility extends Compatibility {
         }
     }
 
+
     @Override
     public Entity getEntity(final World world, final int entityId) {
         try {
@@ -230,13 +205,6 @@ public class Above16Compatibility extends Compatibility {
                        | NoSuchMethodException
                        | IllegalAccessException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void allowMetas(final int... ids) {
-        for (final int id : ids) {
-            this.allowedMetas.add(id);
         }
     }
 

@@ -5,6 +5,7 @@ import dev.cerus.mapads.MapAdsPlugin;
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.api.event.AdvertCreateEvent;
+import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.helpbook.HelpBook;
 import dev.cerus.mapads.image.ImageConverter;
 import dev.cerus.mapads.image.ImageRetriever;
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.milkbowl.vault.economy.Economy;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -71,7 +71,7 @@ public class CreateAdGui {
     private final ImageRetriever imageRetriever;
     private final ImageConverter imageConverter;
     private final ConfigModel config;
-    private final Economy economy;
+    private final EconomyWrapper<?> economy;
     private final Player player;
     private final Context context;
     private GUI gui;
@@ -83,7 +83,7 @@ public class CreateAdGui {
                        final ImageRetriever imageRetriever,
                        final ImageConverter imageConverter,
                        final ConfigModel config,
-                       final Economy economy,
+                       final EconomyWrapper<?> economy,
                        final Player player) {
         this.advertStorage = advertStorage;
         this.imageStorage = imageStorage;
@@ -359,7 +359,7 @@ public class CreateAdGui {
                     return;
                 }
 
-                this.economy.withdrawPlayer(this.player, this.context.selectedMinutes * this.config.pricePerMin);
+                this.economy.withdraw(this.player, this.context.selectedMinutes * this.config.pricePerMin);
                 this.imageStorage.updateMapImage(this.context.image).whenComplete((o, errImg) -> {
                     if (errImg != null) {
                         System.err.println(errImg.getMessage());

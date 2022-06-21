@@ -7,11 +7,11 @@ import dev.cerus.mapads.api.event.AdvertReviewEvent;
 import dev.cerus.mapads.discordbot.AdvertContext;
 import dev.cerus.mapads.discordbot.AdvertReviewCallback;
 import dev.cerus.mapads.discordbot.DiscordBot;
+import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
@@ -24,9 +24,12 @@ public class DiscordHook {
     private final JavaPlugin plugin;
     private final AdvertStorage advertStorage;
     private final ImageStorage imageStorage;
-    private final Economy economy;
+    private final EconomyWrapper<?> economy;
 
-    public DiscordHook(final JavaPlugin plugin, final AdvertStorage advertStorage, final ImageStorage imageStorage, final Economy economy) {
+    public DiscordHook(final JavaPlugin plugin,
+                       final AdvertStorage advertStorage,
+                       final ImageStorage imageStorage,
+                       final EconomyWrapper<?> economy) {
         this.plugin = plugin;
         this.advertStorage = advertStorage;
         this.imageStorage = imageStorage;
@@ -117,7 +120,7 @@ public class DiscordHook {
                             } else {
                                 this.imageStorage.deleteMapImages(advertisement.getImageId());
                                 this.advertStorage.deleteAdverts(advertisement.getAdvertId());
-                                this.economy.depositPlayer(Bukkit.getOfflinePlayer(advertisement.getPlayerUuid()), advertisement.getPricePaid());
+                                this.economy.deposit(Bukkit.getOfflinePlayer(advertisement.getPlayerUuid()), advertisement.getPricePaid());
                             }
                             future.complete(false);
                         });

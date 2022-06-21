@@ -2,6 +2,7 @@ package dev.cerus.mapads.gui;
 
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
+import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
@@ -10,7 +11,6 @@ import dev.cerus.mapads.util.ItemBuilder;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,13 +23,13 @@ public class UnreviewedListGui extends PagedGui<Advertisement> {
     private final ImageStorage imageStorage;
     private final AdScreenStorage adScreenStorage;
     private final AdvertStorage advertStorage;
-    private final Economy economy;
+    private final EconomyWrapper<?> economy;
 
     public UnreviewedListGui(final Player player,
                              final ImageStorage imageStorage,
                              final AdScreenStorage adScreenStorage,
                              final AdvertStorage advertStorage,
-                             final Economy economy) {
+                             final EconomyWrapper<?> economy) {
         super(advertStorage.getPendingAdvertisements().stream()
                 .sorted(Comparator.comparingLong(Advertisement::getPurchaseTimestamp))
                 .collect(Collectors.toList()), player);

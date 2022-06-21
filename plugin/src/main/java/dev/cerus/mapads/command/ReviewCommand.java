@@ -8,11 +8,11 @@ import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
+import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.gui.DetailsGui;
 import dev.cerus.mapads.gui.UnreviewedListGui;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;
 
 @CommandAlias("mapads")
@@ -30,7 +30,7 @@ public class ReviewCommand extends BaseCommand {
     private AdScreenStorage adScreenStorage;
 
     @Dependency
-    private Economy economy;
+    private EconomyWrapper<?> economy;
 
     @Subcommand("single")
     @CommandCompletion("@mapads_adverts")

@@ -41,11 +41,7 @@ public abstract class Compatibility implements Listener {
         return this.configModel.enableCustomDespawning && FrameMarkerUtil.isFrameMarked(eid);
     }
 
-    public abstract void despawnEntity(Player player, int eid);
-
     public abstract void spawnEntity(Player player, Entity entity);
-
-    public abstract void allowMetas(int... ids);
 
     public abstract Entity getEntity(World world, int entityId);
 
