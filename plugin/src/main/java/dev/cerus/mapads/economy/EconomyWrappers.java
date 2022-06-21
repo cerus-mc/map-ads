@@ -1,7 +1,10 @@
 package dev.cerus.mapads.economy;
 
+import dev.cerus.mapads.ConfigModel;
+import dev.cerus.mapads.MapAdsPlugin;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class EconomyWrappers {
 
@@ -10,17 +13,27 @@ public class EconomyWrappers {
 
     public static EconomyWrapper<?> find() {
         return Attempt.<EconomyWrapper<?>>newAttempt()
-                .attemptGet(VaultWrapper::attemptCreate)
+                .attemptGet(EconomyWrappers::override)
+                .ifUnsuccessful(VaultWrapper::attemptCreate)
                 .ifUnsuccessful(PlayerPointsWrapper::attemptCreate)
                 .get()
                 .orElse(null);
+    }
+
+    private static EconomyWrapper<?> override() {
+        final ConfigModel configModel = JavaPlugin.getPlugin(MapAdsPlugin.class).getConfigModel();
+        return switch (configModel.economyOverride.toUpperCase()) {
+            case "VAULT" -> VaultWrapper.attemptCreate();
+            case "PLAYERPOINTS" -> PlayerPointsWrapper.attemptCreate();
+            default -> null;
+        };
     }
 
     private static final class Attempt<T> {
 
         private T val;
 
-        public static <G> Attempt<G> newAttempt() {
+        public static <V> Attempt<V> newAttempt() {
             return new Attempt<>();
         }
 
