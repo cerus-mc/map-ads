@@ -32,7 +32,7 @@ public class ConfigModel {
         this.onlyGroups = configuration.getBoolean("only-show-groups");
         this.deductEachScreenInGroup = configuration.getBoolean("deduct-each-screen-in-group");
         this.enableCustomDespawning = configuration.getBoolean("custom-despawning");
-        this.economyOverride = configuration.getString("economy-override", "");
+        this.economyOverride = configuration.getString("override-economy", "");
     }
 
 }
