@@ -268,6 +268,7 @@ public class MapAdsPlugin extends JavaPlugin {
         metrics.addCustomChart(new SimplePie("default_command_enabled", () -> this.getConfig().getBoolean("disable-default-command") ? "No" : "Yes"));
         metrics.addCustomChart(new SimplePie("premium", () -> Premium.isPremium() ? "Yes" : "No"));
         metrics.addCustomChart(new SimplePie("discord_integration_enabled", () -> finalDiscordEnabled ? "Yes" : "No"));
+        metrics.addCustomChart(new SimplePie("transition_recording_enabled", () -> this.configModel.enableTransitionRecording ? "Yes" : "No"));
         metrics.addCustomChart(new AdvancedPie("transition_usage", () -> {
             final Map<String, Integer> map = new HashMap<>();
             for (final String name : TransitionRegistry.names()) {
