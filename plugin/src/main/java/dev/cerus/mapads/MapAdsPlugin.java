@@ -97,6 +97,7 @@ public class MapAdsPlugin extends JavaPlugin {
             this.getLogger().warning("The setting 'custom-despawning' is not supported yet.");
             this.configModel.enableCustomDespawning = false;
         }
+        this.getLogger().info("Transition recording is " + (this.configModel.enableTransitionRecording ? "enabled" : "disabled") + ".");
 
         // Init L10n
         this.saveResource("lang.yml", false);
