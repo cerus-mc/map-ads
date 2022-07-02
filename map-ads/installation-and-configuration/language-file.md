@@ -1,0 +1,151 @@
+# Language file
+
+You can edit every message, item name and item lore (with the exception of a few cases) by editing the `lang.yml` file.
+
+German translation: [Click here](https://pastebin.com/eMW7G9dF)
+
+```yaml
+'ver': "4"
+'prefix': "&6&lM&e&lap-&6&lA&e&lds &8» &r"
+
+'api,event,create,cancelled': "Advert creation has been cancelled by an external plugin"
+'api,event,review,cancelled': "&cFailed to review advert: Cancelled by an external plugin"
+
+'error,invalid_dimension_format': "&cInvalid dimension format"
+'error,dimension_big': "&cDimensions are too big"
+'error,invalid_url': "&cInvalid url"
+'error,untrusted_site': "&cWebsite is not trusted"
+'error,invalid_dither': "&cInvalid dither mode. Please choose one of the following: &7%s"
+'error,failed_image': "&cFailed to get image. &7(%s)"
+'error,image_big': "&cImage is too big. &7(%s > %s)"
+'error,image_dimensions': "&cImage has invalid dimensions. &7The image needs to have a size of %dx%d pixels (image size: %dx%d)"
+'error,cooldown': "&cPlease wait %dm %ds before doing this again."
+'error,not_image': "&cUrl does not lead to an image"
+'error,content_not_image': "&cUrl leads to content of type '%s' which is not an image type"
+'error,content_unsupported_image': "&cUrl leads to content of type '%s' which is not a supported image type"
+'error,no_screens': "&cThere are no ad-screens that can hold an image of this size."
+'error,screen_not_found': "&cAd-screen not found"
+'error,screen_broken': "&cAd-screen is broken &7(Map screen not found)"
+'error,name_taken': "&cName is already taken"
+'error,does_not_exist': "&cMap screen #%d does not exist"
+'error,transition_not_found': "&cTransition not found"
+'error,expected_screen_or_size': "&cInvalid argument! Expected screen id or size"
+'error,advert_not_found': "&cAdvert not found"
+'error,group_exists': "&cA group with this id already exists"
+'error,group_not_found': "&cGroup does not exist"
+'error,group_contains': "&cThis screen is already part of this group"
+'error,group_not_contains': "&cThis screen is not part of this group"
+
+'success,def_img_changed': "&aThe default image for %dx%d has been changed!"
+'success,def_img_changed_new': "&aThe default image for %s has been changed!"
+'success,def_img_removed': "&aThe default image for %s has been removed!"
+'success,preview': "&aThe image will be displayed on ad-screen &e'%s' &afor one minute."
+'success,created': "&aAd-screen '%s' has been created"
+'success,updated': "&aAd-screen has been updated"
+'success,deleted': "&aAd-screen has been deleted"
+'success,ad_deleted': "&aAdvert has been deleted"
+'success,group_created': "&aGroup '%s' (%s) was created"
+'success,group_deleted': "&aGroup '%s' (%s) was deleted"
+'success,group_screen_added': "&aScreen %s has been added to group '%s'"
+'success,group_screen_removed': "&aScreen %s was removed from group '%s'"
+
+'misc,please_wait': "&7&oPlease wait..."
+'misc,visible': "&eThe image on the ad-screen is only visible to you."
+'misc,img_viewing': "&7You are no longer viewing the image."
+'misc,broken_screen,0': "&cAd-screen '%s' is broken! &7(Map-screen not found)"
+'misc,broken_screen,1': "&7You can fix this by setting a new map screen: &e/mapads screen set screenid %s <Map screen id>"
+'misc,pending': "&7There are &d%d adverts &7that are waiting to be reviewed. (&e/mapads review list&7)"
+'misc,update,0': "&aA new Map-Ads update is available!"
+'misc,update,1': "&e%s"
+'misc,intensive_transition': "&c⚠ &eWarning: &7This transition is marked as performance intensive. &c⚠"
+
+'gui,page': "&bPage %d"
+'gui,prev_page,enabled': "&7« &fPrevious page"
+'gui,prev_page,disabled': "&8« &7Previous page"
+'gui,next_page,enabled': "&fNext page &7»"
+'gui,next_page,disabled': "&7Next page &8»"
+'gui,list,title': "Ad-screens"
+
+'gui,confirm,yes': "&aYes"
+'gui,confirm,no': "&cNo"
+
+'gui,create,title': "Create advertisement"
+'gui,create,format,day': "%dd "
+'gui,create,format,hour': "%dh "
+'gui,create,format,minute': "%dm"
+'gui,create,button,map,name': "&eChoose an ad-screen"
+'gui,create,button,map,lore,noscreen': [ "&7You did not choose an ad-screen yet." ]
+'gui,create,button,map,lore,screen': [ "&f{0} &7({1}x{2})" ]
+'gui,create,button,frame,name': "&aSet your image"
+'gui,create,button,frame,lore': [ "&7No image set", " ", "&7Whitelisted sites:", "&f{0}" ]
+'gui,create,button,glow_frame,name': "&aSet your image"
+'gui,create,button,glow_frame,lore': [ "&f{0}" ]
+'gui,create,button,book,name': "&2Help"
+'gui,create,button,book,lore': [ "&7Click to open the Map-Ads help." ]
+'gui,create,button,gold,name': "&6$%.2f"
+'gui,create,button,amethyst,name': "&dImage dithering"
+'gui,create,button,amethyst,lore': [ "&7Click to change the dithering algorithm.", "&7Dithering algorithm: &e{0}", " ",
+                                     "&fWhat is image dithering?", "&7Dithering in image processing is a technique",
+                                     "&7used to simulate colors or shading." ]
+'gui,create,button,purchase,name,enabled': "&aPurchase ad"
+'gui,create,button,purchase,name,disabled': "&7Purchase ad"
+'gui,create,button,cancel,name,enabled': "&cCancel"
+'gui,create,button,cancel,name,disabled': "&8Cancel"
+'gui,create,button,minus_min,name': "&7&l-"
+'gui,create,button,minus_min,lore': [ "&fDecrease the minutes you want to purchase by {0}", "&fClick+SHIFT to select minimum minutes" ]
+'gui,create,button,plus_min,name': "&6&l+"
+'gui,create,button,plus_min,lore': [ "&fIncrease the minutes you want to purchase by {0}", "&fClick+SHIFT to select maximum minutes" ]
+'gui,create,button,info_min,name': "&8« &b%s &8»"
+'gui,create,button,info_min,lore': [ "&7Minimum: &f{0}", "&7Maximum: &f{1}" ]
+'gui,create,error,choose_screen_first': "Please choose a screen first"
+'gui,create,error,choose_image_first': "Please choose an image first"
+'gui,create,error,invalid_url': "Invalid url"
+'gui,create,error,untrusted_site': "Website is not trusted"
+'gui,create,error,not_image': "Url does not lead to an image"
+'gui,create,error,content_not_image': "Url leads to content of type '%s' which is not an image type"
+'gui,create,error,content_unsupported_image': "Url leads to content of type '%s' which is not a supported image type"
+'gui,create,error,too_big': "Image is too big. Max size is %s but image is %s"
+'gui,create,error,invalid_dimensions': "Image has invalid dimensions. Required dimensions are %dx%d but image is %dx%d"
+'gui,create,error,no_money': "You don't have enough money"
+'gui,create,error_image,0': "&c❌ Url is not whitelisted"
+'gui,create,error_image,1': "&c❌ Image is too big"
+'gui,create,error_image,2': "&c❌ Image width & height is not %dx%d"
+'gui,create,error_image,3': "&c❌ Url does not lead to an image"
+'gui,create,error_image,def': "Unknown error"
+'gui,create,misc,enter_url': "Enter image url"
+'gui,create,misc,confirming_image': "&7Checking image..."
+'gui,create,misc,broadcast': "&bA new advert is waiting for a review! &e/mapads review list"
+
+'gui,details,title': "Advertisement"
+'gui,details,button,info,name': "&6Advertisement"
+'gui,details,button,info,lore': [ "&8» &7By &e{0}", "&8» &7Purchased &e{1} &7for &6${2}", "&8» &7Ad-screen '&e{3}&7'", " ", "&b{4}" ]
+'gui,details,button,viewimg,name': "&eView image"
+'gui,details,button,accept,name': "&aAccept"
+'gui,details,button,accept,confirm,title': "Confirmation"
+'gui,details,button,accept,confirm,name': "&fAre you sure?"
+'gui,details,button,accept,confirm,lore': [ "&7This action cannot be undone." ]
+'gui,details,button,deny,name': "&cDeny"
+'gui,details,button,deny,confirm,title': "Confirmation"
+'gui,details,button,deny,confirm,name': "&fAre you sure?"
+'gui,details,button,deny,confirm,lore': [ "&7This action cannot be undone." ]
+'gui,details,button,back,name': "&7Go back"
+
+'gui,reviewlist,title': "Pending advertisements"
+
+'gui,adverts,title': "Advertisements"
+'gui,adverts,item,name': "&3Advert from {name}"
+'gui,adverts,item,lore,reviewed,yes': "&aYes"
+'gui,adverts,item,lore,reviewed,no': "&cNo"
+'gui,adverts,item,lore': [ "&8» &7Screen: &b{screen}", "&8» &7Price: &6{price}", "&8» &7Minutes remaining: &e{minrem} of {mintotal}",
+                           "&8» &7Reviewed: {review}", "&8» &7Created: &f{created}" ]
+
+'gui,advdetails,title': "Manage advertisement"
+'gui,advdetails,button,delete,name': "&cDelete ad"
+'gui,advdetails,button,delete,lore': [ "&7Clicking this button will delete", "&7the ad.", "&4Warning: &7This cannot be undone!" ]
+'gui,advdetails,button,review,name': "&aReview ad"
+'gui,advdetails,button,review,lore': [ "&7This advertisement has not been reviewed", "&7yet. Clicking this button will bring up",
+                                       "&7the review GUI." ]
+
+'command,advert,remove,confirm,name': "&fDo you want to delete this ad?"
+'command,advert,remove,confirm,lore': [ "&4Warning: &7This cannot be undone." ]
+```

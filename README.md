@@ -1,7 +1,7 @@
-# Map-Ads
+---
+description: Documentation overview
+---
 
-README is a work in progress
+# Overview
 
-The code is kinda messy at certain places and incredbily underdocumented
-
-The Discord module has to be a standalone plugin because it's almost 10 MB (!) big
+* [Map-Ads](map-ads/map-ads-overview.md)

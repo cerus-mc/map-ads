@@ -1,0 +1,62 @@
+# Help book configuration
+
+The help book is a configurable written book that aims to explain the advertising process to players. You can use [MiniMessage](https://docs.adventure.kyori.net/minimessage#format) to style the book.
+
+The default help book config (`plugins/map-ads/helpbook.yml`) looks like this: ([alternative link](https://paste.goose.rodeo/3mrWZk))
+
+```yaml
+title: "Map-Ads Help"
+author: "Cerus"
+pages:
+  '1':
+    - "    <gradient:#1D746A:#CD9B31><b>Map-Ads Help</b></gradient>"
+    - ""
+    - "<gradient:#3390C8:#58B9F3><b>Contents</b></gradient>"
+    - " 1. <hover:show_text:'<color:gray><i>Jump to \"Advertising\"</i></color>'><click:change_page:2>Advertising</click></hover>"
+    - "  1.1. <hover:show_text:'<color:gray><i>Jump to \"The screen\"</i></color>'><click:change_page:3>The screen</click></hover>"
+    - "  1.2. <hover:show_text:'<color:gray><i>Jump to \"Images\"</i></color>'><click:change_page:4>Images</click></hover>"
+    - "  1.3. <hover:show_text:'<color:gray><i>Jump to \"Image dithering\"</i></color>'><click:change_page:5>Image dithering</click></hover>"
+    - "  1.4. <hover:show_text:'<color:gray><i>Jump to \"Time\"</i></color>'><click:change_page:6>Time</click></hover>"
+    - "  1.5. <hover:show_text:'<color:gray><i>Jump to \"Confirming\"</i></color>'><click:change_page:7>Confirming</click></hover>"
+    - " 2. <hover:show_text:'<color:gray><i>Jump to \"Previewing\"</i></color>'><click:change_page:8>Previewing</click></hover>"
+  '2':
+    - "<gradient:#0F4E73:#719FBA><b>Advertising</b></gradient>"
+    - ""
+    - "To open the advertising GUI, type <color:gold><b><hover:show_text:'<gray><i>Click to run command'><click:run_command:/mapads advertise>/mapads advertise</click></hover></b></color>."
+    - "Choose an ad-screen, submit your image, set the amount of minutes you want to purchase and that's it!"
+  '3':
+    - "<gradient:#0F4E73:#719FBA><b>Advertising</b></gradient>"
+    - "<gradient:#3390C8:#58B9F3><b>The screen</b></gradient>"
+    - ""
+    - "In order to advertise you will have to choose an ad-screen by clicking the map item in the upper left corner. Ad-screens come in many different sizes (Up to 20x20 maps or 2560x2560 pixels)."
+  '4':
+    - "<gradient:#0F4E73:#719FBA><b>Advertising</b></gradient>"
+    - "<gradient:#3390C8:#58B9F3><b>Images</b></gradient>"
+    - ""
+    - "After you've chosen an ad-screen you need to set an image by clicking the frame item at the top. The image needs to have the same size as the ad-screen<hover:show_text:'<color:white><b>Comment 1</b></color>\n<color:gray>You can calculate the required width and\nheight using this formula:\n<color:#D0D0D0>ᴡɪᴅᴛʜ_ᴏʀ_ʜᴇɪɢʜᴛ_ᴏꜰ_ᴀᴅ_ꜱᴄʀᴇᴇɴ × 128</color></color>'><b><color:dark_gray>*</color></b></hover>."
+    - "<color:#8A8A8A>Note: You can only submit images from whitelisted sites.</color>"
+  '5':
+    - "<gradient:#0F4E73:#719FBA><b>Advertising</b></gradient>"
+    - "<gradient:#3390C8:#58B9F3><b>Image dithering</b></gradient>"
+    - ""
+    - "Map-Ads supports image dithering<hover:show_text:'<color:white><b>Comment 1</b></color>\n<color:gray>Dithering in image processing is a technique\nused to simulate colors or shading.</color>'><b><color:dark_gray>*</color></b></hover>.\nYou can choose between two dithering modes: <underlined><color:dark_gray>None</color></underlined> and <underlined><color:dark_gray>Floyd-Steinberg</color></underlined>.\nChange the dithering mode by clicking the amethyst shard at the top."
+  '6':
+    - "<gradient:#0F4E73:#719FBA><b>Advertising</b></gradient>"
+    - "<gradient:#3390C8:#58B9F3><b>Time</b></gradient>"
+    - ""
+    - "You can increment and decrement the amount of minutes you want to purchase by clicking the gold & iron nugget at the top right corner. This will change the price (visible by hovering over the gold ingot at the bottom)."
+  '7':
+    - "<gradient:#0F4E73:#719FBA><b>Advertising</b></gradient>"
+    - "<gradient:#3390C8:#58B9F3><b>Confirming</b></gradient>"
+    - ""
+    - "When you're done cusomizing the ad you can click the green concrete at the bottom right. This will check everything and create the ad<hover:show_text:'<color:white><b>Comment 1</b></color>\n<color:gray>Advertisements will have to be manually\nreviewed by staff. If the staff does not\naccept your ad you will receive your\nmoney back.</color>'><b><color:dark_gray>*</color></b></hover> if no errors are found. If there's an error a bell will appear at the bottom left."
+  '8':
+    - "<gradient:#0F4E73:#719FBA><b>Previewing</b></gradient>"
+    - ""
+    - "Map-Ads provides a command to preview your images (<hover:show_text:'<color:white><b>Command:</b></color>\n<color:light_purple>/mapads preview <none/floyd_steinberg> <image url></color>\n\n<color:white><b>Example:</b></color>\n<color:yellow>/mapads preview floyd_steinberg https://cerus.dev/example.png</color>\n\n<color:gray>Parameter 1 = Dither mode (none or floyd_steinberg)\nParameter 2 = Image url</color>'><underlined>hover</underlined></hover>).\nAfter running the command the plugin will let you choose an ad-screen to preview the image on. The image will only be visible to you."
+  '9': [ ]
+  '10':
+    - "\n\n\n\n\n\n\n\n\n\n"
+    - "        <b><rainbow>Map-Ads</rainbow></b>"
+    - "<gray>Made with <dark_red>❤</dark_red> by <gradient:#17DB7E:#1792DB><b><click:open_url:https://github.com/cerus><hover:show_text:'<gray>Open <b><color:#8A8A8A>GitHub</color></b> page</gray>'>Cerus</hover></click></b></gradient></gray>"
+```
