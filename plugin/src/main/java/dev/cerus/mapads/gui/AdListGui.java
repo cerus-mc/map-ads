@@ -26,7 +26,7 @@ public class AdListGui extends PagedGui<Advertisement> {
                      final Consumer<Advertisement> clickCallback) {
         super(new ArrayList<>() {
             {
-                this.addAll(storage.getRunningAdvertisements(screen.getId()));
+                this.addAll(storage.getAdvertisements(screen.getId()));
                 this.addAll(storage.getPendingAdvertisements().stream()
                         .filter(advertisement -> advertisement.getScreenOrGroupId().map(
                                 s -> s.equals(screen.getId()),

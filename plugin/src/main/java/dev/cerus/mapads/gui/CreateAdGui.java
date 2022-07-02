@@ -326,7 +326,12 @@ public class CreateAdGui {
                     return;
                 }
 
-                if (!this.economy.has(this.player, this.context.selectedMinutes * this.config.pricePerMin)) {
+                double price = this.context.screenOrGroup.map(AdScreen::getFixedPrice, group -> group.fixedPrice().get());
+                if (price < 0) {
+                    price = this.context.selectedMinutes * this.config.pricePerMin;
+                }
+
+                if (!this.economy.has(this.player, price)) {
                     this.raiseError(L10n.get("gui.create.error.no_money"));
                     return;
                 }
@@ -344,7 +349,7 @@ public class CreateAdGui {
                         System.currentTimeMillis(),
                         this.context.selectedMinutes,
                         this.context.selectedMinutes,
-                        this.context.selectedMinutes * this.config.pricePerMin,
+                        price,
                         false);
                 final AdvertCreateEvent ev = new AdvertCreateEvent(this.player,
                         advertisement,
@@ -359,7 +364,7 @@ public class CreateAdGui {
                     return;
                 }
 
-                this.economy.withdraw(this.player, this.context.selectedMinutes * this.config.pricePerMin);
+                this.economy.withdraw(this.player, price);
                 this.imageStorage.updateMapImage(this.context.image).whenComplete((o, errImg) -> {
                     if (errImg != null) {
                         System.err.println(errImg.getMessage());
@@ -394,7 +399,13 @@ public class CreateAdGui {
     }
 
     private void setMinuteSelector() {
-        if (this.context.selectedMinutes <= this.config.minAdMins || this.state == State.CONFIRMING) {
+        final int fixedTime = this.context.screenOrGroup == null ? -1
+                : this.context.screenOrGroup.map(AdScreen::getFixedTime, group -> group.fixedTime().get());
+        if (fixedTime > 0) {
+            this.context.selectedMinutes = fixedTime;
+        }
+
+        if (this.context.selectedMinutes <= this.config.minAdMins || this.state == State.CONFIRMING || fixedTime > 0) {
             this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(14)), this.makeGlassPane(Material.GRAY_STAINED_GLASS_PANE));
         } else {
             this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(14)), new Button(new ItemBuilder(Material.IRON_NUGGET)
@@ -414,7 +425,7 @@ public class CreateAdGui {
             }));
         }
 
-        if (this.context.selectedMinutes >= this.config.maxAdMins || this.state == State.CONFIRMING) {
+        if (this.context.selectedMinutes >= this.config.maxAdMins || this.state == State.CONFIRMING || fixedTime > 0) {
             this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(16)), this.makeGlassPane(Material.GRAY_STAINED_GLASS_PANE));
         } else {
             this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(16)), new Button(new ItemBuilder(Material.GOLD_NUGGET)
@@ -436,13 +447,19 @@ public class CreateAdGui {
 
         this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(15)), new Item(new ItemBuilder(Material.CLOCK)
                 .setName(L10n.get("gui.create.button.info_min.name", FormatUtil.formatMinutes(this.context.selectedMinutes)))
-                .setLore(L10n.getList("gui.create.button.info_min.lore").stream()
+                .setLore(fixedTime > 0 ? List.of() : L10n.getList("gui.create.button.info_min.lore").stream()
                         .map(s -> s.replace("{0}", FormatUtil.formatMinutes(this.config.minAdMins)))
                         .map(s -> s.replace("{1}", FormatUtil.formatMinutes(this.config.maxAdMins)))
                         .collect(Collectors.toList()))
                 .build()));
+
+        double price = this.context.screenOrGroup == null ? -1
+                : this.context.screenOrGroup.map(AdScreen::getFixedPrice, group -> group.fixedPrice().get());
+        if (price < 0) {
+            price = this.context.selectedMinutes * this.config.pricePerMin;
+        }
         this.gui.setComponents(SlotRange.single(Coordinate.fromSlot(31)), new Item(new ItemBuilder(Material.GOLD_INGOT)
-                .setName(L10n.get("gui.create.button.gold.name", this.config.pricePerMin * this.context.selectedMinutes))
+                .setName(L10n.get("gui.create.button.gold.name", price))
                 .build()));
     }
 

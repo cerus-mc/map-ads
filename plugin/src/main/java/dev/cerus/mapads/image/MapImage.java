@@ -33,7 +33,7 @@ public class MapImage {
         }
 
         final MapGraphics<?, ?> graphics = screen.getGraphics();
-        graphics.place(this.graphics, atX, atY);
+        graphics.place(this.graphics, atX, atY, 1f, false);
     }
 
     public void free() {

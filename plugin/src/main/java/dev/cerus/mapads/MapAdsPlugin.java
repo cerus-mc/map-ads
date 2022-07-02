@@ -33,6 +33,9 @@ import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.image.storage.MySqlImageStorageImpl;
 import dev.cerus.mapads.image.storage.SqliteImageStorageImpl;
 import dev.cerus.mapads.image.transition.TransitionRegistry;
+import dev.cerus.mapads.image.transition.recorded.RecordedTransitions;
+import dev.cerus.mapads.image.transition.recorded.storage.RecordedTransitionStorage;
+import dev.cerus.mapads.image.transition.recorded.storage.SqliteRecordedTransitionStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.lang.LangUpdater;
 import dev.cerus.mapads.listener.PlayerJoinListener;
@@ -51,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
@@ -143,8 +147,12 @@ public class MapAdsPlugin extends JavaPlugin {
         final AdScreenStorage adScreenStorage = this.loadAdScreenStorage();
         this.closeables.add(adScreenStorage);
 
+        // Load recorded transition storage
+        final RecordedTransitionStorage recordedTransitionStorage = this.loadRecTransitionStorage();
+        this.closeables.add(recordedTransitionStorage);
+
         // Init advert storage
-        final AdvertStorage advertStorage = this.loadAdvertStorage(adScreenStorage, imageStorage);
+        final AdvertStorage advertStorage = this.loadAdvertStorage(adScreenStorage, imageStorage, recordedTransitionStorage);
         if (advertStorage == null) {
             this.getLogger().severe("Invalid advert storage configuration");
             this.getPluginLoader().disablePlugin(this);
@@ -172,7 +180,7 @@ public class MapAdsPlugin extends JavaPlugin {
         // Init misc services
         final DefaultImageController defaultImageController = new DefaultImageController(this, imageStorage);
         final AdvertController advertController = new AdvertController(this, advertStorage, imageStorage,
-                defaultImageController, adScreenStorage);
+                defaultImageController, adScreenStorage, recordedTransitionStorage);
         final ImageRetriever imageRetriever = new ImageRetriever();
         final ImageConverter imageConverter = new ImageConverter();
 
@@ -218,6 +226,7 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerDependency(ImageStorage.class, imageStorage);
         commandManager.registerDependency(AdvertStorage.class, advertStorage);
         commandManager.registerDependency(AdScreenStorage.class, adScreenStorage);
+        commandManager.registerDependency(RecordedTransitionStorage.class, recordedTransitionStorage);
         commandManager.registerDependency(ImageRetriever.class, imageRetriever);
         commandManager.registerDependency(ImageConverter.class, imageConverter);
         commandManager.registerDependency(DefaultImageController.class, defaultImageController);
@@ -242,6 +251,7 @@ public class MapAdsPlugin extends JavaPlugin {
         final BukkitScheduler scheduler = this.getServer().getScheduler();
         scheduler.runTaskTimerAsynchronously(this, new FrameSendTask(this.configModel, adScreenStorage, compatibility), 4 * 20, FrameSendTask.TICK_PERIOD);
         scheduler.runTaskTimerAsynchronously(this, () -> adScreenStorage.getScreens().forEach(advertController::update), 4 * 20, 60 * 20);
+        scheduler.runTaskTimerAsynchronously(this, () -> recordedTransitionStorage.deleteOlderThan(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)), 0, 60 * 20);
         scheduler.runTaskLater(this, () -> this.screensLoaded = true, 4 * 20);
 
         // Register services
@@ -283,6 +293,14 @@ public class MapAdsPlugin extends JavaPlugin {
                 e.printStackTrace();
             }
         }
+        RecordedTransitions.stop();
+    }
+
+    private RecordedTransitionStorage loadRecTransitionStorage() {
+        final HikariConfig sqliteHikariConfig = new HikariConfig();
+        sqliteHikariConfig.setDriverClassName(org.sqlite.JDBC.class.getName());
+        sqliteHikariConfig.setJdbcUrl("jdbc:sqlite:" + this.getDataFolder().getPath() + "/recorded_transitions.db");
+        return new SqliteRecordedTransitionStorage(new HikariDataSource(sqliteHikariConfig));
     }
 
     private AdScreenStorage loadAdScreenStorage() {
@@ -322,7 +340,7 @@ public class MapAdsPlugin extends JavaPlugin {
         }
     }
 
-    private AdvertStorage loadAdvertStorage(final AdScreenStorage adScreenStorage, final ImageStorage imageStorage) {
+    private AdvertStorage loadAdvertStorage(final AdScreenStorage adScreenStorage, final ImageStorage imageStorage, final RecordedTransitionStorage recordedTransitionStorage) {
         final FileConfiguration config = this.getConfig();
         switch (config.getString("advert-storage.type", "sqlite").toLowerCase()) {
             case "mysql":
@@ -336,14 +354,14 @@ public class MapAdsPlugin extends JavaPlugin {
                 mysqlHikariConfig.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
                 mysqlHikariConfig.setJdbcUrl("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/"
                         + mysqlDb + "?user=" + mysqlUser + "&password=" + mysqlPass);
-                return new MySqlAdvertStorageImpl(new HikariDataSource(mysqlHikariConfig), adScreenStorage, imageStorage);
+                return new MySqlAdvertStorageImpl(new HikariDataSource(mysqlHikariConfig), adScreenStorage, imageStorage, recordedTransitionStorage);
             case "sqlite":
                 final String dbName = config.getString("advert-storage.sqlite.db-name");
 
                 final HikariConfig sqliteHikariConfig = new HikariConfig();
                 sqliteHikariConfig.setDriverClassName(org.sqlite.JDBC.class.getName());
                 sqliteHikariConfig.setJdbcUrl("jdbc:sqlite:" + this.getDataFolder().getPath() + "/" + dbName);
-                return new SqliteAdvertStorageImpl(new HikariDataSource(sqliteHikariConfig), adScreenStorage, imageStorage);
+                return new SqliteAdvertStorageImpl(new HikariDataSource(sqliteHikariConfig), adScreenStorage, imageStorage, recordedTransitionStorage);
             default:
                 return null;
         }

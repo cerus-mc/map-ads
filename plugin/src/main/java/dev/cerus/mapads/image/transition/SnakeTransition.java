@@ -1,6 +1,7 @@
 package dev.cerus.mapads.image.transition;
 
 import dev.cerus.mapads.image.MapImage;
+import dev.cerus.mapads.image.transition.recorder.TransitionRecorder;
 import dev.cerus.mapads.scheduler.ExecutorServiceScheduler;
 import dev.cerus.mapads.scheduler.Scheduler;
 import dev.cerus.mapads.scheduler.SchedulerRunnable;
@@ -22,11 +23,12 @@ public class SnakeTransition implements Transition {
     }
 
     @Override
-    public void makeTransition(@NotNull final MapScreen screen, @Nullable final MapImage oldImg, @NotNull final MapImage newImg) {
+    public void makeTransition(@NotNull final MapScreen screen, @Nullable final MapImage oldImg, @NotNull final MapImage newImg, @NotNull final TransitionRecorder recorder) {
         if (oldImg != null && oldImg.getId().equals(newImg.getId())) {
             return;
         }
 
+        recorder.start(screen);
         final MapGraphics<?, ?> graphics = screen.getGraphics();
         this.scheduler.scheduleAtFixedRate(new SchedulerRunnable() {
             private int col = 0;
@@ -70,6 +72,13 @@ public class SnakeTransition implements Transition {
 
                 this.row++;
                 screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
+                recorder.record(screen);
+            }
+
+            @Override
+            public void cancel() {
+                super.cancel();
+                recorder.end(screen);
             }
         }, 0, 1000 / 20, TimeUnit.MILLISECONDS);
     }

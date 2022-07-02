@@ -17,6 +17,7 @@ public class ConfigModel {
     public boolean onlyGroups;
     public boolean deductEachScreenInGroup;
     public boolean enableCustomDespawning;
+    public boolean enableTransitionRecording;
     public String economyOverride;
 
     public ConfigModel(final FileConfiguration configuration) {
@@ -32,6 +33,7 @@ public class ConfigModel {
         this.onlyGroups = configuration.getBoolean("only-show-groups");
         this.deductEachScreenInGroup = configuration.getBoolean("deduct-each-screen-in-group");
         this.enableCustomDespawning = configuration.getBoolean("custom-despawning");
+        this.enableTransitionRecording = configuration.getBoolean("record-transitions");
         this.economyOverride = configuration.getString("override-economy", "");
     }
 

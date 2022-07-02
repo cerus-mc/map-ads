@@ -11,6 +11,7 @@ import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.Mutable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class GroupCommand extends BaseCommand {
             return;
         }
 
-        this.adScreenStorage.updateScreenGroup(new ScreenGroup(id, name, new ArrayList<>()));
+        this.adScreenStorage.updateScreenGroup(new ScreenGroup(id, name, new ArrayList<>(), Mutable.create(-1), Mutable.create(-1d)));
         player.sendMessage(L10n.getPrefixed("success.group_created", name, id));
     }
 
@@ -56,7 +57,7 @@ public class GroupCommand extends BaseCommand {
         player.sendMessage(L10n.getPrefixed("success.group_deleted", group.groupName(), group.id()));
 
         for (final String screenId : group.screenIds()) {
-            final UUID[] adIds = this.advertStorage.getRunningAdvertisements(screenId).stream()
+            final UUID[] adIds = this.advertStorage.getAdvertisements(screenId).stream()
                     .map(Advertisement::getAdvertId)
                     .toArray(UUID[]::new);
             if (adIds.length > 0) {
@@ -113,6 +114,70 @@ public class GroupCommand extends BaseCommand {
         group.screenIds().remove(screenId);
         this.adScreenStorage.updateScreenGroup(group);
         player.sendMessage(L10n.getPrefixed("success.group_screen_removed", screenId, group.groupName()));
+    }
+
+    @Subcommand("fixedtime set")
+    @CommandCompletion("@mapads_groups @range:1-60")
+    public void handleFixedTimeSet(final Player player, final String groupId, final int fixedTime) {
+        final ScreenGroup group = this.adScreenStorage.getScreenGroup(groupId);
+        if (group == null) {
+            player.sendMessage(L10n.getPrefixed("error.group_not_found"));
+            return;
+        }
+        if (fixedTime <= 0) {
+            player.sendMessage(L10n.getPrefixed("error.value_negative"));
+            return;
+        }
+
+        group.fixedTime().set(fixedTime);
+        this.adScreenStorage.updateScreenGroup(group);
+        player.sendMessage(L10n.getPrefixed("success.group_screen_edited", group.groupName()));
+    }
+
+    @Subcommand("fixedtime remove")
+    @CommandCompletion("@mapads_groups")
+    public void handleFixedTimeRemove(final Player player, final String groupId) {
+        final ScreenGroup group = this.adScreenStorage.getScreenGroup(groupId);
+        if (group == null) {
+            player.sendMessage(L10n.getPrefixed("error.group_not_found"));
+            return;
+        }
+
+        group.fixedTime().set(-1);
+        this.adScreenStorage.updateScreenGroup(group);
+        player.sendMessage(L10n.getPrefixed("success.group_screen_edited", group.groupName()));
+    }
+
+    @Subcommand("fixedprice set")
+    @CommandCompletion("@mapads_groups 1000|5000|15000")
+    public void handleFixedPriceSet(final Player player, final String groupId, final double fixedPrice) {
+        final ScreenGroup group = this.adScreenStorage.getScreenGroup(groupId);
+        if (group == null) {
+            player.sendMessage(L10n.getPrefixed("error.group_not_found"));
+            return;
+        }
+        if (fixedPrice <= 0) {
+            player.sendMessage(L10n.getPrefixed("error.value_negative"));
+            return;
+        }
+
+        group.fixedPrice().set(fixedPrice);
+        this.adScreenStorage.updateScreenGroup(group);
+        player.sendMessage(L10n.getPrefixed("success.group_screen_edited", group.groupName()));
+    }
+
+    @Subcommand("fixedprice remove")
+    @CommandCompletion("@mapads_groups")
+    public void handleFixedPriceRemove(final Player player, final String groupId) {
+        final ScreenGroup group = this.adScreenStorage.getScreenGroup(groupId);
+        if (group == null) {
+            player.sendMessage(L10n.getPrefixed("error.group_not_found"));
+            return;
+        }
+
+        group.fixedPrice().set(-1d);
+        this.adScreenStorage.updateScreenGroup(group);
+        player.sendMessage(L10n.getPrefixed("success.group_screen_edited", group.groupName()));
     }
 
 }

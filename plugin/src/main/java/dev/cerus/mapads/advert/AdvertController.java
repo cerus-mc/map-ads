@@ -7,6 +7,10 @@ import dev.cerus.mapads.image.MapImage;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.image.transition.Transition;
 import dev.cerus.mapads.image.transition.TransitionRegistry;
+import dev.cerus.mapads.image.transition.recorded.RecordedTransition;
+import dev.cerus.mapads.image.transition.recorded.RecordedTransitions;
+import dev.cerus.mapads.image.transition.recorded.storage.RecordedTransitionStorage;
+import dev.cerus.mapads.image.transition.recorder.TransitionRecorder;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.util.FrameMarkerUtil;
@@ -16,6 +20,8 @@ import dev.cerus.maps.api.graphics.FastMapScreenGraphics;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Level;
 
 public class AdvertController {
 
@@ -25,17 +31,20 @@ public class AdvertController {
     private final DefaultImageController defaultImageController;
     private final AdScreenStorage adScreenStorage;
     private final MapAdsPlugin plugin;
+    private final RecordedTransitionStorage recordedTransitionStorage;
 
     public AdvertController(final MapAdsPlugin plugin,
                             final AdvertStorage advertStorage,
                             final ImageStorage imageStorage,
                             final DefaultImageController defaultImageController,
-                            final AdScreenStorage adScreenStorage) {
+                            final AdScreenStorage adScreenStorage,
+                            final RecordedTransitionStorage recordedTransitionStorage) {
         this.plugin = plugin;
         this.advertStorage = advertStorage;
         this.imageStorage = imageStorage;
         this.defaultImageController = defaultImageController;
         this.adScreenStorage = adScreenStorage;
+        this.recordedTransitionStorage = recordedTransitionStorage;
     }
 
     public void update(final AdScreen screen) {
@@ -60,10 +69,61 @@ public class AdvertController {
                 : context.currentAdvertImage;
 
         if (image != null) {
-            // Do the transition thingy
-            final Transition transition = TransitionRegistry.getOrDefault(screen.getTransition());
-            transition.makeTransition(mapScreen, context.prevImg, image);
-            mapScreen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(mapScreen));
+            final String screenOrGroupId = context.currentAdvert == null ? screen.getId() : context.currentAdvert.getScreenOrGroupId().unsafeGet();
+            // Check if a transition recording exists
+            if (screenOrGroupId != null && context.prevImg != null
+                    && this.recordedTransitionStorage.has(screenOrGroupId, screen.getTransition(), context.prevImg.getId(), image.getId())) {
+                // Load the recoding
+                this.recordedTransitionStorage.load(screenOrGroupId, screen.getTransition(), context.prevImg.getId(), image.getId())
+                        .whenComplete((recordedTransition, throwable) -> {
+                            if (throwable != null) {
+                                this.plugin.getLogger().log(Level.SEVERE, "Could not play recorded transition (" + screen.getId()
+                                        + "<" + screen.getTransition() + ">, " + context.prevImg.getId() + " -> " + image.getId() + ")", throwable);
+                                return;
+                            }
+                            if (recordedTransition == null) {
+                                return;
+                            }
+
+                            // Play the recording
+                            RecordedTransitions.playTransition(MapScreenRegistry.getScreen(screen.getScreenId()), recordedTransition);
+                            this.recordedTransitionStorage.resetLastAccess(screenOrGroupId, screen.getTransition(), context.prevImg.getId(), image.getId());
+                        });
+            } else {
+                // Init recorder
+                final TransitionRecorder recorder;
+                if (this.plugin.getConfigModel().enableTransitionRecording && screenOrGroupId != null && context.prevImg != null
+                        && (context.currentAdvert == null || !context.currentAdvert.isDeleted())) {
+                    final String transitionId = screen.getTransition();
+                    final UUID imgLeft = context.prevImg.getId();
+                    final UUID imgRight = image.getId();
+                    recorder = TransitionRecorder.callback(TransitionRecorder.binary(), rec -> {
+                        if (!rec.wasStarted()) {
+                            // Don't save non-existing recordings
+                            return;
+                        }
+                        this.recordedTransitionStorage.save(
+                                screenOrGroupId,
+                                transitionId,
+                                imgLeft,
+                                imgRight,
+                                rec.getData()
+                        ).whenComplete((unused, throwable) -> {
+                            if (throwable != null) {
+                                this.plugin.getLogger().log(Level.SEVERE, "Could not save transition recording (" + screen.getId()
+                                        + "<" + screen.getTransition() + ">, " + context.prevImg.getId() + " -> " + image.getId() + ")", throwable);
+                            }
+                        });
+                    });
+                } else {
+                    recorder = TransitionRecorder.noop();
+                }
+
+                // Do the transition thingy
+                final Transition transition = TransitionRegistry.getOrDefault(screen.getTransition());
+                transition.makeTransition(mapScreen, context.prevImg, image, recorder);
+                mapScreen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(mapScreen));
+            }
 
             // If we're displaying an ad we need to decrement its amount of remaining minutes
             if (context.currentAdvert != null) {
@@ -115,6 +175,7 @@ public class AdvertController {
         private Advertisement currentAdvert;
         private MapImage currentAdvertImage;
         private boolean displayDefaultImg;
+        private RecordedTransition recordedTransition;
 
     }
 

@@ -17,6 +17,8 @@ import dev.cerus.mapads.image.ImageRetriever;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.PermissionUtil;
+import java.util.OptionalInt;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.entity.Player;
@@ -71,6 +73,13 @@ public class MapAdsCommand extends BaseCommand {
     @Subcommand("advertise")
     @CommandPermission("mapads.command.advertise")
     public void handleAdvertise(final Player player) {
+        final OptionalInt limit = PermissionUtil.getValue(player, "mapads.limit.concurrent-ads.");
+        final int rented = this.advertStorage.getAdvertisements(player.getUniqueId()).size();
+        if (limit.isPresent() && limit.getAsInt() >= rented) {
+            player.sendMessage(L10n.getPrefixed("error.ad_limit_reached", rented));
+            return;
+        }
+
         final CreateAdGui createAdGui = new CreateAdGui(this.advertStorage,
                 this.imageStorage,
                 this.adScreenStorage,

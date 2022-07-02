@@ -21,6 +21,8 @@ public interface AdvertStorage extends AutoCloseable {
 
     List<Advertisement> getPendingAdvertisements();
 
-    List<Advertisement> getRunningAdvertisements(String screenName);
+    List<Advertisement> getAdvertisements(String screenName);
+
+    List<Advertisement> getAdvertisements(UUID owner);
 
 }

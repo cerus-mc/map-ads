@@ -2,6 +2,7 @@ package dev.cerus.mapads.advert.storage;
 
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.image.storage.ImageStorage;
+import dev.cerus.mapads.image.transition.recorded.storage.RecordedTransitionStorage;
 import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.util.Either;
@@ -28,10 +29,14 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
     protected final Map<String, Integer> indexMap = new HashMap<>();
     private final AdScreenStorage adScreenStorage;
     private final ImageStorage imageStorage;
+    private final RecordedTransitionStorage recordedTransitionStorage;
 
-    protected SqlAdvertStorage(final AdScreenStorage adScreenStorage, final ImageStorage imageStorage) {
+    protected SqlAdvertStorage(final AdScreenStorage adScreenStorage,
+                               final ImageStorage imageStorage,
+                               final RecordedTransitionStorage recordedTransitionStorage) {
         this.adScreenStorage = adScreenStorage;
         this.imageStorage = imageStorage;
+        this.recordedTransitionStorage = recordedTransitionStorage;
     }
 
     protected void initTable() {
@@ -247,6 +252,10 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
             this.imageStorage.deleteMapImages(toDelete.stream()
                     .map(Advertisement::getImageId)
                     .toArray(UUID[]::new));
+            toDelete.forEach(advertisement -> this.recordedTransitionStorage.deleteAll(
+                    advertisement.getScreenOrGroupId().unsafeGet(),
+                    advertisement.getImageId()
+            ));
         }
     }
 
@@ -264,7 +273,7 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
     }
 
     @Override
-    public List<Advertisement> getRunningAdvertisements(final String screenName) {
+    public List<Advertisement> getAdvertisements(final String screenName) {
         return this.advertisements.stream()
                 .filter(advertisement -> advertisement.getRemainingMinutes() > 0)
                 .filter(advertisement -> advertisement.getScreenOrGroupId().map(
@@ -273,6 +282,20 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
                                 .screenIds().contains(screenName))
                 )
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Advertisement> getAdvertisements(final UUID owner) {
+        final List<Advertisement> list = new ArrayList<>();
+        this.advertisements.stream()
+                .filter(advertisement -> advertisement.getPlayerUuid().equals(owner))
+                .filter(advertisement -> !advertisement.isDeleted())
+                .forEach(list::add);
+        this.pendingAdvertisements.stream()
+                .filter(advertisement -> advertisement.getPlayerUuid().equals(owner))
+                .filter(advertisement -> !advertisement.isDeleted())
+                .forEach(list::add);
+        return list;
     }
 
 }

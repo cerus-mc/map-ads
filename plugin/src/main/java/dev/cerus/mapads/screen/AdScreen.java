@@ -5,11 +5,15 @@ public class AdScreen {
     private final String id;
     private int screenId;
     private String transition;
+    private int fixedTime;
+    private double fixedPrice;
 
-    public AdScreen(final String id, final int screenId, final String transition) {
+    public AdScreen(final String id, final int screenId, final String transition, final int fixedTime, final double fixedPrice) {
         this.id = id;
         this.screenId = screenId;
         this.transition = transition;
+        this.fixedTime = fixedTime;
+        this.fixedPrice = fixedPrice;
     }
 
     public String getId() {
@@ -30,6 +34,22 @@ public class AdScreen {
 
     public void setTransition(final String transition) {
         this.transition = transition;
+    }
+
+    public int getFixedTime() {
+        return this.fixedTime;
+    }
+
+    public void setFixedTime(final int fixedTime) {
+        this.fixedTime = fixedTime;
+    }
+
+    public double getFixedPrice() {
+        return this.fixedPrice;
+    }
+
+    public void setFixedPrice(final double fixedPrice) {
+        this.fixedPrice = fixedPrice;
     }
 
 }

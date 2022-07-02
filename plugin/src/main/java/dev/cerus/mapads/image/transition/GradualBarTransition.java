@@ -1,6 +1,7 @@
 package dev.cerus.mapads.image.transition;
 
 import dev.cerus.mapads.image.MapImage;
+import dev.cerus.mapads.image.transition.recorder.TransitionRecorder;
 import dev.cerus.mapads.scheduler.ExecutorServiceScheduler;
 import dev.cerus.mapads.scheduler.Scheduler;
 import dev.cerus.mapads.scheduler.SchedulerRunnable;
@@ -17,11 +18,12 @@ public class GradualBarTransition implements Transition {
     private final Scheduler scheduler = ExecutorServiceScheduler.create(Executors.newScheduledThreadPool(1));
 
     @Override
-    public void makeTransition(final @NotNull MapScreen screen, final MapImage oldImg, final @NotNull MapImage newImg) {
+    public void makeTransition(final @NotNull MapScreen screen, final MapImage oldImg, final @NotNull MapImage newImg, @NotNull final TransitionRecorder recorder) {
         if (oldImg != null && oldImg.getId().equals(newImg.getId())) {
             return;
         }
 
+        recorder.start(screen);
         final MapGraphics<?, ?> graphics = screen.getGraphics();
         this.scheduler.scheduleAtFixedRate(new SchedulerRunnable() {
             private int x = 0;
@@ -41,11 +43,18 @@ public class GradualBarTransition implements Transition {
                     }
                 }
                 screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
+                recorder.record(screen);
 
                 if ((this.x = this.x + STEP) >= screen.getWidth() * 128) {
-                    this.cancel();
                     screen.sendMaps(true, ReviewerUtil.getNonReviewingPlayers(screen));
+                    this.cancel();
                 }
+            }
+
+            @Override
+            public void cancel() {
+                super.cancel();
+                recorder.end(screen);
             }
         }, 0, 1000 / 20, TimeUnit.MILLISECONDS);
     }

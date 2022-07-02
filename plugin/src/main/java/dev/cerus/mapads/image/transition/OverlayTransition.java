@@ -1,6 +1,7 @@
 package dev.cerus.mapads.image.transition;
 
 import dev.cerus.mapads.image.MapImage;
+import dev.cerus.mapads.image.transition.recorder.TransitionRecorder;
 import dev.cerus.mapads.scheduler.ExecutorServiceScheduler;
 import dev.cerus.mapads.scheduler.Scheduler;
 import dev.cerus.mapads.scheduler.SchedulerRunnable;
@@ -18,11 +19,12 @@ public class OverlayTransition implements Transition {
     private final Scheduler scheduler = ExecutorServiceScheduler.create(Executors.newScheduledThreadPool(1));
 
     @Override
-    public void makeTransition(@NotNull final MapScreen screen, @Nullable final MapImage oldImg, @NotNull final MapImage newImg) {
+    public void makeTransition(@NotNull final MapScreen screen, @Nullable final MapImage oldImg, @NotNull final MapImage newImg, @NotNull final TransitionRecorder recorder) {
         if (oldImg != null && oldImg.getId().equals(newImg.getId())) {
             return;
         }
 
+        recorder.start(screen);
         final MapGraphics<?, ?> graphics = screen.getGraphics();
         this.scheduler.scheduleAtFixedRate(new SchedulerRunnable() {
             private int col = 1;
@@ -36,9 +38,16 @@ public class OverlayTransition implements Transition {
                 }
 
                 graphics.place(newImg.getGraphics(), (this.col * STEP) - (newImg.getWidth() * 128), 0, 1f, false);
+                recorder.record(screen);
                 this.col++;
 
                 screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
+            }
+
+            @Override
+            public void cancel() {
+                super.cancel();
+                recorder.end(screen);
             }
         }, 0, 1000 / 20, TimeUnit.MILLISECONDS);
     }

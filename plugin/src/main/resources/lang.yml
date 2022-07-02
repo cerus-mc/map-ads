@@ -1,4 +1,4 @@
-'ver': "4"
+'ver': "5"
 'prefix': "&6&lM&e&lap-&6&lA&e&lds &8» &r"
 
 'api,event,create,cancelled': "Advert creation has been cancelled by an external plugin"
@@ -28,6 +28,8 @@
 'error,group_not_found': "&cGroup does not exist"
 'error,group_contains': "&cThis screen is already part of this group"
 'error,group_not_contains': "&cThis screen is not part of this group"
+'error,ad_limit_reached': "&cYou can't rent more than %d ads at the same time."
+'error,value_negative': "&cThe value can not be below or equal to 0."
 
 'success,def_img_changed': "&aThe default image for %dx%d has been changed!"
 'success,def_img_changed_new': "&aThe default image for %s has been changed!"
@@ -41,6 +43,7 @@
 'success,group_deleted': "&aGroup '%s' (%s) was deleted"
 'success,group_screen_added': "&aScreen %s has been added to group '%s'"
 'success,group_screen_removed': "&aScreen %s was removed from group '%s'"
+'success,group_screen_edited': "&aGroup '%s' was edited"
 
 'misc,please_wait': "&7&oPlease wait..."
 'misc,visible': "&eThe image on the ad-screen is only visible to you."

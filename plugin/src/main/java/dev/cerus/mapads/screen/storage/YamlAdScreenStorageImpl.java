@@ -2,6 +2,7 @@ package dev.cerus.mapads.screen.storage;
 
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.ScreenGroup;
+import dev.cerus.mapads.util.Mutable;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
 import java.io.IOException;
@@ -37,13 +38,21 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             final String id = section.getString("id");
             final int mapScreenId = section.getInt("screen-id");
             final String transition = section.getString("transition");
-            final AdScreen adScreen = new AdScreen(id, mapScreenId, transition);
+            final int fixedTime = section.getInt("fixed-time", -1);
+            final double fixedPrice = section.getDouble("fixed-price", -1);
+            final AdScreen adScreen = new AdScreen(id, mapScreenId, transition, fixedTime, fixedPrice);
             this.screens.add(adScreen);
         }
 
         for (final String key : this.groupConfig.getKeys(false)) {
             final ConfigurationSection section = this.groupConfig.getConfigurationSection(key);
-            this.groups.add(new ScreenGroup(key, section.getString("name"), section.getStringList("screens")));
+            this.groups.add(new ScreenGroup(
+                    key,
+                    section.getString("name"),
+                    section.getStringList("screens"),
+                    Mutable.create(section.getInt("fixed-time", -1)),
+                    Mutable.create(section.getDouble("fixed-price", -1))
+            ));
         }
     }
 
@@ -54,6 +63,8 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             section.set("id", screen.getId());
             section.set("screen-id", screen.getScreenId());
             section.set("transition", screen.getTransition());
+            section.set("fixed-time", screen.getFixedTime());
+            section.set("fixed-price", screen.getFixedPrice());
         }
         this.screenConfig.save(this.screenConfigFile);
 
@@ -62,6 +73,8 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             final ConfigurationSection section = this.groupConfig.createSection(group.id());
             section.set("screens", group.screenIds());
             section.set("name", group.groupName());
+            section.set("fixed-time", group.fixedTime().get());
+            section.set("fixed-price", group.fixedPrice().get());
         }
         this.groupConfig.save(this.groupConfigFile);
     }

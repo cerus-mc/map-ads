@@ -9,6 +9,7 @@ import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.image.transition.TransitionRegistry;
+import dev.cerus.mapads.image.transition.recorded.storage.RecordedTransitionStorage;
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.ScreenGroup;
@@ -31,6 +32,9 @@ public class ScreenCommand extends BaseCommand {
 
     @Dependency
     private AdvertStorage advertStorage;
+
+    @Dependency
+    private RecordedTransitionStorage recordedTransitionStorage;
 
     @Subcommand("teleport")
     @CommandCompletion("@mapads_names")
@@ -73,7 +77,8 @@ public class ScreenCommand extends BaseCommand {
             }
         }
 
-        final UUID[] adIds = this.advertStorage.getRunningAdvertisements(adScreen.getId()).stream()
+        this.recordedTransitionStorage.deleteAll(adScreen.getId());
+        final UUID[] adIds = this.advertStorage.getAdvertisements(adScreen.getId()).stream()
                 .map(Advertisement::getAdvertId)
                 .toArray(UUID[]::new);
         if (adIds.length > 0) {
@@ -95,7 +100,7 @@ public class ScreenCommand extends BaseCommand {
         }
 
         FrameMarkerUtil.mark(screen);
-        final AdScreen adScreen = new AdScreen(name, screenId, "instant");
+        final AdScreen adScreen = new AdScreen(name, screenId, "instant", -1, -1);
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.created", name));
     }
@@ -120,6 +125,7 @@ public class ScreenCommand extends BaseCommand {
             FrameMarkerUtil.unmark(oldScreen);
         }
 
+        this.recordedTransitionStorage.deleteAll(adScreen.getId());
         adScreen.setScreenId(screenId);
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.updated"));
@@ -137,12 +143,78 @@ public class ScreenCommand extends BaseCommand {
             player.sendMessage(L10n.getPrefixed("error.transition_not_found"));
             return;
         }
+
+        this.recordedTransitionStorage.deleteAll(adScreen.getId(), adScreen.getTransition());
         adScreen.setTransition(transition);
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.updated"));
         if (TransitionRegistry.getTransition(transition).isPerformanceIntensive()) {
             player.sendMessage(L10n.getPrefixed("misc.intensive_transition"));
         }
+    }
+
+    @Subcommand("set fixedtime")
+    @CommandCompletion("@mapads_names @range:1-60")
+    public void handleScreenSetFixedTime(final Player player, final String name, final int fixedTime) {
+        final AdScreen adScreen = this.adScreenStorage.getAdScreen(name);
+        if (adScreen == null) {
+            player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
+            return;
+        }
+        if (fixedTime <= 0) {
+            player.sendMessage(L10n.getPrefixed("error.value_negative"));
+            return;
+        }
+
+        adScreen.setFixedTime(fixedTime);
+        this.adScreenStorage.updateAdScreen(adScreen);
+        player.sendMessage(L10n.getPrefixed("success.updated"));
+    }
+
+    @Subcommand("set fixedprice")
+    @CommandCompletion("@mapads_names 1000|5000|15000")
+    public void handleScreenSetFixedTime(final Player player, final String name, final double fixedPrice) {
+        final AdScreen adScreen = this.adScreenStorage.getAdScreen(name);
+        if (adScreen == null) {
+            player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
+            return;
+        }
+        if (fixedPrice <= 0) {
+            player.sendMessage(L10n.getPrefixed("error.value_negative"));
+            return;
+        }
+
+        adScreen.setFixedPrice(fixedPrice);
+        this.adScreenStorage.updateAdScreen(adScreen);
+        player.sendMessage(L10n.getPrefixed("success.updated"));
+    }
+
+    @Subcommand("remove fixedtime")
+    @CommandCompletion("@mapads_names")
+    public void handleScreenRemoveFixedTime(final Player player, final String name) {
+        final AdScreen adScreen = this.adScreenStorage.getAdScreen(name);
+        if (adScreen == null) {
+            player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
+            return;
+        }
+
+        adScreen.setFixedTime(-1);
+        this.adScreenStorage.updateAdScreen(adScreen);
+        player.sendMessage(L10n.getPrefixed("success.updated"));
+    }
+
+    @Subcommand("remove fixedprice")
+    @CommandCompletion("@mapads_names")
+    public void handleScreenRemoveFixedPrice(final Player player, final String name) {
+        final AdScreen adScreen = this.adScreenStorage.getAdScreen(name);
+        if (adScreen == null) {
+            player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
+            return;
+        }
+
+        adScreen.setFixedPrice(-1);
+        this.adScreenStorage.updateAdScreen(adScreen);
+        player.sendMessage(L10n.getPrefixed("success.updated"));
     }
 
 }

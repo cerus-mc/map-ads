@@ -1,6 +1,7 @@
 package dev.cerus.mapads.image.transition;
 
 import dev.cerus.mapads.image.MapImage;
+import dev.cerus.mapads.image.transition.recorder.TransitionRecorder;
 import dev.cerus.mapads.scheduler.ExecutorServiceScheduler;
 import dev.cerus.mapads.scheduler.Scheduler;
 import dev.cerus.mapads.scheduler.SchedulerRunnable;
@@ -20,7 +21,7 @@ public class PixelateBigTransition implements Transition {
     private final Scheduler scheduler = ExecutorServiceScheduler.create(Executors.newScheduledThreadPool(1));
 
     @Override
-    public void makeTransition(final @NotNull MapScreen screen, final MapImage oldImg, final @NotNull MapImage newImg) {
+    public void makeTransition(final @NotNull MapScreen screen, final MapImage oldImg, final @NotNull MapImage newImg, @NotNull final TransitionRecorder recorder) {
         if (oldImg != null && oldImg.getId().equals(newImg.getId())) {
             return;
         }
@@ -43,6 +44,7 @@ public class PixelateBigTransition implements Transition {
             }
         }
 
+        recorder.start(screen);
         final MapGraphics<?, ?> graphics = screen.getGraphics();
         this.scheduler.scheduleAtFixedRate(new SchedulerRunnable() {
             private int count = 0;
@@ -82,6 +84,13 @@ public class PixelateBigTransition implements Transition {
 
                 this.count++;
                 screen.sendMaps(false, ReviewerUtil.getNonReviewingPlayers(screen));
+                recorder.record(screen);
+            }
+
+            @Override
+            public void cancel() {
+                super.cancel();
+                recorder.end(screen);
             }
         }, 0, 2 * (1000 / 20), TimeUnit.MILLISECONDS);
     }
