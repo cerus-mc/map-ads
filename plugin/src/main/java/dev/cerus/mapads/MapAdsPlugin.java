@@ -39,6 +39,7 @@ import dev.cerus.mapads.image.transition.recorded.storage.SqliteRecordedTransiti
 import dev.cerus.mapads.lang.L10n;
 import dev.cerus.mapads.lang.LangUpdater;
 import dev.cerus.mapads.listener.PlayerJoinListener;
+import dev.cerus.mapads.listener.PlayerQuitListener;
 import dev.cerus.mapads.premium.Premium;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.ScreenGroup;
@@ -247,6 +248,7 @@ public class MapAdsPlugin extends JavaPlugin {
         // Register listeners
         final PluginManager pluginManager = this.getServer().getPluginManager();
         pluginManager.registerEvents(new PlayerJoinListener(this, adScreenStorage, advertStorage), this);
+        pluginManager.registerEvents(new PlayerQuitListener(), this);
 
         // Start tasks
         final BukkitScheduler scheduler = this.getServer().getScheduler();

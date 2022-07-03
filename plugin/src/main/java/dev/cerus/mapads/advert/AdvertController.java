@@ -11,6 +11,7 @@ import dev.cerus.mapads.image.transition.recorded.RecordedTransition;
 import dev.cerus.mapads.image.transition.recorded.RecordedTransitions;
 import dev.cerus.mapads.image.transition.recorded.storage.RecordedTransitionStorage;
 import dev.cerus.mapads.image.transition.recorder.TransitionRecorder;
+import dev.cerus.mapads.premium.Premium;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.util.FrameMarkerUtil;
@@ -92,8 +93,8 @@ public class AdvertController {
             } else {
                 // Init recorder
                 final TransitionRecorder recorder;
-                if (this.plugin.getConfigModel().enableTransitionRecording && screenOrGroupId != null && context.prevImg != null
-                        && (context.currentAdvert == null || !context.currentAdvert.isDeleted())) {
+                if (this.plugin.getConfigModel().enableTransitionRecording && Premium.isPremium() && screenOrGroupId != null
+                        && context.prevImg != null && (context.currentAdvert == null || !context.currentAdvert.isDeleted())) {
                     final String transitionId = screen.getTransition();
                     final UUID imgLeft = context.prevImg.getId();
                     final UUID imgRight = image.getId();

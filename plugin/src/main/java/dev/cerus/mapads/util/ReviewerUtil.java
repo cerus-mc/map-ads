@@ -89,9 +89,14 @@ public class ReviewerUtil {
     }
 
     public static Set<Player> getNonReviewingPlayers(final MapScreen screen) {
+        return getNonReviewingPlayers(screen, true);
+    }
+
+    public static Set<Player> getNonReviewingPlayers(final MapScreen screen, final boolean checkViewer) {
         return Bukkit.getOnlinePlayers().stream()
                 .filter(player -> !REVIEWER_MAP.containsKey(player.getUniqueId())
                         || REVIEWER_MAP.get(player.getUniqueId()).screen != screen)
+                .filter(player -> !checkViewer || ScreenViewerUtil.isViewer(screen, player))
                 .collect(Collectors.toSet());
     }
 
