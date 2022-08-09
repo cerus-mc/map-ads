@@ -48,6 +48,8 @@ import dev.cerus.mapads.screen.storage.YamlAdScreenStorageImpl;
 import dev.cerus.mapads.task.FrameSendTask;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,10 +58,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.SimplePie;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -68,6 +72,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
+import sun.misc.Unsafe;
 
 public class MapAdsPlugin extends JavaPlugin {
 
@@ -86,6 +91,10 @@ public class MapAdsPlugin extends JavaPlugin {
             return;
         }
         enabled = true;
+
+        if (Bukkit.getBukkitVersion().contains("1.19.2")) {
+            this.fixAnvilGui();
+        }
 
         // Misc init
         Premium.init();
@@ -286,6 +295,32 @@ public class MapAdsPlugin extends JavaPlugin {
             }
             return map;
         }));
+    }
+
+    private void fixAnvilGui() {
+        try {
+            final Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafeField.setAccessible(true);
+            final Unsafe unsafe = (Unsafe) theUnsafeField.get(null);
+
+            final Class<?> wrapperCls = Class.forName("dev.cerus.mapads.thirdparty.anvilgui.version.Wrapper1_19_R1");
+            final Object wrapper = wrapperCls.getDeclaredConstructor().newInstance();
+            final Field boolField = wrapperCls.getDeclaredField("IS_ONE_NINETEEN_ONE");
+            boolField.setAccessible(true);
+
+            final long off = unsafe.objectFieldOffset(boolField);
+            unsafe.putBoolean(wrapper, off, true);
+
+            final Class<?> mainCls = Class.forName("dev.cerus.mapads.thirdparty.anvilgui.AnvilGUI");
+            final Field wrapperField = mainCls.getDeclaredField("WRAPPER");
+            wrapperField.setAccessible(true);
+            wrapperField.set(null, wrapper);
+
+            this.getLogger().info("AnvilGUI fix has been injected");
+        } catch (final NoSuchFieldException | ClassNotFoundException | InvocationTargetException | IllegalAccessException | InstantiationException |
+                       NoSuchMethodException e) {
+            this.getLogger().log(Level.WARNING, "Failed to inject AnvilGUI fix", e);
+        }
     }
 
     @Override
