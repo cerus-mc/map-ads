@@ -19,8 +19,6 @@ import dev.cerus.mapads.command.PremiumCommand;
 import dev.cerus.mapads.command.PreviewCommand;
 import dev.cerus.mapads.command.ReviewCommand;
 import dev.cerus.mapads.command.ScreenCommand;
-import dev.cerus.mapads.compatibility.Compatibility;
-import dev.cerus.mapads.compatibility.CompatibilityFactory;
 import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.economy.EconomyWrappers;
 import dev.cerus.mapads.helpbook.HelpBook;
@@ -103,10 +101,6 @@ public class MapAdsPlugin extends JavaPlugin {
         // Init config
         this.saveDefaultConfig();
         this.configModel = new ConfigModel(this.getConfig());
-        if (this.configModel.enableCustomDespawning) {
-            this.getLogger().warning("The setting 'custom-despawning' is not supported yet.");
-            this.configModel.enableCustomDespawning = false;
-        }
         this.getLogger().info("Transition recording is " + (this.configModel.enableTransitionRecording ? "enabled" : "disabled") + ".");
 
         // Init L10n
@@ -170,10 +164,6 @@ public class MapAdsPlugin extends JavaPlugin {
             return;
         }
         this.closeables.add(advertStorage);
-
-        // Init compatibility layer
-        final Compatibility compatibility = new CompatibilityFactory().makeCompatibilityLayer(this, adScreenStorage);
-        this.getLogger().info("Using compatibility layer " + compatibility.getClass().getSimpleName());
 
         // Init Discord bot
         boolean discordEnabled = false;
@@ -261,7 +251,7 @@ public class MapAdsPlugin extends JavaPlugin {
 
         // Start tasks
         final BukkitScheduler scheduler = this.getServer().getScheduler();
-        scheduler.runTaskTimerAsynchronously(this, new FrameSendTask(this.configModel, adScreenStorage, compatibility), 4 * 20, FrameSendTask.TICK_PERIOD);
+        scheduler.runTaskTimerAsynchronously(this, new FrameSendTask(this.configModel, adScreenStorage), 4 * 20, FrameSendTask.TICK_PERIOD);
         scheduler.runTaskTimerAsynchronously(this, () -> adScreenStorage.getScreens().forEach(advertController::update), 4 * 20, 60 * 20);
         scheduler.runTaskTimerAsynchronously(this, () -> recordedTransitionStorage.deleteOlderThan(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)), 0, 60 * 20);
         scheduler.runTaskLater(this, () -> this.screensLoaded = true, 4 * 20);

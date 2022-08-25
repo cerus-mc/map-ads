@@ -1,5 +1,6 @@
 package dev.cerus.mapads;
 
+import dev.cerus.mapads.compatibility.MapsCompat;
 import java.util.List;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -16,9 +17,9 @@ public class ConfigModel {
     public boolean updateMessage;
     public boolean onlyGroups;
     public boolean deductEachScreenInGroup;
-    public boolean enableCustomDespawning;
     public boolean enableTransitionRecording;
     public String economyOverride;
+    public int despawnRange;
 
     public ConfigModel(final FileConfiguration configuration) {
         this.maxImageSize = configuration.getInt("images.max-size");
@@ -32,9 +33,9 @@ public class ConfigModel {
         this.updateMessage = configuration.getBoolean("send-update-message");
         this.onlyGroups = configuration.getBoolean("only-show-groups");
         this.deductEachScreenInGroup = configuration.getBoolean("deduct-each-screen-in-group");
-        this.enableCustomDespawning = configuration.getBoolean("custom-despawning");
         this.enableTransitionRecording = configuration.getBoolean("record-transitions");
         this.economyOverride = configuration.getString("override-economy", "");
+        this.despawnRange = !MapsCompat.isThreeOrAbove() ? 30 : Math.max(2, configuration.getInt("despawn-range", 64));
     }
 
 }
