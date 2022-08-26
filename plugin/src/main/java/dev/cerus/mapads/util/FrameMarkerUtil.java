@@ -1,5 +1,6 @@
 package dev.cerus.mapads.util;
 
+import dev.cerus.maps.api.Frame;
 import dev.cerus.maps.api.MapScreen;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,18 +15,18 @@ public class FrameMarkerUtil {
 
     public static void mark(final MapScreen screen) {
         screens.add(screen.getId());
-        for (final int[] arr : screen.getFrameIds()) {
-            for (final int eid : arr) {
-                frames.add(eid);
+        for (final Frame[] arr : screen.getFrames()) {
+            for (final Frame frame : arr) {
+                screens.add(frame.getEntityId());
             }
         }
     }
 
     public static void unmark(final MapScreen screen) {
         screens.remove(screen.getId());
-        for (final int[] arr : screen.getFrameIds()) {
-            for (final int eid : arr) {
-                frames.remove(eid);
+        for (final Frame[] arr : screen.getFrames()) {
+            for (final Frame frame : arr) {
+                screens.remove(frame.getEntityId());
             }
         }
     }

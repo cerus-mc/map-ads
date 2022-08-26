@@ -9,6 +9,8 @@ softdepend:
   - ${parent.artifactId}-discord-bot
   - Vault
   - PlayerPoints
+  - SuperiorSkyblock2
+  - Multiverse-Core
 depend:
   - maps
 

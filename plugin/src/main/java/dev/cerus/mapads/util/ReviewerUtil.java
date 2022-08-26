@@ -16,7 +16,6 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,47 +29,26 @@ public class ReviewerUtil {
                 if (!player.isOnline()) {
                     return;
                 }
-                ((Context) o2).screen.sendFrames(player);
+                ((Context) o2).screen.spawnFrames(player);
                 ((Context) o2).screen.sendMaps(true, player);
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(L10n.get("misc.img_viewing")));
             })
             .build();
 
     public static void teleportTo(final Player player, final MapScreen screen) {
-        final int[][] frameIds = screen.getFrameIds();
-        if (frameIds == null) {
-            return;
+        final Location location = screen.getLocation();
+        player.teleport(location);
+        if (REVIEWER_MAP.containsKey(player.getUniqueId())) {
+            Bukkit.getScheduler().runTaskLater(JavaPlugin.getPlugin(MapAdsPlugin.class), () ->
+                    sendImage(player, screen, REVIEWER_MAP.get(player.getUniqueId()).image), 5);
         }
-
-        final int frameId = frameIds[0][screen.getHeight() - 1];
-        player.getWorld().getEntities().stream()
-                .filter(entity -> entity.getEntityId() == frameId)
-                .filter(entity -> entity instanceof ItemFrame)
-                .map(entity -> (ItemFrame) entity)
-                .findAny()
-                .ifPresent(itemFrame -> {
-                    final Location location = itemFrame.getLocation().clone()
-                            .add(itemFrame.getFacing().getDirection().multiply(2));
-                    location.setYaw(switch (itemFrame.getFacing()) {
-                        case EAST -> 90;
-                        case WEST -> -90;
-                        case NORTH -> 0;
-                        case SOUTH -> 180;
-                        default -> player.getLocation().getYaw();
-                    });
-                    player.teleport(location);
-                    if (REVIEWER_MAP.containsKey(player.getUniqueId())) {
-                        Bukkit.getScheduler().runTaskLater(JavaPlugin.getPlugin(MapAdsPlugin.class), () ->
-                                sendImage(player, screen, REVIEWER_MAP.get(player.getUniqueId()).image), 5);
-                    }
-                });
     }
 
     public static void sendImage(final Player player, final MapScreen screen, final MapImage image) {
         final MapScreen fakeScreen = new MapScreen((int) (System.currentTimeMillis() / 1000), VERSION_ADAPTER, screen.getWidth(), screen.getHeight());
-        fakeScreen.setFrameIds(screen.getFrameIds());
+        fakeScreen.setFrames(screen.getFrames());
         image.drawOnto(fakeScreen, 0, 0);
-        fakeScreen.sendFrames(player);
+        fakeScreen.spawnFrames(player);
         fakeScreen.sendMaps(true, player);
 
         if (REVIEWER_MAP.containsKey(player.getUniqueId())) {
@@ -81,7 +59,7 @@ public class ReviewerUtil {
     public static void markAsReviewer(final Player player, final MapImage image, final MapScreen screen) {
         if (REVIEWER_MAP.containsKey(player.getUniqueId())) {
             final Context ctx = REVIEWER_MAP.remove(player.getUniqueId());
-            ctx.screen.sendFrames(player);
+            ctx.screen.spawnFrames(player);
             ctx.screen.sendMaps(true, player);
         }
 
