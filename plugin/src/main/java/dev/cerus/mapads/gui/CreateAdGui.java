@@ -74,6 +74,7 @@ public class CreateAdGui {
     private final EconomyWrapper<?> economy;
     private final Player player;
     private final Context context;
+    private final String idToOpen;
     private GUI gui;
     private State state;
 
@@ -84,7 +85,8 @@ public class CreateAdGui {
                        final ImageConverter imageConverter,
                        final ConfigModel config,
                        final EconomyWrapper<?> economy,
-                       final Player player) {
+                       final Player player,
+                       final String idToOpen) {
         this.advertStorage = advertStorage;
         this.imageStorage = imageStorage;
         this.adScreenStorage = adScreenStorage;
@@ -94,12 +96,34 @@ public class CreateAdGui {
         this.economy = economy;
         this.player = player;
         this.context = new Context();
+        this.idToOpen = idToOpen;
         this.context.selectedMinutes = config.minAdMins;
         this.context.dither = ImageConverter.Dither.NONE;
         this.state = State.EDITING;
     }
 
     public void open() {
+        if (this.idToOpen != null) {
+            final AdScreen screen = this.adScreenStorage.getAdScreen(this.idToOpen);
+            if (screen != null) {
+                this.context.screenOrGroup = new Either<>(screen, null);
+            } else {
+                final ScreenGroup group = this.adScreenStorage.getScreenGroup(this.idToOpen);
+                if (group != null) {
+                    this.context.screenOrGroup = new Either<>(null, group);
+                }
+            }
+            if (this.context.screenOrGroup != null) {
+                this.context.mapScreen = this.context.screenOrGroup.map(adScreen -> new MapScreen[] {
+                        MapScreenRegistry.getScreen(adScreen.getScreenId())
+                }, group -> group.screenIds().stream()
+                        .map(this.adScreenStorage::getAdScreen)
+                        .map(AdScreen::getScreenId)
+                        .map(MapScreenRegistry::getScreen)
+                        .toArray(MapScreen[]::new));
+            }
+        }
+
         this.gui = new GUIBuilder(L10n.get("gui.create.title"), 5)
                 .withComponents(SlotRange.full(), this.makeGlassPane(Material.GRAY_STAINED_GLASS_PANE))
                 .withComponents(SlotRange.row(0), this.makeGlassPane(Material.BLACK_STAINED_GLASS_PANE))

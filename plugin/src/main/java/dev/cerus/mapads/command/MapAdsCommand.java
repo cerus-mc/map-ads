@@ -5,6 +5,7 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Dependency;
+import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.ConfigModel;
 import dev.cerus.mapads.MapAdsPlugin;
@@ -72,7 +73,7 @@ public class MapAdsCommand extends BaseCommand {
 
     @Subcommand("advertise")
     @CommandPermission("mapads.command.advertise")
-    public void handleAdvertise(final Player player) {
+    public void handleAdvertise(final Player player, @Optional final String id) {
         final OptionalInt limit = PermissionUtil.getValue(player, "mapads.limit.concurrent-ads.");
         final int rented = this.advertStorage.getAdvertisements(player.getUniqueId()).size();
         if (limit.isPresent() && limit.getAsInt() >= rented) {
@@ -87,7 +88,8 @@ public class MapAdsCommand extends BaseCommand {
                 this.imageConverter,
                 this.configModel,
                 this.economy,
-                player);
+                player,
+                id);
         createAdGui.open();
     }
 
