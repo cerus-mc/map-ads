@@ -252,7 +252,7 @@ public class MapAdsPlugin extends JavaPlugin {
         // Start tasks
         final BukkitScheduler scheduler = this.getServer().getScheduler();
         scheduler.runTaskTimerAsynchronously(this, new FrameSendTask(this.configModel, adScreenStorage), 4 * 20, FrameSendTask.TICK_PERIOD);
-        scheduler.runTaskTimerAsynchronously(this, () -> adScreenStorage.getScreens().forEach(advertController::update), 4 * 20, 60 * 20);
+        scheduler.runTaskTimerAsynchronously(this, () -> adScreenStorage.getScreens().forEach(advertController::update), 4 * 20, this.getConfig().getInt("task.update", 60 * 20));
         scheduler.runTaskTimerAsynchronously(this, () -> recordedTransitionStorage.deleteOlderThan(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)), 0, 60 * 20);
         scheduler.runTaskLater(this, () -> this.screensLoaded = true, 4 * 20);
 
@@ -264,6 +264,7 @@ public class MapAdsPlugin extends JavaPlugin {
         servicesManager.register(DefaultImageController.class, defaultImageController, this, ServicePriority.Normal);
         servicesManager.register(ImageConverter.class, imageConverter, this, ServicePriority.Normal);
         servicesManager.register(ImageRetriever.class, imageRetriever, this, ServicePriority.Normal);
+        servicesManager.register(AdvertController.class, advertController, this, ServicePriority.Normal);
 
         // Init metrics
         final Metrics metrics = new Metrics(this, 13063);
