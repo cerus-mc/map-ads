@@ -7,13 +7,15 @@ public class AdScreen {
     private String transition;
     private int fixedTime;
     private double fixedPrice;
+    private boolean noDefaultImage;
 
-    public AdScreen(final String id, final int screenId, final String transition, final int fixedTime, final double fixedPrice) {
+    public AdScreen(final String id, final int screenId, final String transition, final int fixedTime, final double fixedPrice, final boolean noDefaultImage) {
         this.id = id;
         this.screenId = screenId;
         this.transition = transition;
         this.fixedTime = fixedTime;
         this.fixedPrice = fixedPrice;
+        this.noDefaultImage = noDefaultImage;
     }
 
     public String getId() {
@@ -50,6 +52,14 @@ public class AdScreen {
 
     public void setFixedPrice(final double fixedPrice) {
         this.fixedPrice = fixedPrice;
+    }
+
+    public boolean isNoDefaultImage() {
+        return this.noDefaultImage;
+    }
+
+    public void setNoDefaultImage(final boolean noDefaultImage) {
+        this.noDefaultImage = noDefaultImage;
     }
 
 }

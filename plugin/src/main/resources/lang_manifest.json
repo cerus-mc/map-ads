@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "1": {
     "misc.update.0": "&aA new Map-Ads update is available!",
     "misc.update.1": "&e%s",
@@ -61,5 +61,10 @@
     "error.ad_limit_reached": "&cYou can't rent more than %d ads at the same time.",
     "error.value_negative": "&cThe value can not be below or equal to 0.",
     "success.group_screen_edited": "&aGroup '%s' was edited"
+  },
+  "6": {
+    "misc.nodefimg.msg": "&7The default image has been %s.",
+    "misc.nodefimg.on": "&aenabled",
+    "misc.nodefimg.off": "&cdisabled"
   }
 }

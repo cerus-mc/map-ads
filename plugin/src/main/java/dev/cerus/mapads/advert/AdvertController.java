@@ -155,7 +155,7 @@ public class AdvertController {
         if (context.displayDefaultImg) {
             // Don't display the default image again
             context.displayDefaultImg = false;
-        } else if (this.advertStorage.getIndex(screen.getId()) == 0) {
+        } else if (this.advertStorage.getIndex(screen.getId()) == 0 && !screen.isNoDefaultImage()) {
             // Display the default image every time the cycle starts
             context.displayDefaultImg = true;
             context.currentAdvert = null;

@@ -1,4 +1,4 @@
-'ver': "5"
+'ver': "6"
 'prefix': "&6&lM&e&lap-&6&lA&e&lds &8» &r"
 
 'api,event,create,cancelled': "Advert creation has been cancelled by an external plugin"
@@ -54,6 +54,9 @@
 'misc,update,0': "&aA new Map-Ads update is available!"
 'misc,update,1': "&e%s"
 'misc,intensive_transition': "&c⚠ &eWarning: &7This transition is marked as performance intensive. &c⚠"
+'misc,nodefimg,msg': "&7The default image has been %s."
+'misc,nodefimg,on': "&aenabled"
+'misc,nodefimg,off': "&cdisabled"
 
 'gui,page': "&bPage %d"
 'gui,prev_page,enabled': "&7« &fPrevious page"

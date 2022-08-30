@@ -100,7 +100,7 @@ public class ScreenCommand extends BaseCommand {
         }
 
         FrameMarkerUtil.mark(screen);
-        final AdScreen adScreen = new AdScreen(name, screenId, "instant", -1, -1);
+        final AdScreen adScreen = new AdScreen(name, screenId, "instant", -1, -1, false);
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.created", name));
     }
@@ -186,6 +186,21 @@ public class ScreenCommand extends BaseCommand {
 
         adScreen.setFixedPrice(fixedPrice);
         this.adScreenStorage.updateAdScreen(adScreen);
+        player.sendMessage(L10n.getPrefixed("success.updated"));
+    }
+
+    @Subcommand("set nodefaultimage")
+    @CommandCompletion("@mapads_names true|false")
+    public void handleScreenSetNoDefaultImage(final Player player, final String name, final boolean value) {
+        final AdScreen adScreen = this.adScreenStorage.getAdScreen(name);
+        if (adScreen == null) {
+            player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
+            return;
+        }
+
+        adScreen.setNoDefaultImage(value);
+        this.adScreenStorage.updateAdScreen(adScreen);
+        player.sendMessage(L10n.getPrefixed("misc.nodefimg.msg", L10n.get(!value ? "misc.nodefimg.on" : "misc.nodefimg.off")));
         player.sendMessage(L10n.getPrefixed("success.updated"));
     }
 

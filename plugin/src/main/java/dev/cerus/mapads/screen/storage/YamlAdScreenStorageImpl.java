@@ -40,7 +40,8 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             final String transition = section.getString("transition");
             final int fixedTime = section.getInt("fixed-time", -1);
             final double fixedPrice = section.getDouble("fixed-price", -1);
-            final AdScreen adScreen = new AdScreen(id, mapScreenId, transition, fixedTime, fixedPrice);
+            final boolean noDefaultImage = section.getBoolean("no-def-img", false);
+            final AdScreen adScreen = new AdScreen(id, mapScreenId, transition, fixedTime, fixedPrice, noDefaultImage);
             this.screens.add(adScreen);
         }
 
@@ -65,6 +66,7 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             section.set("transition", screen.getTransition());
             section.set("fixed-time", screen.getFixedTime());
             section.set("fixed-price", screen.getFixedPrice());
+            section.set("no-def-img", screen.isNoDefaultImage());
         }
         this.screenConfig.save(this.screenConfigFile);
 
