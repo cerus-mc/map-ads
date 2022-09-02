@@ -28,7 +28,10 @@ public class PremiumCommand extends BaseCommand {
         if (!Premium.isPremium()) {
             player.sendMessage("§7This is not a premium version");
         } else {
-            player.sendMessage("§dDownload-ID: §7" + Premium.getNonce());
+            player.spigot().sendMessage(new ComponentBuilder("§dDownload-ID: §7" + Premium.getNonce())
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§7Click to copy Download-ID")))
+                    .event(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.valueOf(Premium.getNonce())))
+                    .create());
             player.spigot().sendMessage(new ComponentBuilder("§dID: §7" + Premium.to64BitIdentifier())
                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§7Click to copy ID")))
                     .event(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.valueOf(Premium.to64BitIdentifier())))

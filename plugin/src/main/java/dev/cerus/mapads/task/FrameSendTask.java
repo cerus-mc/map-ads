@@ -38,6 +38,12 @@ public class FrameSendTask implements Runnable {
                     final Location screenLoc = mapScreen.getLocation();
                     for (final Player player : ReviewerUtil.getNonReviewingPlayers(mapScreen, false)) {
                         if (!player.getWorld().getName().equals(screenLoc.getWorld().getName())) {
+                            if (ScreenViewerUtil.isViewer(mapScreen, player)) {
+                                ScreenViewerUtil.removeViewer(mapScreen, player);
+                                if (MapsCompat.isThreeOrAbove()) {
+                                    mapScreen.despawnFrames(player);
+                                }
+                            }
                             continue;
                         }
 
