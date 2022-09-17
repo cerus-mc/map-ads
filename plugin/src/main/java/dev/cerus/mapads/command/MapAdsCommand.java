@@ -76,7 +76,7 @@ public class MapAdsCommand extends BaseCommand {
     public void handleAdvertise(final Player player, @Optional final String id) {
         final OptionalInt limit = PermissionUtil.getValue(player, "mapads.limit.concurrent-ads.");
         final int rented = this.advertStorage.getAdvertisements(player.getUniqueId()).size();
-        if (limit.isPresent() && limit.getAsInt() >= rented) {
+        if (limit.isPresent() && limit.getAsInt() <= rented) {
             player.sendMessage(L10n.getPrefixed("error.ad_limit_reached", rented));
             return;
         }
