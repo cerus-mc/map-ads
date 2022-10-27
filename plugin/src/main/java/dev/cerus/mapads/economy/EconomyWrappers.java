@@ -16,6 +16,7 @@ public class EconomyWrappers {
                 .attemptGet(EconomyWrappers::override)
                 .ifUnsuccessful(VaultWrapper::attemptCreate)
                 .ifUnsuccessful(PlayerPointsWrapper::attemptCreate)
+                .ifUnsuccessful(AquaCoreWrapper::attemptCreate)
                 .get()
                 .orElse(null);
     }
@@ -25,6 +26,7 @@ public class EconomyWrappers {
         return switch (configModel.economyOverride.toUpperCase()) {
             case "VAULT" -> VaultWrapper.attemptCreate();
             case "PLAYERPOINTS" -> PlayerPointsWrapper.attemptCreate();
+            case "AQUACORE" -> AquaCoreWrapper.attemptCreate();
             default -> null;
         };
     }

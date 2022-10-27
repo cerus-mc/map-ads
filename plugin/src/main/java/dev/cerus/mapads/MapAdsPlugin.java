@@ -57,6 +57,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
@@ -112,10 +114,12 @@ public class MapAdsPlugin extends JavaPlugin {
             final Object o = configuration.get(key);
             if (o instanceof List) {
                 L10n.put(key.replace(",", "."), ((List<String>) o).stream()
+                        .map(this::translateHexColors)
                         .map(s -> ChatColor.translateAlternateColorCodes('&', s))
                         .collect(Collectors.toList()));
             } else if (o instanceof String) {
-                L10n.put(key.replace(",", "."), ChatColor.translateAlternateColorCodes('&', (String) o));
+                L10n.put(key.replace(",", "."), ChatColor
+                        .translateAlternateColorCodes('&', this.translateHexColors((String) o)));
             } else {
                 this.getLogger().warning("Invalid lang mapping: " + key + "->" + o.getClass().getName());
             }
@@ -408,6 +412,11 @@ public class MapAdsPlugin extends JavaPlugin {
 
     public boolean areScreensLoaded() {
         return this.screensLoaded;
+    }
+
+    private String translateHexColors(final String s) {
+        final Matcher matcher = Pattern.compile("&#[A-Fa-f0-9]{6}").matcher(s);
+        return matcher.replaceAll(res -> "§x§" + String.join("§", res.group().substring(2).split("")));
     }
 
 }

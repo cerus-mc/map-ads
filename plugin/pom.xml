@@ -5,7 +5,7 @@
     <parent>
         <artifactId>map-ads</artifactId>
         <groupId>dev.cerus</groupId>
-        <version>1.2.17</version>
+        <version>1.2.18</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -42,6 +42,12 @@
         <repository>
             <id>rosewood-repo</id>
             <url>https://repo.rosewooddev.io/repository/public/</url>
+        </repository>
+
+        <!-- Barebones repository for absolute legacy projects that only provide a jar -->
+        <repository>
+            <id>cerus</id>
+            <url>https://cerus.dev/maven/</url>
         </repository>
     </repositories>
 
@@ -96,6 +102,12 @@
             <groupId>org.black_ixx</groupId>
             <artifactId>playerpoints</artifactId>
             <version>3.2.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.FaceSlap02</groupId>
+            <artifactId>AquaCoreAPI</artifactId>
+            <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
 
