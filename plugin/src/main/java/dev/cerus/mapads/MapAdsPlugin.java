@@ -4,8 +4,11 @@ import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.BukkitCommandManager;
 import co.aikar.commands.CommandCompletions;
 import co.aikar.commands.InvalidCommandArgument;
+import co.aikar.locales.LanguageTable;
+import co.aikar.locales.MessageKey;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import dev.cerus.mapads.acf.AcfLocaleExtractor;
 import dev.cerus.mapads.advert.AdvertController;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
 import dev.cerus.mapads.advert.storage.MySqlAdvertStorageImpl;
@@ -46,6 +49,9 @@ import dev.cerus.mapads.screen.storage.YamlAdScreenStorageImpl;
 import dev.cerus.mapads.task.FrameSendTask;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -53,6 +59,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -189,8 +196,9 @@ public class MapAdsPlugin extends JavaPlugin {
         final ImageRetriever imageRetriever = new ImageRetriever();
         final ImageConverter imageConverter = new ImageConverter();
 
-        // Register commands & dependencies, init completions
+        // Register commands & dependencies, init completions and messages
         final BukkitCommandManager commandManager = new BukkitCommandManager(this);
+        this.loadAcfMessages(commandManager);
         final CommandCompletions<BukkitCommandCompletionContext> completions = commandManager.getCommandCompletions();
         completions.registerCompletion("mapads_names", context ->
                 adScreenStorage.getScreens().stream()
@@ -399,6 +407,48 @@ public class MapAdsPlugin extends JavaPlugin {
             default:
                 return null;
         }
+    }
+
+    private void loadAcfMessages(final BukkitCommandManager commandManager) {
+        // I'm too lazy to use ACFs locale system the way it was intended
+
+        try {
+            AcfLocaleExtractor.init();
+        } catch (final NoSuchFieldException e) {
+            this.getLogger().log(Level.SEVERE, "Failed to initialize ACF locale extractor", e);
+            return;
+        }
+
+        final LanguageTable table = AcfLocaleExtractor.getTable(commandManager, commandManager.getLocales().getDefaultLocale());
+        final Map<MessageKey, String> messages = AcfLocaleExtractor.getMessages(table);
+
+        final File acfLangFile = new File(this.getDataFolder(), "acf-lang.properties");
+        final Properties acfLangProps = new Properties();
+        if (acfLangFile.exists()) {
+            try (final FileInputStream in = new FileInputStream(acfLangFile)) {
+                acfLangProps.load(in);
+            } catch (final IOException e) {
+                this.getLogger().log(Level.SEVERE, "Failed to load ACF lang file", e);
+                return;
+            }
+        } else {
+            messages.forEach((key, msg) -> acfLangProps.setProperty(key.getKey(), msg));
+            try (final FileOutputStream out = new FileOutputStream(acfLangFile)) {
+                acfLangProps.store(out, null);
+            } catch (final IOException e) {
+                this.getLogger().log(Level.SEVERE, "Failed to store default ACF lang file", e);
+                return;
+            }
+        }
+
+        final Map<MessageKey, String> loadedMessages = new HashMap<>();
+        for (final Object keyObj : acfLangProps.keySet()) {
+            final MessageKey key = MessageKey.of(keyObj.toString());
+            final String msg = acfLangProps.getProperty(keyObj.toString());
+            loadedMessages.put(key, ChatColor.translateAlternateColorCodes('&', this.translateHexColors(msg)));
+        }
+        commandManager.getLocales().addMessages(commandManager.getLocales().getDefaultLocale(), loadedMessages);
+        this.getLogger().info("%d ACF messages were loaded".formatted(loadedMessages.size()));
     }
 
     private void update(final YamlConfiguration configuration, final File l10nFile) {
