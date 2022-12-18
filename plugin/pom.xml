@@ -123,13 +123,13 @@
         <dependency>
             <groupId>dev.cerus.maps</groupId>
             <artifactId>common</artifactId>
-            <version>3.0.0</version>
+            <version>3.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>dev.cerus.maps</groupId>
             <artifactId>plugin</artifactId>
-            <version>3.0.0</version>
+            <version>3.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -149,7 +149,7 @@
         <dependency>
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
-            <version>1.5.3-SNAPSHOT</version>
+            <version>1.6.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
