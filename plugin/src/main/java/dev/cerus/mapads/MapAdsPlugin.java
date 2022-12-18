@@ -50,10 +50,10 @@ import dev.cerus.mapads.task.FrameSendTask;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -422,33 +422,57 @@ public class MapAdsPlugin extends JavaPlugin {
         final LanguageTable table = AcfLocaleExtractor.getTable(commandManager, commandManager.getLocales().getDefaultLocale());
         final Map<MessageKey, String> messages = AcfLocaleExtractor.getMessages(table);
 
-        final File acfLangFile = new File(this.getDataFolder(), "acf-lang.properties");
-        final Properties acfLangProps = new Properties();
+        this.checkForLegacyAcfLang();
+        final File acfLangFile = new File(this.getDataFolder(), "acf-lang.yml");
+        final FileConfiguration acfConf;
         if (acfLangFile.exists()) {
-            try (final FileInputStream in = new FileInputStream(acfLangFile)) {
-                acfLangProps.load(in);
-            } catch (final IOException e) {
-                this.getLogger().log(Level.SEVERE, "Failed to load ACF lang file", e);
-                return;
-            }
+            acfConf = YamlConfiguration.loadConfiguration(acfLangFile);
         } else {
-            messages.forEach((key, msg) -> acfLangProps.setProperty(key.getKey(), msg));
-            try (final FileOutputStream out = new FileOutputStream(acfLangFile)) {
-                acfLangProps.store(out, null);
+            acfConf = new YamlConfiguration();
+            messages.forEach((key, msg) -> acfConf.set(key.getKey().replace('.', '/'), msg));
+            try {
+                acfConf.save(acfLangFile);
             } catch (final IOException e) {
-                this.getLogger().log(Level.SEVERE, "Failed to store default ACF lang file", e);
-                return;
+                this.getLogger().log(Level.SEVERE, "Failed to save ACF lang file", e);
             }
         }
 
         final Map<MessageKey, String> loadedMessages = new HashMap<>();
-        for (final Object keyObj : acfLangProps.keySet()) {
-            final MessageKey key = MessageKey.of(keyObj.toString());
-            final String msg = acfLangProps.getProperty(keyObj.toString());
+        for (final String keyStr : acfConf.getKeys(false)) {
+            final MessageKey key = MessageKey.of(keyStr.replace('/', '.'));
+            final String msg = acfConf.getString(keyStr);
             loadedMessages.put(key, ChatColor.translateAlternateColorCodes('&', this.translateHexColors(msg)));
         }
         commandManager.getLocales().addMessages(commandManager.getLocales().getDefaultLocale(), loadedMessages);
         this.getLogger().info("%d ACF messages were loaded".formatted(loadedMessages.size()));
+    }
+
+    private void checkForLegacyAcfLang() {
+        final File legacyAcfLangFile = new File(this.getDataFolder(), "acf-lang.properties");
+        if (legacyAcfLangFile.exists()) {
+            final Properties acfLangProps = new Properties();
+            try (final FileInputStream in = new FileInputStream(legacyAcfLangFile)) {
+                acfLangProps.load(in);
+            } catch (final IOException e) {
+                this.getLogger().log(Level.SEVERE, "Failed to load legacy ACF lang file", e);
+                return;
+            }
+
+            final File acfLangFile = new File(this.getDataFolder(), "acf-lang.yml");
+            final YamlConfiguration acfConf = YamlConfiguration.loadConfiguration(acfLangFile);
+            for (final Object keyObj : acfLangProps.keySet()) {
+                final String key = keyObj.toString();
+                final String msg = acfLangProps.getProperty(keyObj.toString());
+                acfConf.set(key.replace('.', '/'), msg);
+            }
+
+            try {
+                acfConf.save(acfLangFile);
+                Files.move(legacyAcfLangFile.toPath(), legacyAcfLangFile.toPath().getParent().resolve("acf-lang.properties.bak"));
+            } catch (final IOException e) {
+                this.getLogger().log(Level.SEVERE, "Failed to save ACF lang file", e);
+            }
+        }
     }
 
     private void update(final YamlConfiguration configuration, final File l10nFile) {

@@ -403,6 +403,7 @@ public class CreateAdGui {
                             this.state = State.EDITING;
                             this.player.closeInventory();
                             this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+                            this.player.sendMessage(L10n.getPrefixed("gui.create.misc.success"));
 
                             Bukkit.getOnlinePlayers().forEach(plr -> {
                                 if (plr.hasPermission("mapads.admin")) {

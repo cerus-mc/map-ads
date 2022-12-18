@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "1": {
     "misc.update.0": "&aA new Map-Ads update is available!",
     "misc.update.1": "&e%s",
@@ -66,5 +66,8 @@
     "misc.nodefimg.msg": "&7The default image has been %s.",
     "misc.nodefimg.on": "&aenabled",
     "misc.nodefimg.off": "&cdisabled"
+  },
+  "7": {
+    "gui.create.misc.success": "&aYour ad has been created! &7Our moderation team will review your ad as soon as possible."
   }
 }

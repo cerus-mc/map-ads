@@ -57,7 +57,7 @@ public class DetailsGui {
 
     public void open() {
         this.player.playSound(this.player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 1);
-        final GUI gui = new GUIBuilder("Advertisement", 3)
+        final GUI gui = new GUIBuilder(L10n.get("gui.details.title"), 3)
                 .withInteractionPolicy(SlotRange.full(), false)
                 .withComponents(SlotRange.full(), new Item(new ItemBuilder(Material.WHITE_STAINED_GLASS_PANE).setName(" ").build()))
                 .withComponents(

@@ -1,4 +1,4 @@
-'ver': "6"
+'ver': "7"
 'prefix': "&6&lM&e&lap-&6&lA&e&lds &8» &r"
 
 'api,event,create,cancelled': "Advert creation has been cancelled by an external plugin"
@@ -114,6 +114,7 @@
 'gui,create,misc,enter_url': "Enter image url"
 'gui,create,misc,confirming_image': "&7Checking image..."
 'gui,create,misc,broadcast': "&bA new advert is waiting for a review! &e/mapads review list"
+'gui,create,misc,success': "&aYour ad has been created! &7Our moderation team will review your ad as soon as possible."
 
 'gui,details,title': "Advertisement"
 'gui,details,button,info,name': "&6Advertisement"

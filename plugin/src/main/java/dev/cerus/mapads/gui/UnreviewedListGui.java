@@ -64,7 +64,7 @@ public class UnreviewedListGui extends PagedGui<Advertisement> {
     @Override
     protected ItemStack getDisplayItem(final Advertisement item) {
         return new ItemBuilder(Material.FILLED_MAP)
-                .setName("§6Advertisement")
+                .setName(L10n.get("gui.details.button.info.name"))
                 .setLore(L10n.getList("gui.details.button.info.lore").stream()
                         .map(s -> s.replace("{0}", Bukkit.getOfflinePlayer(item.getPlayerUuid()).getName()))
                         .map(s -> s.replace("{1}", FormatUtil.formatMinutes(item.getPurchasedMinutes())))
