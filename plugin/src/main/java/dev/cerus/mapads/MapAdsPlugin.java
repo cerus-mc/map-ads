@@ -70,7 +70,6 @@ import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.SimplePie;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -98,10 +97,6 @@ public class MapAdsPlugin extends JavaPlugin {
             return;
         }
         enabled = true;
-
-        if (Bukkit.getBukkitVersion().contains("1.19.2")) {
-            this.fixAnvilGui();
-        }
 
         // Misc init
         Premium.init();

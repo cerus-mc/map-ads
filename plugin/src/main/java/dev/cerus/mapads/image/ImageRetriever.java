@@ -23,6 +23,8 @@ public class ImageRetriever {
     public Result getImage(final String url, final int maxSize) {
         try {
             final HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestProperty("User-Agent", "github.com/cerus-mc/map-ads");
+            connection.setRequestProperty("Accept", "*/*");
             connection.setDoInput(true);
 
             String contentType = connection.getContentType();
@@ -31,6 +33,7 @@ public class ImageRetriever {
             }
 
             final int contentLength = connection.getContentLength();
+
             if (contentLength <= 0 || contentLength > maxSize) {
                 connection.disconnect();
                 return new Result(null, contentLength, null, contentType);
