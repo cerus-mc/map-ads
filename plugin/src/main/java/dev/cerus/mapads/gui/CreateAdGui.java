@@ -32,6 +32,7 @@ import dev.pelkum.yamif.gui.GUIBuilder;
 import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -196,11 +197,12 @@ public class CreateAdGui {
             this.player.playSound(this.player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
             new AnvilGUI.Builder()
                     .plugin(JavaPlugin.getPlugin(MapAdsPlugin.class))
-                    .onComplete((plr, s) -> {
+                    .onComplete(completion -> {
+                        final String text = completion.getText();
                         Bukkit.getScheduler().runTaskLater(JavaPlugin.getPlugin(MapAdsPlugin.class), () -> {
                             final URI uri;
                             try {
-                                uri = URI.create(s);
+                                uri = URI.create(text);
                             } catch (final IllegalArgumentException ignored) {
                                 this.raiseError(L10n.get("gui.create.error.invalid_url"));
                                 this.updateGui();
@@ -274,7 +276,7 @@ public class CreateAdGui {
                                 });
                             });
                         }, 3);
-                        return AnvilGUI.Response.close();
+                        return Collections.singletonList(AnvilGUI.ResponseAction.close());
                     })
                     .text(L10n.get("gui.create.misc.enter_url"))
                     .onClose(plr -> Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(MapAdsPlugin.class), this::open))
