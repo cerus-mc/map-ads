@@ -5,7 +5,7 @@
     <parent>
         <artifactId>map-ads</artifactId>
         <groupId>dev.cerus</groupId>
-        <version>1.2.22</version>
+        <version>1.2.23</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -76,6 +76,12 @@
                         </goals>
                         <configuration>
                             <minimizeJar>false</minimizeJar>
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.dv8tion.jda</pattern>
+                                    <shadedPattern>dev.cerus.mapads.discordbot.thirdparty.jda</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>

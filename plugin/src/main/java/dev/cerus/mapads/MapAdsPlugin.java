@@ -106,6 +106,10 @@ public class MapAdsPlugin extends JavaPlugin {
         this.saveDefaultConfig();
         this.configModel = new ConfigModel(this.getConfig());
         this.getLogger().info("Transition recording is " + (this.configModel.enableTransitionRecording ? "enabled" : "disabled") + ".");
+        if (this.configModel.trustedImageUrls.contains("*")) {
+            this.getLogger().warning("Warning: Every website is considered trusted. This is a potential security risk.");
+            this.getLogger().warning("Remove the \"*\" from the url-whitelist section in the config to disable this.");
+        }
 
         // Init L10n
         this.saveResource("lang.yml", false);

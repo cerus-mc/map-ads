@@ -8,6 +8,10 @@ public class UrlVerificationUtil {
     }
 
     public static boolean verify(final String host, final ConfigModel model) {
+        if (model.trustedImageUrls.contains("*")) {
+            return true;
+        }
+
         final String[] hostSplit = host.split("\\.");
         outer:
         for (final String trustedImageUrl : model.trustedImageUrls) {
