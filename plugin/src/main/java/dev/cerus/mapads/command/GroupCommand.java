@@ -5,6 +5,7 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Dependency;
+import co.aikar.commands.annotation.Flags;
 import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
@@ -15,6 +16,7 @@ import dev.cerus.mapads.util.Mutable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,7 +42,7 @@ public class GroupCommand extends BaseCommand {
             return;
         }
 
-        this.adScreenStorage.updateScreenGroup(new ScreenGroup(id, name, new ArrayList<>(), Mutable.create(-1), Mutable.create(-1d)));
+        this.adScreenStorage.updateScreenGroup(new ScreenGroup(id, name, new ArrayList<>(), Mutable.create(-1), Mutable.create(-1d), Mutable.create(null)));
         player.sendMessage(L10n.getPrefixed("success.group_created", name, id));
     }
 
@@ -176,6 +178,38 @@ public class GroupCommand extends BaseCommand {
         }
 
         group.fixedPrice().set(-1d);
+        this.adScreenStorage.updateScreenGroup(group);
+        player.sendMessage(L10n.getPrefixed("success.group_screen_edited", group.groupName()));
+    }
+
+    @Subcommand("beneficiary set")
+    @CommandCompletion("@mapads_groups @players")
+    public void handleBeneficiarySet(final Player player, final String groupId, @Flags("other") final OfflinePlayer beneficiary) {
+        final ScreenGroup group = this.adScreenStorage.getScreenGroup(groupId);
+        if (group == null) {
+            player.sendMessage(L10n.getPrefixed("error.group_not_found"));
+            return;
+        }
+        if (beneficiary.hasPlayedBefore() && !beneficiary.isOnline()) {
+            player.sendMessage(L10n.getPrefixed("error.player_not_found", beneficiary.getName()));
+            return;
+        }
+
+        group.beneficiary().set(beneficiary.getUniqueId());
+        this.adScreenStorage.updateScreenGroup(group);
+        player.sendMessage(L10n.getPrefixed("success.group_screen_edited", group.groupName()));
+    }
+
+    @Subcommand("beneficiary remove")
+    @CommandCompletion("@mapads_groups")
+    public void handleBeneficiaryRemove(final Player player, final String groupId) {
+        final ScreenGroup group = this.adScreenStorage.getScreenGroup(groupId);
+        if (group == null) {
+            player.sendMessage(L10n.getPrefixed("error.group_not_found"));
+            return;
+        }
+
+        group.beneficiary().set(null);
         this.adScreenStorage.updateScreenGroup(group);
         player.sendMessage(L10n.getPrefixed("success.group_screen_edited", group.groupName()));
     }

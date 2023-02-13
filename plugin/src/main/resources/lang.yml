@@ -1,4 +1,4 @@
-'ver': "7"
+'ver': "8"
 'prefix': "&6&lM&e&lap-&6&lA&e&lds &8» &r"
 
 'api,event,create,cancelled': "Advert creation has been cancelled by an external plugin"
@@ -30,6 +30,7 @@
 'error,group_not_contains': "&cThis screen is not part of this group"
 'error,ad_limit_reached': "&cYou can't rent more than %d ads at the same time."
 'error,value_negative': "&cThe value can not be below or equal to 0."
+'error,player_not_found': "&cPlayer '%s' has never been seen on the server."
 
 'success,def_img_changed': "&aThe default image for %dx%d has been changed!"
 'success,def_img_changed_new': "&aThe default image for %s has been changed!"
@@ -57,6 +58,7 @@
 'misc,nodefimg,msg': "&7The default image has been %s."
 'misc,nodefimg,on': "&aenabled"
 'misc,nodefimg,off': "&cdisabled"
+'misc,beneficiary_earnings': "&aYou've earned &e%s %s &aincome by renting ad space on screen/group &b%s&a."
 
 'gui,page': "&bPage %d"
 'gui,prev_page,enabled': "&7« &fPrevious page"

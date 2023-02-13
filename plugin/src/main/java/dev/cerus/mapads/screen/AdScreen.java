@@ -1,5 +1,7 @@
 package dev.cerus.mapads.screen;
 
+import java.util.UUID;
+
 public class AdScreen {
 
     private final String id;
@@ -8,14 +10,16 @@ public class AdScreen {
     private int fixedTime;
     private double fixedPrice;
     private boolean noDefaultImage;
+    private UUID beneficiary;
 
-    public AdScreen(final String id, final int screenId, final String transition, final int fixedTime, final double fixedPrice, final boolean noDefaultImage) {
+    public AdScreen(final String id, final int screenId, final String transition, final int fixedTime, final double fixedPrice, final boolean noDefaultImage, final UUID beneficiary) {
         this.id = id;
         this.screenId = screenId;
         this.transition = transition;
         this.fixedTime = fixedTime;
         this.fixedPrice = fixedPrice;
         this.noDefaultImage = noDefaultImage;
+        this.beneficiary = beneficiary;
     }
 
     public String getId() {
@@ -60,6 +64,14 @@ public class AdScreen {
 
     public void setNoDefaultImage(final boolean noDefaultImage) {
         this.noDefaultImage = noDefaultImage;
+    }
+
+    public UUID getBeneficiary() {
+        return this.beneficiary;
+    }
+
+    public void setBeneficiary(final UUID beneficiary) {
+        this.beneficiary = beneficiary;
     }
 
 }

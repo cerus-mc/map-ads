@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "1": {
     "misc.update.0": "&aA new Map-Ads update is available!",
     "misc.update.1": "&e%s",
@@ -69,5 +69,9 @@
   },
   "7": {
     "gui.create.misc.success": "&aYour ad has been created! &7Our moderation team will review your ad as soon as possible."
+  },
+  "8": {
+    "error.player_not_found": "&cPlayer '%s' has never been seen on the server.",
+    "misc.beneficiary_earnings": "&aYou've earned &e%s %s &aincome by renting ad space on screen/group &b%s&a."
   }
 }

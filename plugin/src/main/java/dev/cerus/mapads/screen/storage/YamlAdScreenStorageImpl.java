@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -41,7 +43,8 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             final int fixedTime = section.getInt("fixed-time", -1);
             final double fixedPrice = section.getDouble("fixed-price", -1);
             final boolean noDefaultImage = section.getBoolean("no-def-img", false);
-            final AdScreen adScreen = new AdScreen(id, mapScreenId, transition, fixedTime, fixedPrice, noDefaultImage);
+            final UUID beneficiary = Optional.ofNullable(section.getString("beneficiary", null)).map(UUID::fromString).orElse(null);
+            final AdScreen adScreen = new AdScreen(id, mapScreenId, transition, fixedTime, fixedPrice, noDefaultImage, beneficiary);
             this.screens.add(adScreen);
         }
 
@@ -52,7 +55,8 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
                     section.getString("name"),
                     section.getStringList("screens"),
                     Mutable.create(section.getInt("fixed-time", -1)),
-                    Mutable.create(section.getDouble("fixed-price", -1))
+                    Mutable.create(section.getDouble("fixed-price", -1)),
+                    Mutable.create(Optional.ofNullable(section.getString("beneficiary", null)).map(UUID::fromString).orElse(null))
             ));
         }
     }
@@ -67,6 +71,7 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             section.set("fixed-time", screen.getFixedTime());
             section.set("fixed-price", screen.getFixedPrice());
             section.set("no-def-img", screen.isNoDefaultImage());
+            section.set("beneficiary", Optional.ofNullable(screen.getBeneficiary()).map(Object::toString).orElse(null));
         }
         this.screenConfig.save(this.screenConfigFile);
 
@@ -77,6 +82,7 @@ public class YamlAdScreenStorageImpl implements AdScreenStorage {
             section.set("name", group.groupName());
             section.set("fixed-time", group.fixedTime().get());
             section.set("fixed-price", group.fixedPrice().get());
+            section.set("beneficiary", Optional.ofNullable(group.beneficiary().get()).map(Object::toString).orElse(null));
         }
         this.groupConfig.save(this.groupConfigFile);
     }

@@ -12,6 +12,8 @@ public interface EconomyWrapper<T> {
 
     String format(double val);
 
+    String currencyNamePlural();
+
     T implementation();
 
     default String asString() {

@@ -5,8 +5,16 @@ import dev.cerus.mapads.util.Mutable;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-public record ScreenGroup(String id, String groupName, List<String> screenIds, Mutable<Integer> fixedTime, Mutable<Double> fixedPrice) {
+public record ScreenGroup(
+        String id,
+        String groupName,
+        List<String> screenIds,
+        Mutable<Integer> fixedTime,
+        Mutable<Double> fixedPrice,
+        Mutable<UUID> beneficiary
+) {
 
     public List<String> sizeStrings(final AdScreenStorage storage) {
         return this.screenIds.stream()

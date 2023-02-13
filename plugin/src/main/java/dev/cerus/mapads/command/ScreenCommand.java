@@ -5,6 +5,7 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Dependency;
+import co.aikar.commands.annotation.Flags;
 import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
@@ -19,6 +20,7 @@ import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
 import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.util.UUID;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -100,7 +102,7 @@ public class ScreenCommand extends BaseCommand {
         }
 
         FrameMarkerUtil.mark(screen);
-        final AdScreen adScreen = new AdScreen(name, screenId, "instant", -1, -1, false);
+        final AdScreen adScreen = new AdScreen(name, screenId, "instant", -1, -1, false, null);
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.created", name));
     }
@@ -228,6 +230,38 @@ public class ScreenCommand extends BaseCommand {
         }
 
         adScreen.setFixedPrice(-1);
+        this.adScreenStorage.updateAdScreen(adScreen);
+        player.sendMessage(L10n.getPrefixed("success.updated"));
+    }
+
+    @Subcommand("set beneficiary")
+    @CommandCompletion("@mapads_names @players")
+    public void handleBeneficiarySet(final Player player, final String name, @Flags("other") final OfflinePlayer beneficiary) {
+        final AdScreen adScreen = this.adScreenStorage.getAdScreen(name);
+        if (adScreen == null) {
+            player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
+            return;
+        }
+        if (beneficiary.hasPlayedBefore() && !beneficiary.isOnline()) {
+            player.sendMessage(L10n.getPrefixed("error.player_not_found", beneficiary.getName()));
+            return;
+        }
+
+        adScreen.setBeneficiary(beneficiary.getUniqueId());
+        this.adScreenStorage.updateAdScreen(adScreen);
+        player.sendMessage(L10n.getPrefixed("success.updated"));
+    }
+
+    @Subcommand("remove beneficiary")
+    @CommandCompletion("@mapads_names")
+    public void handleBeneficiaryRemove(final Player player, final String name) {
+        final AdScreen adScreen = this.adScreenStorage.getAdScreen(name);
+        if (adScreen == null) {
+            player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
+            return;
+        }
+
+        adScreen.setBeneficiary(null);
         this.adScreenStorage.updateAdScreen(adScreen);
         player.sendMessage(L10n.getPrefixed("success.updated"));
     }

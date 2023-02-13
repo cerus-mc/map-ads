@@ -7,7 +7,10 @@ import dev.cerus.mapads.api.event.AdvertReviewEvent;
 import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import dev.cerus.mapads.lang.L10n;
+import dev.cerus.mapads.screen.AdScreen;
+import dev.cerus.mapads.screen.ScreenGroup;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
+import dev.cerus.mapads.util.Either;
 import dev.cerus.mapads.util.EnumUtil;
 import dev.cerus.mapads.util.FormatUtil;
 import dev.cerus.mapads.util.ItemBuilder;
@@ -21,11 +24,13 @@ import dev.pelkum.yamif.grid.SlotRange;
 import dev.pelkum.yamif.gui.GUI;
 import dev.pelkum.yamif.gui.GUIBuilder;
 import java.text.SimpleDateFormat;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -126,6 +131,23 @@ public class DetailsGui {
                                                 this.player.closeInventory();
                                                 this.player.playSound(this.player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
                                                 this.player.performCommand("mapads review list");
+
+                                                // Give money to beneficiary
+                                                final Either<AdScreen, ScreenGroup> screenOrGroup = this.advertisement.getScreenOrGroupId()
+                                                        .mapToEither(this.adScreenStorage::getAdScreen, this.adScreenStorage::getScreenGroup);
+                                                final UUID beneficiaryUuid = screenOrGroup.map(AdScreen::getBeneficiary, group -> group.beneficiary().get());
+                                                final double price = this.advertisement.getPricePaid();
+                                                if (beneficiaryUuid != null) {
+                                                    // There's a beneficiary, deposit the money
+                                                    final OfflinePlayer beneficiary = Bukkit.getOfflinePlayer(beneficiaryUuid);
+                                                    this.economy.deposit(beneficiary, price);
+                                                    if (beneficiary.isOnline() && beneficiary.getPlayer() != null) {
+                                                        // Beneficiary is online, send message
+                                                        beneficiary.getPlayer().sendMessage(L10n.getPrefixed("misc.beneficiary_earnings",
+                                                                this.economy.format(price), this.economy.currencyNamePlural(),
+                                                                screenOrGroup.map(AdScreen::getId, ScreenGroup::groupName)));
+                                                    }
+                                                }
                                             });
                                         });
                                     })

@@ -46,6 +46,11 @@ public class VaultWrapper implements EconomyWrapper<Economy> {
     }
 
     @Override
+    public String currencyNamePlural() {
+        return this.economy.currencyNamePlural();
+    }
+
+    @Override
     public Economy implementation() {
         return this.economy;
     }

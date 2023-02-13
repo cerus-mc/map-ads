@@ -44,6 +44,11 @@ public class AquaCoreWrapper implements EconomyWrapper<AquaCoreAPI> {
     }
 
     @Override
+    public String currencyNamePlural() {
+        return "Coins";
+    }
+
+    @Override
     public AquaCoreAPI implementation() {
         return AquaCoreAPI.INSTANCE;
     }

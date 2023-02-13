@@ -44,6 +44,11 @@ public class PlayerPointsWrapper implements EconomyWrapper<PlayerPointsAPI> {
     }
 
     @Override
+    public String currencyNamePlural() {
+        return "points";
+    }
+
+    @Override
     public PlayerPointsAPI implementation() {
         return this.api;
     }
