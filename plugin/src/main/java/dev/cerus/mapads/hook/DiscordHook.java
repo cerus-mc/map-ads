@@ -7,9 +7,11 @@ import dev.cerus.mapads.api.event.AdvertReviewEvent;
 import dev.cerus.mapads.discordbot.AdvertContext;
 import dev.cerus.mapads.discordbot.AdvertReviewCallback;
 import dev.cerus.mapads.discordbot.DiscordBot;
+import dev.cerus.mapads.discordbot.diagnostics.Diagnosis;
 import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.image.storage.ImageStorage;
 import java.io.File;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
@@ -25,6 +27,7 @@ public class DiscordHook {
     private final AdvertStorage advertStorage;
     private final ImageStorage imageStorage;
     private final EconomyWrapper<?> economy;
+    private DiscordBot discordBot;
 
     public DiscordHook(final JavaPlugin plugin,
                        final AdvertStorage advertStorage,
@@ -63,15 +66,15 @@ public class DiscordHook {
         config.buttonAccept = configuration.getString("message.button.accept", null);
         config.buttonDeny = configuration.getString("message.button.deny", null);
 
-        final DiscordBot discordBot = new DiscordBot(config, this.getCallback());
-        discordBot.start();
+        this.discordBot = new DiscordBot(config, this.getAdvertCallback());
+        this.discordBot.start();
 
         Bukkit.getPluginManager().registerEvents(new Listener() {
             @EventHandler(priority = EventPriority.HIGHEST)
             public void handleNewAd(final AdvertCreateEvent event) {
                 if (!event.isCancelled()) {
                     final Advertisement advertisement = event.getAdvertisement();
-                    discordBot.sendAdvertCreateMessage(new AdvertContext(
+                    DiscordHook.this.discordBot.sendAdvertCreateMessage(new AdvertContext(
                             advertisement.getAdvertId(),
                             event.getImageUrl(),
                             event.getPlayer().getUniqueId(),
@@ -90,15 +93,19 @@ public class DiscordHook {
             @EventHandler(priority = EventPriority.HIGHEST)
             public void handleReview(final AdvertReviewEvent event) {
                 if (!event.isCancelled() && !event.isDiscord()) {
-                    discordBot.handleReview(event.getAdvertisement().getAdvertId(), event.getResult() == AdvertReviewEvent.Result.ACCEPT);
+                    DiscordHook.this.discordBot.handleReview(event.getAdvertisement().getAdvertId(), event.getResult() == AdvertReviewEvent.Result.ACCEPT);
                 }
             }
         }, this.plugin);
 
-        return discordBot::stop;
+        return this.discordBot::stop;
     }
 
-    private AdvertReviewCallback getCallback() {
+    public CompletableFuture<Collection<Diagnosis>> runDiagnostics() {
+        return this.discordBot.runDiagnostics();
+    }
+
+    private AdvertReviewCallback getAdvertCallback() {
         return (adId, accepted) -> {
             final CompletableFuture<Boolean> future = new CompletableFuture<>();
             this.advertStorage.getPendingAdvertisements().stream()

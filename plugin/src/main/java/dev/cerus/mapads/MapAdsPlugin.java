@@ -15,6 +15,7 @@ import dev.cerus.mapads.advert.storage.MySqlAdvertStorageImpl;
 import dev.cerus.mapads.advert.storage.SqliteAdvertStorageImpl;
 import dev.cerus.mapads.command.AdvertCommand;
 import dev.cerus.mapads.command.DefaultImageCommand;
+import dev.cerus.mapads.command.DiagnoseCommand;
 import dev.cerus.mapads.command.GroupCommand;
 import dev.cerus.mapads.command.HelpCommand;
 import dev.cerus.mapads.command.MapAdsCommand;
@@ -22,6 +23,7 @@ import dev.cerus.mapads.command.PremiumCommand;
 import dev.cerus.mapads.command.PreviewCommand;
 import dev.cerus.mapads.command.ReviewCommand;
 import dev.cerus.mapads.command.ScreenCommand;
+import dev.cerus.mapads.discordbot.diagnostics.Diagnosis;
 import dev.cerus.mapads.economy.EconomyWrapper;
 import dev.cerus.mapads.economy.EconomyWrappers;
 import dev.cerus.mapads.helpbook.HelpBook;
@@ -55,6 +57,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -62,7 +65,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,6 +92,7 @@ public class MapAdsPlugin extends JavaPlugin {
     private final Set<AutoCloseable> closeables = new HashSet<>();
     private ConfigModel configModel;
     private boolean screensLoaded;
+    private Supplier<CompletableFuture<Collection<Diagnosis>>> diagnosticsSupplier;
 
     @Override
     public void onEnable() {
@@ -177,6 +183,7 @@ public class MapAdsPlugin extends JavaPlugin {
 
         // Init Discord bot
         boolean discordEnabled = false;
+        this.diagnosticsSupplier = () -> null;
         if (this.getServer().getPluginManager().isPluginEnabled("map-ads-discord-bot")) {
             final DiscordHook discordHook = new DiscordHook(this, advertStorage, imageStorage, economyWrapper);
             final AutoCloseable closeable = discordHook.load();
@@ -184,6 +191,7 @@ public class MapAdsPlugin extends JavaPlugin {
                 this.closeables.add(closeable);
                 this.getLogger().info("Discovered Discord extension");
                 discordEnabled = true;
+                this.diagnosticsSupplier = discordHook::runDiagnostics;
             }
         }
         final boolean finalDiscordEnabled = discordEnabled;
@@ -254,6 +262,7 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerCommand(new PreviewCommand());
         commandManager.registerCommand(new AdvertCommand());
         commandManager.registerCommand(new GroupCommand());
+        commandManager.registerCommand(new DiagnoseCommand());
 
         // Register listeners
         final PluginManager pluginManager = this.getServer().getPluginManager();
@@ -477,6 +486,11 @@ public class MapAdsPlugin extends JavaPlugin {
     private void update(final YamlConfiguration configuration, final File l10nFile) {
         final LangUpdater langUpdater = new LangUpdater();
         langUpdater.update(l10nFile, configuration);
+    }
+
+
+    public CompletableFuture<Collection<Diagnosis>> runBotDiagnostics() {
+        return this.diagnosticsSupplier.get();
     }
 
     public ConfigModel getConfigModel() {

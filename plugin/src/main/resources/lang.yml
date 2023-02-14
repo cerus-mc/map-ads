@@ -1,4 +1,4 @@
-'ver': "8"
+'ver': "9"
 'prefix': "&6&lM&e&lap-&6&lA&e&lds &8» &r"
 
 'api,event,create,cancelled': "Advert creation has been cancelled by an external plugin"
@@ -59,6 +59,10 @@
 'misc,nodefimg,on': "&aenabled"
 'misc,nodefimg,off': "&cdisabled"
 'misc,beneficiary_earnings': "&aYou've earned &e%s %s &aincome by renting ad space on screen/group &b%s&a."
+'misc,diagnostics,no_bot': "&cThe Discord bot is not running"
+'misc,diagnostics,info': "&7Found %d diagnoses"
+'misc,diagnostics,diagnose,success': "&8» &aSuccess: &7\"%s\""
+'misc,diagnostics,diagnose,error': "&8» &cError: &7\"%s\""
 
 'gui,page': "&bPage %d"
 'gui,prev_page,enabled': "&7« &fPrevious page"

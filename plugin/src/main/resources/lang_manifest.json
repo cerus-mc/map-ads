@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "1": {
     "misc.update.0": "&aA new Map-Ads update is available!",
     "misc.update.1": "&e%s",
@@ -73,5 +73,11 @@
   "8": {
     "error.player_not_found": "&cPlayer '%s' has never been seen on the server.",
     "misc.beneficiary_earnings": "&aYou've earned &e%s %s &aincome by renting ad space on screen/group &b%s&a."
+  },
+  "9": {
+    "misc.diagnostics.no_bot": "&cThe Discord bot is not running",
+    "misc.diagnostics.info": "&7Found %d diagnoses",
+    "misc.diagnostics.diagnose.success": "&8» &aSuccess: &7\"%s\"",
+    "misc.diagnostics.diagnose.error": "&8» &cError: &7\"%s\""
   }
 }
