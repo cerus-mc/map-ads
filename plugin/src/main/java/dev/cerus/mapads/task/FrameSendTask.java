@@ -34,7 +34,7 @@ public class FrameSendTask implements Runnable {
         try {
             for (final AdScreen screen : this.adScreenStorage.getScreens()) {
                 final MapScreen mapScreen = MapScreenRegistry.getScreen(screen.getScreenId());
-                if (mapScreen != null && mapScreen.getLocation() != null) {
+                if (mapScreen != null && mapScreen.getLocation() != null && mapScreen.getLocation().getWorld() != null) {
                     final Location screenLoc = mapScreen.getLocation();
                     for (final Player player : ReviewerUtil.getNonReviewingPlayers(mapScreen, false)) {
                         if (!player.getWorld().getName().equals(screenLoc.getWorld().getName())) {
