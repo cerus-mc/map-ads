@@ -14,7 +14,6 @@ import dev.cerus.mapads.image.transition.recorder.TransitionRecorder;
 import dev.cerus.mapads.premium.Premium;
 import dev.cerus.mapads.screen.AdScreen;
 import dev.cerus.mapads.screen.storage.AdScreenStorage;
-import dev.cerus.mapads.util.FrameMarkerUtil;
 import dev.cerus.mapads.util.ReviewerUtil;
 import dev.cerus.maps.api.MapScreen;
 import dev.cerus.maps.api.graphics.FastMapScreenGraphics;
@@ -52,9 +51,6 @@ public class AdvertController {
         final MapScreen mapScreen = MapScreenRegistry.getScreen(screen.getScreenId());
         if (mapScreen == null) {
             return;
-        }
-        if (!FrameMarkerUtil.isScreenMarked(mapScreen.getId())) {
-            FrameMarkerUtil.mark(mapScreen);
         }
 
         if (!(mapScreen.getGraphics() instanceof FastMapScreenGraphics)) {
