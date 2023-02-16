@@ -52,12 +52,15 @@ public class AdvertController {
         if (mapScreen == null) {
             return;
         }
-
         if (!(mapScreen.getGraphics() instanceof FastMapScreenGraphics)) {
             mapScreen.useFastGraphics(true);
         }
 
-        final Context context = this.contextMap.computeIfAbsent(screen.getId(), o -> new Context());
+        final Context context = this.contextMap.computeIfAbsent(screen.getId(), o -> {
+            final Context ctx = new Context();
+            ctx.stay = 1; // TODO
+            return ctx;
+        });
 
         // Get the default image if we either don't have an ad to
         // display or if we are explicitly asked to display the default image
@@ -173,6 +176,7 @@ public class AdvertController {
         private MapImage currentAdvertImage;
         private boolean displayDefaultImg;
         private RecordedTransition recordedTransition;
+        private int stay;
 
     }
 
