@@ -229,7 +229,7 @@ public class ScreenCommand extends BaseCommand {
             player.sendMessage(L10n.getPrefixed("error.screen_not_found"));
             return;
         }
-        if (beneficiary.hasPlayedBefore() && !beneficiary.isOnline()) {
+        if (!beneficiary.hasPlayedBefore() && !beneficiary.isOnline()) {
             player.sendMessage(L10n.getPrefixed("error.player_not_found", beneficiary.getName()));
             return;
         }
