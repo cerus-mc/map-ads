@@ -197,8 +197,8 @@ public class CreateAdGui {
             this.player.playSound(this.player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
             new AnvilGUI.Builder()
                     .plugin(JavaPlugin.getPlugin(MapAdsPlugin.class))
-                    .onComplete(completion -> {
-                        final String text = completion.getText();
+                    .onClick((integer, stateSnapshot) -> {
+                        final String text = stateSnapshot.getText();
                         Bukkit.getScheduler().runTaskLater(JavaPlugin.getPlugin(MapAdsPlugin.class), () -> {
                             final URI uri;
                             try {
@@ -256,8 +256,8 @@ public class CreateAdGui {
                                 }
                                 final MapScreen first = this.context.mapScreen[0];
                                 if (image.getWidth() % 128 != 0 || image.getHeight() % 128 != 0
-                                        || image.getWidth() / 128 != first.getWidth()
-                                        || image.getHeight() / 128 != first.getHeight()) {
+                                    || image.getWidth() / 128 != first.getWidth()
+                                    || image.getHeight() / 128 != first.getHeight()) {
                                     this.state = State.ERROR_IMAGE;
                                     this.context.errorState = 2;
                                     this.raiseError(L10n.get("gui.create.error.invalid_dimensions",
@@ -495,7 +495,7 @@ public class CreateAdGui {
             case ERROR_IMAGE -> {
                 final MapScreen first = this.context.mapScreen[0];
                 yield new ItemBuilder(BTN_FRAME).setLore(L10n.get("gui.create.error_image."
-                                + (this.context.errorState > 4 ? "def" : this.context.errorState),
+                                                                  + (this.context.errorState > 4 ? "def" : this.context.errorState),
                         this.context.errorState == 2 ? new Object[] {
                                 first.getWidth() * 128, first.getHeight() * 128
                         } : new Object[0])).build();
