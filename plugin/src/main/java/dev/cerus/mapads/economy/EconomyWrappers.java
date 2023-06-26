@@ -18,7 +18,7 @@ public class EconomyWrappers {
                 .ifUnsuccessful(PlayerPointsWrapper::attemptCreate)
                 .ifUnsuccessful(AquaCoreWrapper::attemptCreate)
                 .get()
-                .orElse(null);
+                .orElse(NoopWrapper.create());
     }
 
     private static EconomyWrapper<?> override() {

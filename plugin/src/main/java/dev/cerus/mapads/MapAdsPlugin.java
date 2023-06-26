@@ -145,14 +145,6 @@ public class MapAdsPlugin extends JavaPlugin {
 
         // Init economy
         final EconomyWrapper<?> economyWrapper = EconomyWrappers.find();
-        if (economyWrapper == null) {
-            this.getLogger().severe("No economy plugin found! Please install one of the following supported economy plugins:");
-            this.getLogger().severe("- Vault");
-            this.getLogger().severe("- PlayerPoints");
-            this.getLogger().severe("Map-Ads will not function without one.");
-            this.getPluginLoader().disablePlugin(this);
-            return;
-        }
         this.getLogger().info("Found economy wrapper " + economyWrapper.asString());
 
         // Init image storage
