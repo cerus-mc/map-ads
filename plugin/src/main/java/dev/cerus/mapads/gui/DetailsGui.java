@@ -132,6 +132,7 @@ public class DetailsGui {
                                                 this.player.playSound(this.player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
                                                 this.player.performCommand("mapads review list");
 
+                                                if(!economy.isFunctional()) return;
                                                 // Give money to beneficiary
                                                 final Either<AdScreen, ScreenGroup> screenOrGroup = this.advertisement.getScreenOrGroupId()
                                                         .mapToEither(this.adScreenStorage::getAdScreen, this.adScreenStorage::getScreenGroup);

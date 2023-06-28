@@ -127,7 +127,7 @@ public class DiscordHook {
                             } else {
                                 this.imageStorage.deleteMapImages(advertisement.getImageId());
                                 this.advertStorage.deleteAdverts(advertisement.getAdvertId());
-                                this.economy.deposit(Bukkit.getOfflinePlayer(advertisement.getPlayerUuid()), advertisement.getPricePaid());
+                                if(this.economy.isFunctional()) this.economy.deposit(Bukkit.getOfflinePlayer(advertisement.getPlayerUuid()), advertisement.getPricePaid());
                             }
                             future.complete(false);
                         });
