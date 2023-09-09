@@ -8,10 +8,7 @@ import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.MapAdsPlugin;
 import dev.cerus.mapads.discordbot.diagnostics.Diagnosis;
 import dev.cerus.mapads.lang.L10n;
-import dev.cerus.mapads.util.DumpBuilder;
-import java.io.File;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import org.bukkit.command.CommandSender;
@@ -24,7 +21,8 @@ public class DiagnoseCommand extends BaseCommand {
     @Dependency
     private MapAdsPlugin plugin;
 
-    @Subcommand("dump")
+    // TODO: Implement proper dumps
+    /*@Subcommand("dump")
     @CommandPermission("mapads.command.diagnose.dump")
     public void handleDump(final CommandSender sender) {
         DumpBuilder.create(new File(this.plugin.getDataFolder(), "dump.txt"))
@@ -40,7 +38,7 @@ public class DiagnoseCommand extends BaseCommand {
                         new String[] {"ztuizuikzug", "zjsdfg", "fgfddfgfg"}
                 ))
                 .write();
-    }
+    }*/
 
     @Subcommand("discordbot")
     @CommandPermission("mapads.command.diagnose.discordbot")
