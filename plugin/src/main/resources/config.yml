@@ -22,8 +22,7 @@ advert-storage:
 images:
   max-size: 5242880
   url-whitelist:
-    - "imgur.com"
-    - "*.imgur.com"
+    - "i.postimg.cc"
 ads:
   min-ad-minutes: 10
   max-ad-minutes: 120
