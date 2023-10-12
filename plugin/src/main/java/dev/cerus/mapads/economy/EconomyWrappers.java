@@ -27,6 +27,7 @@ public class EconomyWrappers {
             case "VAULT" -> VaultWrapper.attemptCreate();
             case "PLAYERPOINTS" -> PlayerPointsWrapper.attemptCreate();
             case "AQUACORE" -> AquaCoreWrapper.attemptCreate();
+            case "NOOP" -> NoopWrapper.create();
             default -> null;
         };
     }
