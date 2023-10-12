@@ -69,6 +69,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -264,6 +265,17 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerCommand(new GroupCommand());
         commandManager.registerCommand(new DiagnoseCommand());
 
+        // Workaround for acf locale errors
+        try {
+            final Field loggerField = commandManager.getClass().getDeclaredField("logger");
+            loggerField.setAccessible(true);
+            final Logger acfLogger = (Logger) loggerField.get(commandManager);
+            acfLogger.setLevel(Level.OFF);
+            acfLogger.setFilter(record -> false);
+        } catch (final NoSuchFieldException | IllegalAccessException ex) {
+            this.getLogger().log(Level.WARNING, "Failed to disable ACF logger", ex);
+        }
+
         // Register listeners
         final PluginManager pluginManager = this.getServer().getPluginManager();
         pluginManager.registerEvents(new PlayerJoinListener(this, adScreenStorage, advertStorage), this);
@@ -376,7 +388,7 @@ public class MapAdsPlugin extends JavaPlugin {
                 final HikariConfig mysqlHikariConfig = new HikariConfig();
                 mysqlHikariConfig.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
                 mysqlHikariConfig.setJdbcUrl("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/"
-                        + mysqlDb + "?user=" + mysqlUser + "&password=" + mysqlPass);
+                                             + mysqlDb + "?user=" + mysqlUser + "&password=" + mysqlPass);
                 return new MySqlImageStorageImpl(new HikariDataSource(mysqlHikariConfig));
             case "sqlite":
                 final String dbName = config.getString("image-storage.sqlite.db-name");
@@ -403,7 +415,7 @@ public class MapAdsPlugin extends JavaPlugin {
                 final HikariConfig mysqlHikariConfig = new HikariConfig();
                 mysqlHikariConfig.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
                 mysqlHikariConfig.setJdbcUrl("jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/"
-                        + mysqlDb + "?user=" + mysqlUser + "&password=" + mysqlPass);
+                                             + mysqlDb + "?user=" + mysqlUser + "&password=" + mysqlPass);
                 return new MySqlAdvertStorageImpl(new HikariDataSource(mysqlHikariConfig), adScreenStorage, imageStorage, recordedTransitionStorage);
             case "sqlite":
                 final String dbName = config.getString("advert-storage.sqlite.db-name");
