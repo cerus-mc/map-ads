@@ -20,4 +20,8 @@ public interface EconomyWrapper<T> {
         return this.getClass().getSimpleName() + "<" + this.implementation().getClass().getName() + ">";
     }
 
+    default boolean isFunctional() {
+        return true;
+    }
+
 }

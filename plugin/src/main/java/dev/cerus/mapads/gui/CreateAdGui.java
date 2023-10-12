@@ -357,7 +357,7 @@ public class CreateAdGui {
                     price = this.context.selectedMinutes * this.config.pricePerMin;
                 }
 
-                if (!this.economy.has(this.player, price)) {
+                if (this.economy.isFunctional() && !this.economy.has(this.player, price)) {
                     this.raiseError(L10n.get("gui.create.error.no_money"));
                     return;
                 }
@@ -390,7 +390,7 @@ public class CreateAdGui {
                     return;
                 }
 
-                this.economy.withdraw(this.player, price);
+                if(this.economy.isFunctional()) this.economy.withdraw(this.player, price);
                 this.imageStorage.updateMapImage(this.context.image).whenComplete((o, errImg) -> {
                     if (errImg != null) {
                         System.err.println(errImg.getMessage());
@@ -480,6 +480,7 @@ public class CreateAdGui {
                         .collect(Collectors.toList()))
                 .build()));
 
+        if(!economy.isFunctional()) return;
         double price = this.context.screenOrGroup == null ? -1
                 : this.context.screenOrGroup.map(AdScreen::getFixedPrice, group -> group.fixedPrice().get());
         if (price < 0) {
