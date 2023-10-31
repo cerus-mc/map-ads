@@ -28,14 +28,9 @@ import org.bukkit.entity.Player;
 @CommandPermission("mapads.command.screen")
 public class ScreenCommand extends BaseCommand {
 
-    @Dependency
-    private AdScreenStorage adScreenStorage;
-
-    @Dependency
-    private AdvertStorage advertStorage;
-
-    @Dependency
-    private RecordedTransitionStorage recordedTransitionStorage;
+    @Dependency private AdScreenStorage adScreenStorage;
+    @Dependency private AdvertStorage advertStorage;
+    @Dependency private RecordedTransitionStorage recordedTransitionStorage;
 
     @Subcommand("teleport")
     @CommandCompletion("@mapads_names")

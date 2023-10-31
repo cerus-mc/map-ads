@@ -25,14 +25,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 @CommandPermission("mapads.command.group")
 public class GroupCommand extends BaseCommand {
 
-    @Dependency
-    private JavaPlugin plugin;
-
-    @Dependency
-    private AdScreenStorage adScreenStorage;
-
-    @Dependency
-    private AdvertStorage advertStorage;
+    @Dependency private JavaPlugin plugin;
+    @Dependency private AdScreenStorage adScreenStorage;
+    @Dependency private AdvertStorage advertStorage;
 
     @Subcommand("create")
     @CommandCompletion("group_id @mapads_group_name")
@@ -74,7 +69,7 @@ public class GroupCommand extends BaseCommand {
         player.sendMessage(L10n.get("prefix") + "§7" + groups.size() + " groups");
         for (final ScreenGroup group : groups) {
             player.sendMessage(L10n.get("prefix") + "§7" + group.groupName() + " §8[" + group.id()
-                    + "]§7: §f" + String.join(", ", group.screenIds()));
+                               + "]§7: §f" + String.join(", ", group.screenIds()));
         }
     }
 

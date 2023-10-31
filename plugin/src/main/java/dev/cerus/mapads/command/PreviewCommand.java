@@ -42,17 +42,10 @@ public class PreviewCommand extends BaseCommand {
             .variableExpiration()
             .build();
 
-    @Dependency
-    private ImageRetriever imageRetriever;
-
-    @Dependency
-    private ImageConverter imageConverter;
-
-    @Dependency
-    private ConfigModel config;
-
-    @Dependency
-    private AdScreenStorage adScreenStorage;
+    @Dependency private ImageRetriever imageRetriever;
+    @Dependency private ImageConverter imageConverter;
+    @Dependency private ConfigModel config;
+    @Dependency private AdScreenStorage adScreenStorage;
 
     @Default
     @CommandCompletion("none|floyd_steinberg @nothing")
@@ -129,8 +122,8 @@ public class PreviewCommand extends BaseCommand {
             final Predicate<AdScreen> predicate = adScreen -> {
                 final MapScreen mapScreen = MapScreenRegistry.getScreen(adScreen.getScreenId());
                 return mapScreen != null
-                        && mapScreen.getWidth() * 128 == image.getWidth()
-                        && mapScreen.getHeight() * 128 == image.getHeight();
+                       && mapScreen.getWidth() * 128 == image.getWidth()
+                       && mapScreen.getHeight() * 128 == image.getHeight();
             };
 
             if (this.adScreenStorage.getScreens().stream().noneMatch(predicate)) {

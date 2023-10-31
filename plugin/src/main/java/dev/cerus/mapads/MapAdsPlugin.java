@@ -25,7 +25,9 @@ import dev.cerus.mapads.command.ReviewCommand;
 import dev.cerus.mapads.command.ScreenCommand;
 import dev.cerus.mapads.discordbot.diagnostics.Diagnosis;
 import dev.cerus.mapads.economy.EconomyWrapper;
+import dev.cerus.mapads.economy.EconomyWrapperContainer;
 import dev.cerus.mapads.economy.EconomyWrappers;
+import dev.cerus.mapads.economy.NoopWrapper;
 import dev.cerus.mapads.helpbook.HelpBook;
 import dev.cerus.mapads.helpbook.HelpBookConfiguration;
 import dev.cerus.mapads.hook.DiscordHook;
@@ -76,6 +78,7 @@ import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.SimplePie;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -145,8 +148,12 @@ public class MapAdsPlugin extends JavaPlugin {
         HelpBook.init(helpBookConfiguration);
 
         // Init economy
-        final EconomyWrapper<?> economyWrapper = EconomyWrappers.find();
-        this.getLogger().info("Found economy wrapper " + economyWrapper.asString());
+        final EconomyWrapperContainer economyWrapperContainer = new EconomyWrapperContainer(NoopWrapper.create());
+        Bukkit.getScheduler().runTask(this, () -> {
+            final EconomyWrapper<?> economyWrapper = EconomyWrappers.find();
+            this.getLogger().info("Found economy wrapper " + economyWrapper.asString());
+            economyWrapperContainer.complete(economyWrapper);
+        });
 
         // Init image storage
         final ImageStorage imageStorage = this.loadImageStorage();
@@ -178,7 +185,7 @@ public class MapAdsPlugin extends JavaPlugin {
         boolean discordEnabled = false;
         this.diagnosticsSupplier = () -> null;
         if (this.getServer().getPluginManager().isPluginEnabled("map-ads-discord-bot")) {
-            final DiscordHook discordHook = new DiscordHook(this, advertStorage, imageStorage, economyWrapper);
+            final DiscordHook discordHook = new DiscordHook(this, advertStorage, imageStorage, economyWrapperContainer);
             final AutoCloseable closeable = discordHook.load();
             if (closeable != null) {
                 this.closeables.add(closeable);
@@ -245,7 +252,7 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerDependency(DefaultImageController.class, defaultImageController);
         commandManager.registerDependency(AdvertController.class, advertController);
         commandManager.registerDependency(ConfigModel.class, this.configModel);
-        commandManager.registerDependency(EconomyWrapper.class, economyWrapper);
+        commandManager.registerDependency(EconomyWrapperContainer.class, economyWrapperContainer);
         commandManager.registerCommand(new MapAdsCommand());
         commandManager.registerCommand(new PremiumCommand());
         commandManager.registerCommand(new ScreenCommand());

@@ -27,14 +27,9 @@ import org.bukkit.entity.Player;
 @CommandPermission("mapads.command.advert")
 public class AdvertCommand extends BaseCommand {
 
-    @Dependency
-    private AdvertStorage advertStorage;
-
-    @Dependency
-    private ImageStorage imageStorage;
-
-    @Dependency
-    private AdScreenStorage adScreenStorage;
+    @Dependency private AdvertStorage advertStorage;
+    @Dependency private ImageStorage imageStorage;
+    @Dependency private AdScreenStorage adScreenStorage;
 
     @Subcommand("list")
     @CommandCompletion("@mapads_names")

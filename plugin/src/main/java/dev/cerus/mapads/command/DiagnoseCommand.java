@@ -18,8 +18,7 @@ import org.bukkit.command.CommandSender;
 @CommandPermission("mapads.command.diagnose")
 public class DiagnoseCommand extends BaseCommand {
 
-    @Dependency
-    private MapAdsPlugin plugin;
+    @Dependency private MapAdsPlugin plugin;
 
     // TODO: Implement proper dumps
     /*@Subcommand("dump")

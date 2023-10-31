@@ -10,7 +10,7 @@ import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.ConfigModel;
 import dev.cerus.mapads.MapAdsPlugin;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
-import dev.cerus.mapads.economy.EconomyWrapper;
+import dev.cerus.mapads.economy.EconomyWrapperContainer;
 import dev.cerus.mapads.gui.CreateAdGui;
 import dev.cerus.mapads.image.DefaultImageController;
 import dev.cerus.mapads.image.ImageConverter;
@@ -29,29 +29,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 @CommandAlias("mapads")
 public class MapAdsCommand extends BaseCommand {
 
-    @Dependency
-    private ImageStorage imageStorage;
-
-    @Dependency
-    private AdvertStorage advertStorage;
-
-    @Dependency
-    private AdScreenStorage adScreenStorage;
-
-    @Dependency
-    private ImageRetriever imageRetriever;
-
-    @Dependency
-    private ImageConverter imageConverter;
-
-    @Dependency
-    private DefaultImageController defaultImageController;
-
-    @Dependency
-    private ConfigModel configModel;
-
-    @Dependency
-    private EconomyWrapper<?> economy;
+    @Dependency private ImageStorage imageStorage;
+    @Dependency private AdvertStorage advertStorage;
+    @Dependency private AdScreenStorage adScreenStorage;
+    @Dependency private ImageRetriever imageRetriever;
+    @Dependency private ImageConverter imageConverter;
+    @Dependency private DefaultImageController defaultImageController;
+    @Dependency private ConfigModel configModel;
+    @Dependency private EconomyWrapperContainer economy;
 
     @Default
     public void handle(final Player player) {
@@ -87,7 +72,7 @@ public class MapAdsCommand extends BaseCommand {
                 this.imageRetriever,
                 this.imageConverter,
                 this.configModel,
-                this.economy,
+                this.economy.get(),
                 player,
                 id);
         createAdGui.open();

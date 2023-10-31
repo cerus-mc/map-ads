@@ -19,8 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 @CommandPermission("mapads.command.premium")
 public class PremiumCommand extends BaseCommand {
 
-    @Dependency
-    private JavaPlugin plugin;
+    @Dependency private JavaPlugin plugin;
 
     @Default
     public void handle(final Player player) {

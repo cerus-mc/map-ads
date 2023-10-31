@@ -34,23 +34,12 @@ public class DefaultImageCommand extends BaseCommand {
     private static final int W_MAX = 20;
     private static final int H_MAX = 20;
 
-    @Dependency
-    private ImageStorage imageStorage;
-
-    @Dependency
-    private ImageRetriever imageRetriever;
-
-    @Dependency
-    private ImageConverter imageConverter;
-
-    @Dependency
-    private DefaultImageController defaultImageController;
-
-    @Dependency
-    private AdScreenStorage adScreenStorage;
-
-    @Dependency
-    private MapAdsPlugin plugin;
+    @Dependency private ImageStorage imageStorage;
+    @Dependency private ImageRetriever imageRetriever;
+    @Dependency private ImageConverter imageConverter;
+    @Dependency private DefaultImageController defaultImageController;
+    @Dependency private AdScreenStorage adScreenStorage;
+    @Dependency private MapAdsPlugin plugin;
 
     @Subcommand("remove")
     @CommandCompletion("@mapads_commondim|@mapads_names")
@@ -143,7 +132,7 @@ public class DefaultImageCommand extends BaseCommand {
                 return;
             }
             if (image.getWidth() % 128 != 0 || image.getHeight() % 128 != 0
-                    || image.getWidth() / 128 != requiredWidth || image.getHeight() / 128 != requiredHeight) {
+                || image.getWidth() / 128 != requiredWidth || image.getHeight() / 128 != requiredHeight) {
                 player.sendMessage(L10n.getPrefixed("error.image_dimensions", requiredWidth * 128,
                         requiredHeight * 128, image.getWidth(), image.getHeight()));
                 return;

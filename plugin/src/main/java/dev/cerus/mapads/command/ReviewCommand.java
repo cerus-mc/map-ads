@@ -8,7 +8,7 @@ import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.advert.Advertisement;
 import dev.cerus.mapads.advert.storage.AdvertStorage;
-import dev.cerus.mapads.economy.EconomyWrapper;
+import dev.cerus.mapads.economy.EconomyWrapperContainer;
 import dev.cerus.mapads.gui.DetailsGui;
 import dev.cerus.mapads.gui.UnreviewedListGui;
 import dev.cerus.mapads.image.storage.ImageStorage;
@@ -20,17 +20,10 @@ import org.bukkit.entity.Player;
 @CommandPermission("mapads.command.review")
 public class ReviewCommand extends BaseCommand {
 
-    @Dependency
-    private AdvertStorage advertStorage;
-
-    @Dependency
-    private ImageStorage imageStorage;
-
-    @Dependency
-    private AdScreenStorage adScreenStorage;
-
-    @Dependency
-    private EconomyWrapper<?> economy;
+    @Dependency private AdvertStorage advertStorage;
+    @Dependency private ImageStorage imageStorage;
+    @Dependency private AdScreenStorage adScreenStorage;
+    @Dependency private EconomyWrapperContainer economy;
 
     @Subcommand("single")
     @CommandCompletion("@mapads_adverts")
@@ -40,14 +33,14 @@ public class ReviewCommand extends BaseCommand {
                 .findAny()
                 .orElse(null);
         if (advertisement != null) {
-            final DetailsGui detailsGui = new DetailsGui(this.advertStorage, this.imageStorage, this.adScreenStorage, this.economy, player, advertisement);
+            final DetailsGui detailsGui = new DetailsGui(this.advertStorage, this.imageStorage, this.adScreenStorage, this.economy.get(), player, advertisement);
             detailsGui.open();
         }
     }
 
     @Subcommand("list")
     public void handleReviewList(final Player player) {
-        final UnreviewedListGui gui = new UnreviewedListGui(player, this.imageStorage, this.adScreenStorage, this.advertStorage, this.economy);
+        final UnreviewedListGui gui = new UnreviewedListGui(player, this.imageStorage, this.adScreenStorage, this.advertStorage, this.economy.get());
         gui.open();
     }
 
