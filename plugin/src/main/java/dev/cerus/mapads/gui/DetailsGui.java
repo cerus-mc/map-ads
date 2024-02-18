@@ -72,7 +72,7 @@ public class DetailsGui {
                                 .setLore(L10n.getList("gui.details.button.info.lore").stream()
                                         .map(s -> s.replace("{0}", Bukkit.getOfflinePlayer(this.advertisement.getPlayerUuid()).getName()))
                                         .map(s -> s.replace("{1}", FormatUtil.formatMinutes(this.advertisement.getPurchasedMinutes())))
-                                        .map(s -> s.replace("{2}", String.valueOf(this.advertisement.getPricePaid())))
+                                        .map(s -> s.replace("{2}", String.format("%.2f", this.advertisement.getPricePaid())))
                                         .map(s -> s.replace("{3}", this.advertisement.getScreenOrGroupId().unsafeGet()))
                                         .map(s -> s.replace("{4}", DATE_FORMAT.format(this.advertisement.getPurchaseTimestamp())))
                                         .collect(Collectors.toList()))
@@ -132,7 +132,9 @@ public class DetailsGui {
                                                 this.player.playSound(this.player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 1);
                                                 this.player.performCommand("mapads review list");
 
-                                                if(!economy.isFunctional()) return;
+                                                if (!this.economy.isFunctional()) {
+                                                    return;
+                                                }
                                                 // Give money to beneficiary
                                                 final Either<AdScreen, ScreenGroup> screenOrGroup = this.advertisement.getScreenOrGroupId()
                                                         .mapToEither(this.adScreenStorage::getAdScreen, this.adScreenStorage::getScreenGroup);

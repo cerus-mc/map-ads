@@ -68,7 +68,7 @@ public class UnreviewedListGui extends PagedGui<Advertisement> {
                 .setLore(L10n.getList("gui.details.button.info.lore").stream()
                         .map(s -> s.replace("{0}", Bukkit.getOfflinePlayer(item.getPlayerUuid()).getName()))
                         .map(s -> s.replace("{1}", FormatUtil.formatMinutes(item.getPurchasedMinutes())))
-                        .map(s -> s.replace("{2}", String.valueOf(item.getPricePaid())))
+                        .map(s -> s.replace("{2}", String.format("%.2f", item.getPricePaid())))
                         .map(s -> s.replace("{3}", item.getScreenOrGroupId().unsafeGet()))
                         .map(s -> s.replace("{4}", DATE_FORMAT.format(item.getPurchaseTimestamp())))
                         .collect(Collectors.toList()))
