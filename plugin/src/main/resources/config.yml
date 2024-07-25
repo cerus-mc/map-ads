@@ -23,6 +23,7 @@ images:
   max-size: 5242880
   url-whitelist:
     - "i.postimg.cc"
+    - "postimg.cc"
 ads:
   min-ad-minutes: 10
   max-ad-minutes: 120

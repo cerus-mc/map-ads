@@ -15,6 +15,6 @@ depend:
   - maps
 
 libraries:
-  - "org.xerial:sqlite-jdbc:3.36.0.3"
+  - "org.xerial:sqlite-jdbc:3.41.2.2"
   - "org.mariadb.jdbc:mariadb-java-client:2.7.2"
   - "org.jsoup:jsoup:1.17.2"
