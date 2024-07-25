@@ -1,5 +1,6 @@
 package dev.cerus.mapads.image;
 
+import dev.cerus.mapads.MapAdsPlugin;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,10 +9,18 @@ import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class ImageRetriever {
 
+    private final Logger logger = JavaPlugin.getPlugin(MapAdsPlugin.class).getLogger();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public CompletableFuture<Result> getImageAsync(final String url, final int maxSize) {
@@ -31,9 +40,15 @@ public class ImageRetriever {
             if (contentType != null) {
                 contentType = contentType.split(";")[0];
             }
+            
+            if ("text/html".equals(contentType)) {
+                Result result = extractImage(connection, maxSize);
+                if (result != null) {
+                    return result;
+                }
+            }
 
             final int contentLength = connection.getContentLength();
-
             if (contentLength <= 0 || contentLength > maxSize) {
                 connection.disconnect();
                 return new Result(null, contentLength, null, contentType);
@@ -44,7 +59,39 @@ public class ImageRetriever {
             return new Result(image, contentLength, null, contentType);
         } catch (final IOException e) {
             return new Result(null, -1, e, null);
+        } catch (final Throwable t) {
+            JavaPlugin.getPlugin(MapAdsPlugin.class).getLogger().log(Level.SEVERE, "Uncaught exception wile trying to get image", t);
+            return new Result(null, -1, t, null);
         }
+    }
+
+    private Result extractImage(HttpURLConnection connection, int maxSize) throws IOException {
+        URL url = connection.getURL();
+        logger.info("Attempting to extract an image from " + url);
+
+        InputStream in;
+        try {
+            in = connection.getInputStream();
+        } catch (IOException ignored) {
+            in = connection.getErrorStream();
+        }
+
+        Document document = Jsoup.parse(in, null, url.getHost());
+        Elements imgTags = document.body().select("img");
+        if (imgTags.isEmpty()) {
+            logger.info("Website does not contain any <img> tags");
+            return null;
+        }
+        String base = url.toString().split("/")[0];
+        for (Element imgTag : imgTags) {
+            String srcAttr = imgTag.attr("src");
+            if (!srcAttr.isBlank() && srcAttr.startsWith(base)) {
+                logger.info("Found " + srcAttr);
+                return getImage(srcAttr, maxSize);
+            }
+        }
+        logger.info("All found image tags are invalid");
+        return null;
     }
 
     public static class Result {

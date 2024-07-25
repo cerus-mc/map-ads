@@ -264,17 +264,6 @@ public class MapAdsPlugin extends JavaPlugin {
         commandManager.registerCommand(new GroupCommand());
         commandManager.registerCommand(new DiagnoseCommand());
 
-        // Workaround for acf locale errors
-        try {
-            final Field loggerField = commandManager.getClass().getDeclaredField("logger");
-            loggerField.setAccessible(true);
-            final Logger acfLogger = (Logger) loggerField.get(commandManager);
-            acfLogger.setLevel(Level.OFF);
-            acfLogger.setFilter(record -> false);
-        } catch (final NoSuchFieldException | IllegalAccessException ex) {
-            this.getLogger().log(Level.WARNING, "Failed to disable ACF logger", ex);
-        }
-
         // Register listeners
         final PluginManager pluginManager = this.getServer().getPluginManager();
         pluginManager.registerEvents(new PlayerJoinListener(this, adScreenStorage, advertStorage), this);

@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "1": {
     "misc.update.0": "&aA new Map-Ads update is available!",
     "misc.update.1": "&e%s",
@@ -79,5 +79,8 @@
     "misc.diagnostics.info": "&7Found %d diagnoses",
     "misc.diagnostics.diagnose.success": "&8» &aSuccess: &7\"%s\"",
     "misc.diagnostics.diagnose.error": "&8» &cError: &7\"%s\""
+  },
+  "10": {
+    "gui.create.error_image.4": "&c❌ Url does not lead to an image"
   }
 }

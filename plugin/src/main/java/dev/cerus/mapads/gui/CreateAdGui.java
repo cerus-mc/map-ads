@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
@@ -225,7 +226,15 @@ public class CreateAdGui {
                             this.state = State.CONFIRMING;
                             this.updateGui();
                             this.imageRetriever.getImageAsync(uri.toString(), this.config.maxImageSize).whenComplete((result, throwable) -> {
-                                if (result.getErr() != null) {
+                                // This is dumb
+                                Throwable err = null;
+                                if (throwable != null) {
+                                    err = throwable;
+                                } else if (result.getErr() != null) {
+                                    err = result.getErr();
+                                }
+
+                                if (err != null) {
                                     this.state = State.ERROR_IMAGE;
                                     this.context.errorState = 3;
                                     this.raiseError(result.getErr().getMessage());
@@ -238,9 +247,9 @@ public class CreateAdGui {
                                     if (result.getType() == null) {
                                         this.raiseError(L10n.get("gui.create.error.not_image"));
                                     } else if (result.getType().startsWith("image")) {
-                                        this.raiseError(L10n.get("gui.create.error.content_not_image"));
+                                        this.raiseError(L10n.get("gui.create.error.content_not_image", result.getType()));
                                     } else {
-                                        this.raiseError(L10n.get("gui.create.error.content_unsupported_image"));
+                                        this.raiseError(L10n.get("gui.create.error.content_unsupported_image", result.getType()));
                                     }
                                     this.updateGui();
                                     return;
@@ -390,7 +399,7 @@ public class CreateAdGui {
                     return;
                 }
 
-                if(this.economy.isFunctional()) this.economy.withdraw(this.player, price);
+                if (this.economy.isFunctional()) this.economy.withdraw(this.player, price);
                 this.imageStorage.updateMapImage(this.context.image).whenComplete((o, errImg) -> {
                     if (errImg != null) {
                         System.err.println(errImg.getMessage());
@@ -480,7 +489,7 @@ public class CreateAdGui {
                         .collect(Collectors.toList()))
                 .build()));
 
-        if(!economy.isFunctional()) return;
+        if (!economy.isFunctional()) return;
         double price = this.context.screenOrGroup == null ? -1
                 : this.context.screenOrGroup.map(AdScreen::getFixedPrice, group -> group.fixedPrice().get());
         if (price < 0) {

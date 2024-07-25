@@ -1,4 +1,4 @@
-'ver': "9"
+'ver': "10"
 'prefix': "&6&lM&e&lap-&6&lA&e&lds &8» &r"
 
 'api,event,create,cancelled': "Advert creation has been cancelled by an external plugin"
@@ -116,6 +116,7 @@
 'gui,create,error_image,1': "&c❌ Image is too big"
 'gui,create,error_image,2': "&c❌ Image width & height is not %dx%d"
 'gui,create,error_image,3': "&c❌ Url does not lead to an image"
+'gui,create,error_image,4': "&c❌ Url does not lead to an image"
 'gui,create,error_image,def': "Unknown error"
 'gui,create,misc,enter_url': "Enter image url"
 'gui,create,misc,confirming_image': "&7Checking image..."

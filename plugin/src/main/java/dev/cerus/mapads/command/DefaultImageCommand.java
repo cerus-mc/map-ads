@@ -7,6 +7,7 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Subcommand;
 import dev.cerus.mapads.MapAdsPlugin;
+import dev.cerus.mapads.gui.CreateAdGui;
 import dev.cerus.mapads.image.DefaultImageController;
 import dev.cerus.mapads.image.ImageConverter;
 import dev.cerus.mapads.image.ImageRetriever;
@@ -24,6 +25,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 @CommandAlias("mapads")
@@ -122,6 +124,19 @@ public class DefaultImageCommand extends BaseCommand {
             final ImageRetriever.Result result = this.imageRetriever.getImage(imageUrl, this.plugin.getConfigModel().maxImageSize);
             if (result.getErr() != null) {
                 player.sendMessage(L10n.getPrefixed("error.failed_image", result.getErr().getMessage()));
+                return;
+            }
+            if (!result.isImage()) {
+                String message;
+                if (result.getType() == null) {
+                    message = L10n.get("gui.create.error.not_image");
+                } else if (result.getType().startsWith("image")) {
+                    message = L10n.get("gui.create.error.content_not_image", result.getType());
+                } else {
+                    message = L10n.get("gui.create.error.content_unsupported_image", result.getType());
+                }
+                // A bit hacky
+                player.sendMessage(L10n.get("prefix") + ChatColor.RED + message + ".");
                 return;
             }
             final BufferedImage image = result.getImage();
