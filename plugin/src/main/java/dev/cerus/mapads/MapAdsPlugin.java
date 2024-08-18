@@ -75,6 +75,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import net.wesjd.anvilgui.version.VersionMatcher;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.SimplePie;
@@ -306,30 +307,17 @@ public class MapAdsPlugin extends JavaPlugin {
             }
             return map;
         }));
+
+        fixAnvilGui();
     }
 
     private void fixAnvilGui() {
         try {
-            final Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafeField.setAccessible(true);
-            final Unsafe unsafe = (Unsafe) theUnsafeField.get(null);
-
-            final Class<?> wrapperCls = Class.forName("dev.cerus.mapads.thirdparty.anvilgui.version.Wrapper1_19_R1");
-            final Object wrapper = wrapperCls.getDeclaredConstructor().newInstance();
-            final Field boolField = wrapperCls.getDeclaredField("IS_ONE_NINETEEN_ONE");
-            boolField.setAccessible(true);
-
-            final long off = unsafe.objectFieldOffset(boolField);
-            unsafe.putBoolean(wrapper, off, true);
-
-            final Class<?> mainCls = Class.forName("dev.cerus.mapads.thirdparty.anvilgui.AnvilGUI");
-            final Field wrapperField = mainCls.getDeclaredField("WRAPPER");
-            wrapperField.setAccessible(true);
-            wrapperField.set(null, wrapper);
-
-            this.getLogger().info("AnvilGUI fix has been injected");
-        } catch (final NoSuchFieldException | ClassNotFoundException | InvocationTargetException | IllegalAccessException | InstantiationException |
-                       NoSuchMethodException e) {
+            Field mapField = VersionMatcher.class.getDeclaredField("VERSION_TO_REVISION");
+            mapField.setAccessible(true);
+            Map<String, String> verMap = (Map<String, String>) mapField.get(null);
+            verMap.put("1.21.1", "1_21_R1");
+        } catch (final NoSuchFieldException | IllegalAccessException e) {
             this.getLogger().log(Level.WARNING, "Failed to inject AnvilGUI fix", e);
         }
     }
