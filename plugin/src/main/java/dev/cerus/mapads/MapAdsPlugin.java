@@ -55,8 +55,6 @@ import dev.cerus.maps.plugin.map.MapScreenRegistry;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,11 +69,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.wesjd.anvilgui.version.VersionMatcher;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.SimplePie;
@@ -88,7 +84,6 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
-import sun.misc.Unsafe;
 
 public class MapAdsPlugin extends JavaPlugin {
 
@@ -307,19 +302,6 @@ public class MapAdsPlugin extends JavaPlugin {
             }
             return map;
         }));
-
-        fixAnvilGui();
-    }
-
-    private void fixAnvilGui() {
-        try {
-            Field mapField = VersionMatcher.class.getDeclaredField("VERSION_TO_REVISION");
-            mapField.setAccessible(true);
-            Map<String, String> verMap = (Map<String, String>) mapField.get(null);
-            verMap.put("1.21.1", "1_21_R1");
-        } catch (final NoSuchFieldException | IllegalAccessException e) {
-            this.getLogger().log(Level.WARNING, "Failed to inject AnvilGUI fix", e);
-        }
     }
 
     @Override
