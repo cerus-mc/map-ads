@@ -7,7 +7,7 @@
     <groupId>dev.cerus</groupId>
     <artifactId>map-ads</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.33</version>
+    <version>1.2.34</version>
     <modules>
         <module>plugin</module>
         <module>discord-bot</module>
