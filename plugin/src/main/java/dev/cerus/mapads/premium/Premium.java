@@ -55,4 +55,10 @@ public class Premium {
         return !user.startsWith("%%") && !resource.startsWith("%%") && !nonce.startsWith("%%");
     }
 
+    public static String dump() {
+        if (!isPremium()) {
+            return "Not Premium";
+        }
+        return "U: " + user + " R: " + resource + " N: " + nonce + " P: " + poly + " ID: " + to64BitIdentifier();
+    }
 }

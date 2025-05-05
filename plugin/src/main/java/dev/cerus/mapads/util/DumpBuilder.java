@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DumpBuilder {
 
@@ -31,6 +33,36 @@ public class DumpBuilder {
         }
         this.line("#".repeat(maxLen + 4));
         return this;
+    }
+
+    @SafeVarargs
+    public final DumpBuilder table(String[] header, Supplier<String[]>... columnSuppliers) {
+        if (header.length != columnSuppliers.length) {
+            throw new IllegalArgumentException("Number of columns does not match the number of columns provided.");
+        }
+
+        String[][] matrix = new String[columnSuppliers.length][];
+        int rowNum = 0;
+        for (int i = 0; i < columnSuppliers.length; i++) {
+            matrix[i] = columnSuppliers[i].get();
+            rowNum = matrix[i].length;
+        }
+
+        List<String[]> rows = new ArrayList<>();
+        rows.add(header);
+        outer:
+        for (int r = 0; r < rowNum; r++) {
+            String[] row = new String[header.length];
+            for (int i = 0; i < header.length; i++) {
+                if (matrix[i].length == 0) {
+                    continue outer;
+                }
+                row[i] = matrix[i][r];
+            }
+            rows.add(row);
+        }
+
+        return table(rows);
     }
 
     public DumpBuilder table(final List<String[]> rows) {

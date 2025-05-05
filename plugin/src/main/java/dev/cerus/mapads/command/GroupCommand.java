@@ -15,6 +15,7 @@ import dev.cerus.mapads.screen.storage.AdScreenStorage;
 import dev.cerus.mapads.util.Mutable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -53,13 +54,15 @@ public class GroupCommand extends BaseCommand {
         this.adScreenStorage.deleteScreenGroup(group);
         player.sendMessage(L10n.getPrefixed("success.group_deleted", group.groupName(), group.id()));
 
-        for (final String screenId : group.screenIds()) {
-            final UUID[] adIds = this.advertStorage.getAdvertisements(screenId).stream()
-                    .map(Advertisement::getAdvertId)
-                    .toArray(UUID[]::new);
-            if (adIds.length > 0) {
-                this.advertStorage.deleteAdverts(adIds);
-            }
+        UUID[] adIds = advertStorage.getAllAdvertisements().stream()
+                .filter(ad -> {
+                    String gid = ad.getScreenOrGroupId().map(s -> null, s -> s);
+                    return gid != null && gid.equals(group.id());
+                })
+                .map(Advertisement::getAdvertId)
+                .toArray(UUID[]::new);
+        if (adIds.length > 0) {
+            this.advertStorage.deleteAdverts(adIds);
         }
     }
 

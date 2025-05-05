@@ -87,4 +87,14 @@ public class Advertisement {
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
+
+    @Override
+    public String toString() {
+        return "Advertisement{" +
+               "advertId=" + advertId +
+               ", playerUuid=" + playerUuid +
+               ", imageId=" + imageId +
+               ", screenOrGroupId=" + screenOrGroupId +
+               '}';
+    }
 }

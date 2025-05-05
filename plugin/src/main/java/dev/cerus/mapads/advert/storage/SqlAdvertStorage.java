@@ -85,11 +85,12 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
                             final List<Advertisement> list = this.advertisementMap.computeIfAbsent(screenId, $ -> new ArrayList<>());
                             list.add(advertisement);
                         }, groupId -> {
-                            final ScreenGroup group = this.adScreenStorage.getScreenGroup(groupId);
-                            for (final String screenId : group.screenIds()) {
-                                final List<Advertisement> list = this.advertisementMap.computeIfAbsent(screenId, $ -> new ArrayList<>());
-                                list.add(advertisement);
-                            }
+                            this.adScreenStorage.getScreenGroupSafely(groupId, "loadAllAds() -> " + advertisement).ifPresent(group -> {
+                                for (final String screenId : group.screenIds()) {
+                                    final List<Advertisement> list = this.advertisementMap.computeIfAbsent(screenId, $ -> new ArrayList<>());
+                                    list.add(advertisement);
+                                }
+                            });
                         });
                     } else {
                         this.pendingAdvertisements.add(advertisement);
@@ -278,8 +279,8 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
                 .filter(advertisement -> advertisement.getRemainingMinutes() > 0)
                 .filter(advertisement -> advertisement.getScreenOrGroupId().map(
                         screenId -> screenId.equals(screenName),
-                        groupId -> this.adScreenStorage.getScreenGroup(groupId)
-                                .screenIds().contains(screenName))
+                        groupId -> this.adScreenStorage.getScreenGroupSafely(groupId, "getAdvertisements() -> " + advertisement)
+                                .map(g -> g.screenIds().contains(screenName)).orElse(false))
                 )
                 .collect(Collectors.toList());
     }
@@ -298,4 +299,8 @@ public abstract class SqlAdvertStorage implements AdvertStorage {
         return list;
     }
 
+    @Override
+    public List<Advertisement> getAllAdvertisements() {
+        return List.copyOf(advertisements);
+    }
 }

@@ -25,4 +25,6 @@ public interface AdvertStorage extends AutoCloseable {
 
     List<Advertisement> getAdvertisements(UUID owner);
 
+    List<Advertisement> getAllAdvertisements();
+
 }

@@ -52,4 +52,11 @@ public class Either<A, B> {
         return (T) this.get();
     }
 
+    @Override
+    public String toString() {
+        return "Either{" +
+               "a=" + a +
+               ", b=" + b +
+               '}';
+    }
 }
